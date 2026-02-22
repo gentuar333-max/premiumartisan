@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type React from "react";
 
-// ✅ Import relativ (më i sigurti për Vercel) — mos e ndrysho
+// ✅ Import i saktë për strukturën që ke: app/lib/seo.ts
 import {
   SITE,
   cities,
@@ -16,13 +16,12 @@ import {
   buildLocalBusinessSchema,
   buildServiceSchema,
   jsonLdScriptTag,
-} from "../../lib/seo";
+} from "@/app/lib/seo";
 
 // (Opsionale, por e dobishme për SEO + build të pastër në Vercel)
 // export const dynamicParams = false;
 
 export function generateStaticParams() {
-  // prebuild pages for SEO
   const params: { slug: string }[] = [];
   for (const c of cities) {
     for (const s of services) {
@@ -45,7 +44,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     });
   }
 
-  const serviceName = service.labelShort; // Peinture / Rénovation
+  const serviceName = service.labelShort;
   const cityName = city.name;
 
   const title = `Devis ${serviceName} à ${cityName} | 4 artisans max | PremiumArtisan`;
@@ -80,7 +79,7 @@ export default function CityServicePage({ params }: { params: { slug: string } }
   const cityName = city.name;
   const postalHint = city.postalExamples?.[0] ?? "";
 
-  // ✅ FAQ e jotja (nuk e fshij)
+  // ✅ FAQ (nuk e fshij)
   const faq = [
     {
       q: `Quel est le prix moyen pour ${serviceName.toLowerCase()} à ${cityName} ?`,
@@ -100,7 +99,6 @@ export default function CityServicePage({ params }: { params: { slug: string } }
     },
   ];
 
-  // ✅ Schema: FAQ (e jotja) + FAQ (nga seo.ts) + Breadcrumb + LocalBusiness + Service
   const pagePath = `/travaux/${params.slug}`;
   const base = SITE.baseUrl.replace(/\/$/, "");
   const pageUrl = `${base}${pagePath}`;
