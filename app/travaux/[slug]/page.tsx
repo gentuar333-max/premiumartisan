@@ -154,11 +154,26 @@ export default async function CityServicePage({
   return (
     <main style={styles.wrap}>
       {/* ✅ JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdCustom) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdFromEngine) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(breadcrumbJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(localBusinessJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(serviceJsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdCustom) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdFromEngine) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(localBusinessJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(serviceJsonLd) }}
+      />
 
       <div style={styles.inner}>
         <nav style={styles.breadcrumbs} aria-label="Fil d’ariane">
@@ -178,7 +193,8 @@ export default async function CityServicePage({
         </h1>
 
         <p style={styles.lead}>
-          Gratuit, sans engagement. Jusqu’à <b>4 réponses maximum</b>, projet privé, sans sollicitations inutiles.
+          Gratuit, sans engagement. Jusqu’à <b>4 réponses maximum</b>, projet privé,
+          sans sollicitations inutiles.
         </p>
 
         <div style={styles.ctaRow}>
@@ -235,7 +251,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   inner: { maxWidth: 960, margin: "0 auto", padding: "34px 18px 44px" },
 
-  breadcrumbs: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", fontSize: 12.5, opacity: 0.9 },
+  breadcrumbs: {
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    alignItems: "center",
+    fontSize: 12.5,
+    opacity: 0.9,
+  },
   crumbLink: { color: "#0B1020", textDecoration: "underline", fontWeight: 800 },
   crumbSep: { opacity: 0.6 },
   crumbCurrent: { color: "rgba(11,16,32,0.75)", fontWeight: 800 },
