@@ -6,6 +6,16 @@ import type { Metadata } from "next";
  * You can expand services/cities any time without touching pages logic.
  */
 
+/** ✅ Site URL (works on localhost + Vercel + custom domain)
+ * Set in Vercel: NEXT_PUBLIC_SITE_URL=https://premiumartisan.fr
+ */
+function normalizeBaseUrl(url: string) {
+  return url.replace(/\/$/, "");
+}
+
+const DEFAULT_LOCAL = "http://localhost:3000";
+const SITE_URL = normalizeBaseUrl(process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_LOCAL);
+
 export type ServiceId = "peinture" | "renovation";
 export type CityId =
   | "dijon"
@@ -36,8 +46,10 @@ export type City = {
 
 export const SITE = {
   name: "PremiumArtisan",
-  domain: "premiumartisan.fr", // change when you have domain
-  baseUrl: "http://localhost:3000", // change to https://premiumartisan.fr in prod
+  // domain used only for display/logic if you need it (optional)
+  domain: SITE_URL.replace(/^https?:\/\//, ""),
+  // ✅ critical for canonical, OG, schema
+  baseUrl: SITE_URL,
   areaLabel: "Dijon & Côte-d'Or",
 };
 

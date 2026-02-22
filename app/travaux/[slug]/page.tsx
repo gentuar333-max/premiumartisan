@@ -18,7 +18,7 @@ import {
   jsonLdScriptTag,
 } from "../../lib/seo";
 
-// (Opsionale, por e dobishme për SEO + build të pastër në Vercel)
+// ✅ për build të pastër + SEO
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -31,8 +31,15 @@ export function generateStaticParams() {
   return params;
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const parsed = parseTravauxSlug(params.slug);
+// ✅ Next 15: params është Promise -> duhet async + await
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+
+  const parsed = parseTravauxSlug(slug);
   const service = parsed.service;
   const city = parsed.city;
 
@@ -40,11 +47,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     return makeMetadata({
       title: "Devis travaux | PremiumArtisan",
       description: "Recevez jusqu’à 4 devis d’artisans locaux. Gratuit, sans engagement.",
-      path: `/travaux/${params.slug}`,
+      path: `/travaux/${slug}`,
     });
   }
 
-  const serviceName = service.labelShort;
+  const serviceName = service.labelShort; // Peinture / Rénovation
   const cityName = city.name;
 
   const title = `Devis ${serviceName} à ${cityName} | 4 artisans max | PremiumArtisan`;
@@ -53,12 +60,19 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return makeMetadata({
     title,
     description,
-    path: `/travaux/${params.slug}`,
+    path: `/travaux/${slug}`,
   });
 }
 
-export default function CityServicePage({ params }: { params: { slug: string } }) {
-  const parsed = parseTravauxSlug(params.slug);
+// ✅ Next 15: params është Promise -> duhet async + await
+export default async function CityServicePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+  const parsed = parseTravauxSlug(slug);
   const service = parsed.service;
   const city = parsed.city;
 
@@ -79,7 +93,7 @@ export default function CityServicePage({ params }: { params: { slug: string } }
   const cityName = city.name;
   const postalHint = city.postalExamples?.[0] ?? "";
 
-  // ✅ FAQ (nuk e fshij)
+  // ✅ FAQ (e jotja)
   const faq = [
     {
       q: `Quel est le prix moyen pour ${serviceName.toLowerCase()} à ${cityName} ?`,
@@ -99,7 +113,8 @@ export default function CityServicePage({ params }: { params: { slug: string } }
     },
   ];
 
-  const pagePath = `/travaux/${params.slug}`;
+  // ✅ Schema: FAQ (custom) + FAQ (nga seo.ts) + Breadcrumb + LocalBusiness + Service
+  const pagePath = `/travaux/${slug}`;
   const base = SITE.baseUrl.replace(/\/$/, "");
   const pageUrl = `${base}${pagePath}`;
 
