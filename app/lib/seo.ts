@@ -606,4 +606,24 @@ export function buildBreadcrumbSchema(items: { name: string; path: string }[]) {
 
 export function jsonLdScriptTag(obj: unknown) {
   return JSON.stringify(obj, null, 0);
+}// 🔧 Helpers for pages (SAFE – nuk prish SEO engine)
+export function serviceLabel(slug: string): string {
+  const service = services.find(
+    (s) =>
+      s.metierSlug === slug ||
+      s.intentKeyword === slug ||
+      slug.includes(s.metierSlug)
+  );
+  return service ? service.labelShort : slug;
+}
+
+export function titleCaseCity(citySlug: string): string {
+  const city = cities.find((c) => c.id === citySlug);
+  if (city) return city.name;
+
+  // fallback: dijon -> Dijon, fontaine-les-dijon -> Fontaine Les Dijon
+  return citySlug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
