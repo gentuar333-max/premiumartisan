@@ -1,59 +1,69 @@
 // app/travaux/[slug]/page.tsx
 import Link from "next/link";
 import type { Metadata } from "next";
-import { cities, services, serviceLabel, titleCaseCity, SITE } from "@/lib/seo";
+import type React from "react";
 
-function parseSlug(slug: string): { service: string; city: string } | null {
-  // expected: devis-<service>-<cityId>
-  // examples: devis-peinture-dijon, devis-peinture-interieure-beaune
-  if (!slug.startsWith("devis-")) return null;
+// ✅ Import relativ (më i sigurti për Vercel) — mos e ndrysho
+import {
+  SITE,
+  cities,
+  services,
+  parseTravauxSlug,
+  buildTravauxSlug,
+  makeMetadata,
+  buildFaqSchema,
+  buildBreadcrumbSchema,
+  buildLocalBusinessSchema,
+  buildServiceSchema,
+  jsonLdScriptTag,
+} from "../../lib/seo";
 
-  const rest = slug.replace("devis-", "");
-  const parts = rest.split("-");
-  if (parts.length < 2) return null;
-
-  const city = parts[parts.length - 1]; // <-- cityId (ex: dijon)
-  const service = parts.slice(0, -1).join("-"); // <-- service slug
-  return { service, city };
-}
+// (Opsionale, por e dobishme për SEO + build të pastër në Vercel)
+// export const dynamicParams = false;
 
 export function generateStaticParams() {
   // prebuild pages for SEO
   const params: { slug: string }[] = [];
   for (const c of cities) {
     for (const s of services) {
-      params.push({ slug: `devis-${s.slug}-${c.id}` }); // ✅ use c.id
+      params.push({ slug: buildTravauxSlug(s, c) }); // p.sh. devis-peinture-dijon
     }
   }
   return params;
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const parsed = parseSlug(params.slug);
-  if (!parsed) return { title: "Devis travaux | PremiumArtisan" };
+  const parsed = parseTravauxSlug(params.slug);
+  const service = parsed.service;
+  const city = parsed.city;
 
-  const cityObj = cities.find((c) => c.id === parsed.city); // ✅ use c.id
-  const cityName = cityObj ? cityObj.name : titleCaseCity(parsed.city);
-  const serviceName = serviceLabel(parsed.service);
+  if (!service || !city) {
+    return makeMetadata({
+      title: "Devis travaux | PremiumArtisan",
+      description: "Recevez jusqu’à 4 devis d’artisans locaux. Gratuit, sans engagement.",
+      path: `/travaux/${params.slug}`,
+    });
+  }
 
-  const title = `Devis ${serviceName} ${cityName} | 4 artisans max | PremiumArtisan`;
+  const serviceName = service.labelShort; // Peinture / Rénovation
+  const cityName = city.name;
+
+  const title = `Devis ${serviceName} à ${cityName} | 4 artisans max | PremiumArtisan`;
   const description = `Recevez jusqu’à 4 devis pour ${serviceName.toLowerCase()} à ${cityName} (Côte-d'Or). Gratuit, sans spam, projet privé.`;
 
-  const base = SITE.baseUrl.replace(/\/$/, "");
-  const url = `${base}/travaux/${params.slug}`;
-
-  return {
+  return makeMetadata({
     title,
     description,
-    alternates: { canonical: url },
-    openGraph: { title, description, url },
-  };
+    path: `/travaux/${params.slug}`,
+  });
 }
 
 export default function CityServicePage({ params }: { params: { slug: string } }) {
-  const parsed = parseSlug(params.slug);
+  const parsed = parseTravauxSlug(params.slug);
+  const service = parsed.service;
+  const city = parsed.city;
 
-  if (!parsed) {
+  if (!service || !city) {
     return (
       <main style={styles.wrap}>
         <div style={styles.inner}>
@@ -66,11 +76,11 @@ export default function CityServicePage({ params }: { params: { slug: string } }
     );
   }
 
-  const city = cities.find((c) => c.id === parsed.city); // ✅ use c.id
-  const cityName = city ? city.name : titleCaseCity(parsed.city);
-  const postalHint = city?.postalHint ?? "";
-  const serviceName = serviceLabel(parsed.service);
+  const serviceName = service.labelShort;
+  const cityName = city.name;
+  const postalHint = city.postalExamples?.[0] ?? "";
 
+  // ✅ FAQ e jotja (nuk e fshij)
   const faq = [
     {
       q: `Quel est le prix moyen pour ${serviceName.toLowerCase()} à ${cityName} ?`,
@@ -90,7 +100,12 @@ export default function CityServicePage({ params }: { params: { slug: string } }
     },
   ];
 
-  const faqJsonLd = {
+  // ✅ Schema: FAQ (e jotja) + FAQ (nga seo.ts) + Breadcrumb + LocalBusiness + Service
+  const pagePath = `/travaux/${params.slug}`;
+  const base = SITE.baseUrl.replace(/\/$/, "");
+  const pageUrl = `${base}${pagePath}`;
+
+  const faqJsonLdCustom = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faq.map((x) => ({
@@ -100,21 +115,37 @@ export default function CityServicePage({ params }: { params: { slug: string } }
     })),
   };
 
+  const faqJsonLdFromEngine = buildFaqSchema(service, city);
+
+  const breadcrumbJsonLd = buildBreadcrumbSchema([
+    { name: "Accueil", path: "/" },
+    { name: "Travaux", path: "/travaux" },
+    { name: `Devis ${serviceName} ${cityName}`, path: pagePath },
+  ]);
+
+  const localBusinessJsonLd = buildLocalBusinessSchema(service, city, pageUrl);
+  const serviceJsonLd = buildServiceSchema(service, city, pageUrl);
+
   const related = cities
-    .filter((c) => c.id !== parsed.city)
+    .filter((c) => c.id !== city.id)
     .slice(0, 5)
     .map((c) => ({
       label: `${serviceName} ${c.name}`,
-      href: `/travaux/devis-${parsed.service}-${c.id}`, // ✅ use c.id
+      href: `/travaux/${buildTravauxSlug(service, c)}`,
     }));
 
-  const formLink = `/publier-projet/form?type=${encodeURIComponent(parsed.service)}${
+  const formLink = `/publier-projet/form?type=${encodeURIComponent(service.metierSlug)}${
     postalHint ? `&cp=${encodeURIComponent(postalHint)}` : ""
   }`;
 
   return (
     <main style={styles.wrap}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      {/* ✅ JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdCustom) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdFromEngine) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(localBusinessJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(serviceJsonLd) }} />
 
       <div style={styles.inner}>
         <nav style={styles.breadcrumbs} aria-label="Fil d’ariane">
@@ -181,7 +212,9 @@ export default function CityServicePage({ params }: { params: { slug: string } }
       </div>
     </main>
   );
-}const styles: Record<string, React.CSSProperties> = {
+}
+
+const styles: Record<string, React.CSSProperties> = {
   wrap: {
     minHeight: "100vh",
     background: "#F7F8FB",
