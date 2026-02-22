@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type React from "react";
 
-// ✅ Import i saktë për strukturën që ke: app/lib/seo.ts
+// ✅ Import RELATIV (më i sigurti në Vercel) sepse file është: app/lib/seo.ts
 import {
   SITE,
   cities,
@@ -16,10 +16,10 @@ import {
   buildLocalBusinessSchema,
   buildServiceSchema,
   jsonLdScriptTag,
-} from "@/app/lib/seo";
+} from "../../lib/seo";
 
 // (Opsionale, por e dobishme për SEO + build të pastër në Vercel)
-// export const dynamicParams = false;
+export const dynamicParams = false;
 
 export function generateStaticParams() {
   const params: { slug: string }[] = [];
