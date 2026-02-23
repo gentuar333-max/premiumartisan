@@ -440,8 +440,14 @@ export default function PublierProjetForm() {
         return;
       }
 
+      const token = typeof data?.token === "string" ? data.token : null;
+      if (!token) {
+        setErrorMsg("Erreur serveur. Réessayez.");
+        return;
+      }
+
       lastSubmitRef.current = now;
-      router.push("/publier-projet");
+      router.push(`/suivi-projet/${encodeURIComponent(token)}`);
     } catch {
       setErrorMsg("Erreur serveur. Réessayez.");
     } finally {

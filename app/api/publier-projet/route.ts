@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { randomBytes } from "crypto";
 
 // Formatim: nëse zgjedhen disa "Peinture ...", ruaje si: "Peinture : intérieure, rénovation, extérieure"
 // dhe mos e përsërit "Peinture" disa herë.
@@ -109,6 +110,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const clientToken = randomBytes(24).toString("hex");
+
     const { error } = await supabase.from("publier_projets").insert([
       {
         category: categoryValue,
@@ -119,6 +122,7 @@ export async function POST(request: Request) {
         location: location ? String(location) : null,
         description: description ? String(description) : null,
         photo_name: photoName ? String(photoName) : null,
+        client_token: clientToken,
       },
     ]);
 
@@ -130,7 +134,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, token: clientToken });
   } catch (err) {
     console.error("API ERROR:", err);
     return NextResponse.json(

@@ -1,14 +1,6 @@
 // app/lib/seo.ts
 import type { Metadata } from "next";
 
-/**
- * Minimal but solid programmatic SEO engine.
- * You can expand services/cities any time without touching pages logic.
- */
-
-/** ✅ Site URL (works on localhost + Vercel + custom domain)
- * Set in Vercel: NEXT_PUBLIC_SITE_URL=https://premiumartisan.fr
- */
 function normalizeBaseUrl(url: string) {
   return url.replace(/\/$/, "");
 }
@@ -17,20 +9,14 @@ const DEFAULT_LOCAL = "http://localhost:3000";
 const SITE_URL = normalizeBaseUrl(process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_LOCAL);
 
 export type ServiceId = "peinture" | "renovation";
-export type CityId =
-  | "dijon"
-  | "chenove"
-  | "talant"
-  | "beaune"
-  | "quetigny"
-  | "fontaine-les-dijon";
+export type CityId = "dijon" | "chenove" | "talant" | "beaune" | "quetigny" | "fontaine-les-dijon";
 
 export type Service = {
   id: ServiceId;
   label: string;
   labelShort: string;
-  intentKeyword: string; // used for /travaux slug
-  metierSlug: string; // used for /[metier]/[ville]
+  intentKeyword: string;
+  metierSlug: string;
   bullets: string[];
   faqs: { q: string; a: (cityName: string) => string }[];
 };
@@ -38,17 +24,15 @@ export type Service = {
 export type City = {
   id: CityId;
   name: string;
-  deptLabel: string; // Côte-d'Or
-  deptCode: string; // 21
+  deptLabel: string;
+  deptCode: string;
   postalExamples: string[];
   nearby: string[];
 };
 
 export const SITE = {
   name: "PremiumArtisan",
-  // domain used only for display/logic if you need it (optional)
   domain: SITE_URL.replace(/^https?:\/\//, ""),
-  // ✅ critical for canonical, OG, schema
   baseUrl: SITE_URL,
   areaLabel: "Dijon & Côte-d'Or",
 };
@@ -95,12 +79,7 @@ export const services: Service[] = [
     labelShort: "Rénovation",
     intentKeyword: "devis-renovation",
     metierSlug: "renovation",
-    bullets: [
-      "Jusqu’à 4 réponses maximum",
-      "Matching local (zone + besoin)",
-      "Projet privé",
-      "Délais réalistes, artisans sérieux",
-    ],
+    bullets: ["Jusqu’à 4 réponses maximum", "Matching local (zone + besoin)", "Projet privé", "Délais réalistes, artisans sérieux"],
     faqs: [
       {
         q: "Rénovation partielle ou complète ?",
@@ -127,54 +106,12 @@ export const services: Service[] = [
 ];
 
 export const cities: City[] = [
-  {
-    id: "dijon",
-    name: "Dijon",
-    deptLabel: "Côte-d'Or",
-    deptCode: "21",
-    postalExamples: ["21000", "21100"],
-    nearby: ["Chenôve", "Talant", "Quetigny", "Fontaine-lès-Dijon"],
-  },
-  {
-    id: "chenove",
-    name: "Chenôve",
-    deptLabel: "Côte-d'Or",
-    deptCode: "21",
-    postalExamples: ["21300"],
-    nearby: ["Dijon", "Talant"],
-  },
-  {
-    id: "talant",
-    name: "Talant",
-    deptLabel: "Côte-d'Or",
-    deptCode: "21",
-    postalExamples: ["21240"],
-    nearby: ["Dijon", "Chenôve"],
-  },
-  {
-    id: "beaune",
-    name: "Beaune",
-    deptLabel: "Côte-d'Or",
-    deptCode: "21",
-    postalExamples: ["21200"],
-    nearby: ["Chagny", "Nuits-Saint-Georges"],
-  },
-  {
-    id: "quetigny",
-    name: "Quetigny",
-    deptLabel: "Côte-d'Or",
-    deptCode: "21",
-    postalExamples: ["21800"],
-    nearby: ["Dijon", "Chevigny-Saint-Sauveur"],
-  },
-  {
-    id: "fontaine-les-dijon",
-    name: "Fontaine-lès-Dijon",
-    deptLabel: "Côte-d'Or",
-    deptCode: "21",
-    postalExamples: ["21121"],
-    nearby: ["Dijon", "Talant"],
-  },
+  { id: "dijon", name: "Dijon", deptLabel: "Côte-d'Or", deptCode: "21", postalExamples: ["21000", "21100"], nearby: ["Chenôve", "Talant", "Quetigny", "Fontaine-lès-Dijon"] },
+  { id: "chenove", name: "Chenôve", deptLabel: "Côte-d'Or", deptCode: "21", postalExamples: ["21300"], nearby: ["Dijon", "Talant"] },
+  { id: "talant", name: "Talant", deptLabel: "Côte-d'Or", deptCode: "21", postalExamples: ["21240"], nearby: ["Dijon", "Chenôve"] },
+  { id: "beaune", name: "Beaune", deptLabel: "Côte-d'Or", deptCode: "21", postalExamples: ["21200"], nearby: ["Chagny", "Nuits-Saint-Georges"] },
+  { id: "quetigny", name: "Quetigny", deptLabel: "Côte-d'Or", deptCode: "21", postalExamples: ["21800"], nearby: ["Dijon", "Chevigny-Saint-Sauveur"] },
+  { id: "fontaine-les-dijon", name: "Fontaine-lès-Dijon", deptLabel: "Côte-d'Or", deptCode: "21", postalExamples: ["21121"], nearby: ["Dijon", "Talant"] },
 ];
 
 export function getServiceByMetierSlug(metier: string): Service | undefined {
@@ -186,22 +123,16 @@ export function getCityBySlug(ville: string): City | undefined {
 }
 
 export function buildTravauxSlug(service: Service, city: City) {
-  // /travaux/devis-peinture-dijon
   return `${service.intentKeyword}-${slugifyCity(city.name)}`;
 }
 
 export function parseTravauxSlug(slug: string): { service?: Service; city?: City } {
-  // slug example: devis-peinture-dijon
-  // or devis-renovation-chenove
   const parts = slug.split("-");
   if (parts.length < 3) return {};
-
-  const intent = `${parts[0]}-${parts[1]}`; // devis-peinture / devis-renovation
+  const intent = `${parts[0]}-${parts[1]}`;
   const citySlug = parts.slice(2).join("-");
-
   const service = services.find((s) => s.intentKeyword === intent);
   const city = cities.find((c) => slugifyCity(c.name) === citySlug);
-
   return { service, city };
 }
 
@@ -229,18 +160,8 @@ export function makeMetadata(opts: { title: string; description: string; path: s
     title: opts.title,
     description: opts.description,
     alternates: { canonical: url },
-    openGraph: {
-      title: opts.title,
-      description: opts.description,
-      url,
-      siteName: SITE.name,
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: opts.title,
-      description: opts.description,
-    },
+    openGraph: { title: opts.title, description: opts.description, url, siteName: SITE.name, type: "website" },
+    twitter: { card: "summary_large_image", title: opts.title, description: opts.description },
   };
 }
 
@@ -251,10 +172,7 @@ export function buildFaqSchema(service: Service, city: City) {
     mainEntity: service.faqs.map((f) => ({
       "@type": "Question",
       name: f.q,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: f.a(city.name),
-      },
+      acceptedAnswer: { "@type": "Answer", text: f.a(city.name) },
     })),
   };
 }
@@ -265,10 +183,7 @@ export function buildLocalBusinessSchema(service: Service, city: City, pageUrl: 
     "@type": "LocalBusiness",
     name: `${SITE.name} – ${service.labelShort} à ${city.name}`,
     url: pageUrl,
-    areaServed: {
-      "@type": "AdministrativeArea",
-      name: `${city.deptLabel} (${city.deptCode})`,
-    },
+    areaServed: { "@type": "AdministrativeArea", name: `${city.deptLabel} (${city.deptCode})` },
     address: {
       "@type": "PostalAddress",
       addressLocality: city.name,
@@ -285,11 +200,7 @@ export function buildServiceSchema(service: Service, city: City, pageUrl: string
     "@type": "Service",
     name: `${service.labelShort} – ${city.name}`,
     areaServed: city.name,
-    provider: {
-      "@type": "Organization",
-      name: SITE.name,
-      url: absUrl("/"),
-    },
+    provider: { "@type": "Organization", name: SITE.name, url: absUrl("/") },
     url: pageUrl,
     serviceType: service.labelShort,
   };
@@ -312,11 +223,8 @@ export function jsonLdScriptTag(obj: unknown) {
   return JSON.stringify(obj, null, 0);
 }
 
-// 🔧 Helpers for pages (SAFE – nuk prish SEO engine)
 export function serviceLabel(slug: string): string {
-  const service = services.find(
-    (s) => s.metierSlug === slug || s.intentKeyword === slug || slug.includes(s.metierSlug)
-  );
+  const service = services.find((s) => s.metierSlug === slug || s.intentKeyword === slug || slug.includes(s.metierSlug));
   return service ? service.labelShort : slug;
 }
 
@@ -324,7 +232,6 @@ export function titleCaseCity(citySlug: string): string {
   const city = cities.find((c) => c.id === citySlug);
   if (city) return city.name;
 
-  // fallback: dijon -> Dijon, fontaine-les-dijon -> Fontaine Les Dijon
   return citySlug
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

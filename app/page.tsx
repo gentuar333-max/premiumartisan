@@ -19,7 +19,6 @@ export default function Page() {
     params.set("type", typeProjet);
     if (codePostal.trim()) params.set("cp", codePostal.trim());
 
-    // IMPORTANT: backticks (`)
     router.push(`/publier-projet/form?${params.toString()}`);
   };
 
@@ -46,7 +45,6 @@ export default function Page() {
     },
   ];
 
-  // JSON-LD FAQ (Rich Results)
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -59,7 +57,7 @@ export default function Page() {
 
   return (
     <main style={styles.page}>
-      {/* HERO (BLUE) */}
+      {/* HERO (BLUE) — keep title long, no hero image */}
       <section style={styles.heroSection}>
         <div style={styles.container}>
           <div style={styles.badge}>PremiumArtisan • Dijon & Côte-d&apos;Or</div>
@@ -75,7 +73,7 @@ export default function Page() {
             <b>4 réponses maximum</b>.
           </p>
 
-          {/* MINI FORM (Option A) */}
+          {/* MINI FORM */}
           <form onSubmit={onSubmitMiniForm} style={styles.miniForm} aria-label="Mini formulaire">
             <select
               value={typeProjet}
@@ -111,7 +109,7 @@ export default function Page() {
             <div style={styles.trustItem}>4 artisans maximum</div>
           </div>
 
-          {/* SEO INTERNAL LINKS (light, no clutter) */}
+          {/* SEO INTERNAL LINKS */}
           <div style={styles.quickLinks}>
             <span style={styles.quickLinksLabel}>Devis locaux :</span>
             <Link style={styles.quickLink} href="/travaux/devis-peinture-dijon">
@@ -126,11 +124,10 @@ export default function Page() {
           </div>
         </div>
 
-        {/* ONLY vertical space (+~25%) without adding content */}
         <div style={styles.heroSpacer} />
       </section>
 
-      {/* WHY + REVIEWS (GRAY DARKER ~25%) */}
+      {/* WHY + REVIEWS (GRAY darker ~40% from why to reviews) */}
       <section style={styles.whyWrap}>
         <div style={styles.sectionInner}>
           <h2 style={styles.h2Dark}>Pourquoi choisir PremiumArtisan ?</h2>
@@ -169,7 +166,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Option B: reviews (soft-critical, more real) */}
           <h3 style={styles.h3Dark}>Ils nous font confiance à Dijon & Côte-d&apos;Or</h3>
 
           <div style={styles.reviewsGrid}>
@@ -200,39 +196,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHITE SECTION (Examples + How) */}
+      {/* COMMENT ÇA MARCHE */}
       <section style={styles.whiteWrap}>
         <div style={styles.sectionInner}>
-          <section style={styles.examplesSection}>
-            <h2 style={styles.h2White}>Exemples de chantiers peinture</h2>
-
-            <div style={styles.examplesGrid}>
-              <div style={styles.exampleCard}>
-                <img
-                  src="/images/peinture-rouleau.webp"
-                  alt="Peintre appliquant la peinture au rouleau"
-                  style={styles.exampleImg}
-                />
-                <div style={styles.exampleBody}>
-                  <div style={styles.exampleTitle}>Peinture intérieure</div>
-                  <div style={styles.exampleText}>Finition nette, protection des sols, rendu premium.</div>
-                </div>
-              </div>
-
-              <div style={styles.exampleCard}>
-                <img
-                  src="/images/peinture-echelle.webp"
-                  alt="Peintre sur échelle peignant un mur"
-                  style={styles.exampleImg}
-                />
-                <div style={styles.exampleBody}>
-                  <div style={styles.exampleTitle}>Murs & plafonds</div>
-                  <div style={styles.exampleText}>Préparation, sous-couche, 2 couches — résultat durable.</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
           <section id="comment" style={styles.howSection}>
             <h2 style={styles.h2White}>Comment ça marche</h2>
 
@@ -254,24 +220,40 @@ export default function Page() {
             </div>
           </section>
 
-          <section style={styles.artisanSection}>
-            <div style={styles.artisanCard}>
-              <div style={styles.artisanTitle}>Êtes-vous artisan peintre à Dijon / Côte-d&apos;Or ?</div>
-              <div style={styles.artisanText}>
-                Rejoignez PremiumArtisan pour recevoir des demandes qualifiées, sans spam et avec un volume maîtrisé.
+          {/* 2 PHOTOS (after Comment ça marche) */}
+          <section style={styles.photosSection}>
+            <div style={styles.examplesGrid}>
+              <div style={styles.exampleCard}>
+                <img
+                  src="/images/artisan-at-work.webp"
+                  alt="Artisan au travail"
+                  style={styles.exampleImg}
+                />
+                <div style={styles.exampleBody}>
+                  <div style={styles.exampleTitle}>Chantier en cours</div>
+                  <div style={styles.exampleText}>Un artisan peintre en action, préparation et application.</div>
+                </div>
               </div>
-              <Link href="/login" style={styles.artisanBtn}>
-                Accès artisan
-              </Link>
+
+              <div style={styles.exampleCard}>
+                <img
+                  src="/images/painting-hero.webp"
+                  alt="Peinture intérieure"
+                  style={styles.exampleImg}
+                />
+                <div style={styles.exampleBody}>
+                  <div style={styles.exampleTitle}>Peinture intérieure</div>
+                  <div style={styles.exampleText}>Finition propre, rendu premium et durable.</div>
+                </div>
+              </div>
             </div>
           </section>
         </div>
       </section>
 
-      {/* LIGHT FAQ (GRAY LIGHT) */}
+      {/* FAQ (after photos) */}
       <section style={styles.faqWrap}>
         <div style={styles.sectionInner}>
-          {/* JSON-LD */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
           <h2 style={styles.h2Faq}>Questions fréquentes</h2>
@@ -317,9 +299,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "start",
   },
 
-  heroSpacer: {
-    height: 120, // adds vertical space (~25% more feel) without adding content
-  },
+  heroSpacer: { height: 120 },
 
   badge: {
     display: "inline-flex",
@@ -395,11 +375,15 @@ const styles: Record<string, React.CSSProperties> = {
   quickLinksLabel: { fontSize: 12.5, fontWeight: 800, opacity: 0.8 },
   quickLink: { fontSize: 12.5, fontWeight: 800, color: "rgba(234,240,255,0.90)", textDecoration: "underline" },
 
-  /* GRAY DARKER SECTION */
+  /* WHY WRAP — darker gray (~40% darker feel) + wave SVG */
   whyWrap: {
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.00), rgba(255,255,255,0.00)), #E9ECF2",
-    padding: "48px 0 56px",
+    padding: "54px 0 60px",
+    backgroundColor: "#D9DEE7",
+    backgroundImage:
+      "linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.16)), radial-gradient(900px 520px at 50% 52%, rgba(0,0,0,0.14), rgba(0,0,0,0) 62%), url('/images/bg-wave-gray.svg')",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
   },
 
   sectionInner: { maxWidth: 1150, margin: "0 auto", padding: "0 20px" },
@@ -412,9 +396,10 @@ const styles: Record<string, React.CSSProperties> = {
   whyCard: {
     borderRadius: 20,
     border: "1px solid rgba(17,24,39,0.10)",
-    background: "rgba(255,255,255,0.78)", // brighter than background, but overall section darker feel
+    background: "rgba(255,255,255,0.68)",
     boxShadow: "0 18px 46px rgba(17,24,39,0.10)",
     padding: 18,
+    backdropFilter: "blur(2px)",
   },
 
   whyTitle: { fontWeight: 950, marginBottom: 8, color: "#111827" },
@@ -425,17 +410,33 @@ const styles: Record<string, React.CSSProperties> = {
   reviewCard: {
     borderRadius: 20,
     border: "1px solid rgba(17,24,39,0.10)",
-    background: "rgba(255,255,255,0.72)",
+    background: "rgba(255,255,255,0.64)",
     padding: 18,
+    backdropFilter: "blur(2px)",
   },
   reviewText: { color: "rgba(17,24,39,0.78)", lineHeight: 1.6, fontStyle: "italic" },
   reviewMeta: { marginTop: 10, fontWeight: 900, color: "#111827", opacity: 0.85 },
 
-  /* WHITE CONTENT SECTION */
+  /* WHITE SECTION */
   whiteWrap: { background: "#FFFFFF", padding: "52px 0 56px" },
 
-  examplesSection: { padding: "0 0 22px" },
   h2White: { fontSize: 42, fontWeight: 950, margin: "0 0 18px", color: "#0B1020" },
+
+  howSection: { padding: "0 0 18px" },
+
+  stepsGrid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16, marginTop: 10 },
+
+  stepCard: {
+    borderRadius: 20,
+    border: "1px solid rgba(11,16,32,0.10)",
+    background: "#FFFFFF",
+    boxShadow: "0 18px 44px rgba(11,16,32,0.10)",
+    padding: 18,
+  },
+  stepTitle: { fontWeight: 950, marginBottom: 6, color: "#0B1020" },
+  stepText: { color: "rgba(11,16,32,0.72)", lineHeight: 1.5 },
+
+  photosSection: { padding: "14px 0 0" },
 
   examplesGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, marginTop: 10 },
 
@@ -452,46 +453,7 @@ const styles: Record<string, React.CSSProperties> = {
   exampleTitle: { fontWeight: 950, fontSize: 16, color: "#0B1020" },
   exampleText: { color: "rgba(11,16,32,0.72)", lineHeight: 1.5 },
 
-  howSection: { padding: "26px 0 6px" },
-  stepsGrid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 16 },
-
-  stepCard: {
-    borderRadius: 20,
-    border: "1px solid rgba(11,16,32,0.10)",
-    background: "#FFFFFF",
-    boxShadow: "0 18px 44px rgba(11,16,32,0.10)",
-    padding: 18,
-  },
-  stepTitle: { fontWeight: 950, marginBottom: 6, color: "#0B1020" },
-  stepText: { color: "rgba(11,16,32,0.72)", lineHeight: 1.5 },
-
-  artisanSection: { padding: "20px 0 0" },
-  artisanCard: {
-    borderRadius: 24,
-    border: "1px solid rgba(11,16,32,0.10)",
-    background: "#FFFFFF",
-    boxShadow: "0 30px 80px rgba(11,16,32,0.10)",
-    padding: 22,
-    display: "grid",
-    gap: 10,
-  },
-  artisanTitle: { fontWeight: 950, fontSize: 20, color: "#0B1020" },
-  artisanText: { color: "rgba(11,16,32,0.72)", lineHeight: 1.55, maxWidth: 900 },
-  artisanBtn: {
-    width: "fit-content",
-    padding: "12px 16px",
-    borderRadius: 14,
-    border: "1px solid rgba(11,16,32,0.14)",
-    background: "rgba(11,16,32,0.04)",
-    color: "#0B1020",
-    fontWeight: 950,
-    textDecoration: "none",
-    display: "inline-flex",
-    alignItems: "center",
-    whiteSpace: "nowrap",
-  },
-
-  /* FAQ LIGHT GRAY */
+  /* FAQ */
   faqWrap: { background: "#F7F8FB", padding: "52px 0 44px" },
   h2Faq: { fontSize: 40, fontWeight: 950, margin: "0 0 16px", color: "#0B1020" },
 
@@ -509,41 +471,4 @@ const styles: Record<string, React.CSSProperties> = {
   footer: { marginTop: 22, padding: "0 0 8px" },
   footerLine: { borderTop: "1px solid rgba(11,16,32,0.10)", marginTop: 10, paddingTop: 14 },
   footerText: { color: "rgba(11,16,32,0.60)", fontSize: 12.5 },
-};// lib/seo.ts
-export type City = {
-  name: string;
-  slug: string;
-  postalHint: string;
 };
-
-export type Service = {
-  name: string;
-  slug: string; // used in URL
-};
-
-export const cities: City[] = [
-  { name: "Dijon", slug: "dijon", postalHint: "21000" },
-  { name: "Beaune", slug: "beaune", postalHint: "21200" },
-  { name: "Chenôve", slug: "chenove", postalHint: "21300" },
-  { name: "Talant", slug: "talant", postalHint: "21240" },
-  { name: "Quetigny", slug: "quetigny", postalHint: "21800" },
-  { name: "Longvic", slug: "longvic", postalHint: "21600" },
-];
-
-export const services: Service[] = [
-  { name: "Peinture", slug: "peinture" },
-  { name: "Peinture intérieure", slug: "peinture-interieure" },
-  { name: "Peinture extérieure", slug: "peinture-exterieure" },
-  { name: "Murs & plafonds", slug: "plafond" },
-  { name: "Rénovation", slug: "renovation" },
-];
-
-export function titleCaseCity(slug: string) {
-  if (slug === "chenove") return "Chenôve";
-  return slug.charAt(0).toUpperCase() + slug.slice(1);
-}
-
-export function serviceLabel(serviceSlug: string) {
-  const found = services.find((s) => s.slug === serviceSlug);
-  return found?.name ?? "Travaux";
-}

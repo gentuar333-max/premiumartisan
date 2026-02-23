@@ -1,7 +1,7 @@
 // app/robots.ts
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://YOUR-DOMAIN.TLD"; // <- vendos domain real
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,10 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: [
-          "/api/",        // mbron endpointet
-          "/admin/",      // nëse krijon dashboard më vonë
-        ],
+        disallow: ["/api/", "/admin/"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
