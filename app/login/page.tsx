@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const CATEGORIES = ["Peinture", "Plomberie", "Électricien", "Maçonnerie"];
 
@@ -23,6 +24,7 @@ function capitalizeFirstLetter(value: string) {
 }
 
 export default function PublierProjetPage() {
+  const router = useRouter();
   const [phone, setPhone] = useState("");
   const [category, setCategory] = useState("");
   const [name, setName] = useState("");
@@ -37,14 +39,7 @@ export default function PublierProjetPage() {
   const [toastOpen, setToastOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Anti-bot
   const [honeypot, setHoneypot] = useState("");
-  const formStartRef = useRef<number>(Date.now());
-  const lastSubmitRef = useRef<number>(0);
-
-  // Cooldown countdown (nga serveri)
-  const [cooldownLeft, setCooldownLeft] = useState<number>(0);
-  const cooldownTimerRef = useRef<number | null>(null);
 
   // Dropdown
   const [catOpen, setCatOpen] = useState(false);
@@ -65,51 +60,12 @@ export default function PublierProjetPage() {
     return () => window.clearTimeout(t);
   }, [toastOpen]);
 
-  useEffect(() => {
-    return () => {
-      if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
-    };
-  }, []);
-
   const phoneDigits = phone.replace(/\D/g, "");
-
-  const startCooldown = (secs: number) => {
-    setCooldownLeft(secs);
-    if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
-
-    cooldownTimerRef.current = window.setInterval(() => {
-      setCooldownLeft((v) => {
-        if (v <= 1) {
-          if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
-          cooldownTimerRef.current = null;
-          return 0;
-        }
-        return v - 1;
-      });
-    }, 1000);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (cooldownLeft > 0) {
-      setErrorMsg(`Veuillez patienter ${cooldownLeft} secondes avant de renvoyer votre demande.`);
-      return;
-    }
-
     if (honeypot.trim() !== "") return;
-
-    const timeSpent = Date.now() - formStartRef.current;
-    if (timeSpent < 1500) {
-      setErrorMsg("Veuillez patienter un instant avant d’envoyer le formulaire.");
-      return;
-    }
-
-    const now = Date.now();
-    if (now - lastSubmitRef.current < 5000) {
-      setErrorMsg("Veuillez attendre quelques secondes avant un nouvel envoi.");
-      return;
-    }
 
     const missing: string[] = [];
     if (!category) missing.push("category");
@@ -148,9 +104,7 @@ export default function PublierProjetPage() {
 
       if (!res.ok || !data?.ok) {
         if (res.status === 429) {
-          const retry = typeof data?.retryAfter === "number" ? data.retryAfter : 15;
-          startCooldown(retry);
-          setErrorMsg(`Veuillez patienter ${retry} secondes avant de renvoyer votre demande.`);
+          setErrorMsg("Trop de demandes. Réessayez dans quelques instants.");
           return;
         }
 
@@ -163,12 +117,11 @@ export default function PublierProjetPage() {
         return;
       }
 
-      lastSubmitRef.current = now;
+      const token = typeof data?.token === "string" ? data.token : null;
       setToastOpen(true);
-
-      // opsionale: pastrim
-      // setCategory(""); setName(""); setPhone(""); setPostal(""); setSurface(""); setLocation(""); setDescription(""); setPhotoName("");
-      // formStartRef.current = Date.now();
+      if (token) {
+        router.push(`/confirmation?token=${encodeURIComponent(token)}`);
+      }
     } catch {
       setErrorMsg("Erreur serveur. Réessayez.");
     } finally {
@@ -188,7 +141,7 @@ export default function PublierProjetPage() {
         <div style={styles.toastWrap}>
           <div style={styles.toastCard}>
             <div style={styles.toastTitle}>Succès</div>
-            <div style={styles.toastText}>✅ Projet envoyé avec succès !</div>
+            <div style={styles.toastText}>Projet publié ✅</div>
             <button onClick={() => setToastOpen(false)} style={styles.toastBtn}>
               OK
             </button>
@@ -375,14 +328,30 @@ export default function PublierProjetPage() {
 
             <button
               type="submit"
-              disabled={loading || cooldownLeft > 0}
+              disabled={loading}
               style={{
                 ...styles.button,
-                opacity: loading || cooldownLeft > 0 ? 0.65 : 1,
-                cursor: loading || cooldownLeft > 0 ? "not-allowed" : "pointer",
+                opacity: loading ? 0.65 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
               }}
             >
-              {loading ? "ENVOI EN COURS..." : cooldownLeft > 0 ? `ATTENDEZ ${cooldownLeft}s` : "PUBLIER MAINTENANT"}
+              {loading && (
+                <span
+                  style={{
+                    width: 18,
+                    height: 18,
+                    border: "2px solid rgba(255,255,255,0.4)",
+                    borderTopColor: "white",
+                    borderRadius: "50%",
+                    animation: "spin 0.8s linear infinite",
+                  }}
+                />
+              )}
+              {loading ? "ENVOI EN COURS..." : "PUBLIER MAINTENANT"}
             </button>
           </form>
         </section>

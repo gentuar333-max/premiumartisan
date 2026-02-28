@@ -32,8 +32,14 @@ function formatBudgetLabel(v: BudgetRange) {
   return BUDGET_OPTIONS.find((x) => x.value === v)?.label ?? "-";
 }
 
+// France: starts with 0, 10 digits. Only 01,02,03,04,05,06,07,09 (no 08, no 00). Format: XX XX XX XX XX
+const VALID_PREFIXES = ["01", "02", "03", "04", "05", "06", "07", "09"];
 function formatFrenchPhoneWithSpaces(raw: string) {
-  const digits = raw.replace(/\D/g, "").slice(0, 10);
+  let digits = raw.replace(/\D/g, "");
+  if (digits.startsWith("0033")) digits = "0" + digits.slice(4);
+  else if (digits.startsWith("00")) digits = digits.slice(2); // strip invalid 00
+  if (digits.length >= 2 && digits[0] === "0" && digits[1] === "8") digits = "0" + digits.slice(2); // reject 08
+  digits = digits.slice(0, 10);
   const parts: string[] = [];
   for (let i = 0; i < digits.length; i += 2) parts.push(digits.slice(i, i + 2));
   return parts.join(" ");
@@ -108,9 +114,6 @@ export default function PublierProjetForm() {
 
   // Anti-bot
   const [honeypot, setHoneypot] = useState("");
-  const formStartRef = useRef<number>(Date.now());
-  const lastSubmitRef = useRef<number>(0);
-
   const phoneDigits = phone.replace(/\D/g, "");
 
   // Dropdown catégories
@@ -142,7 +145,8 @@ export default function PublierProjetForm() {
       case "name":
         return name.trim().length >= 2;
       case "phone":
-        return phoneDigits.length === 10;
+        if (phoneDigits.length !== 10 || phoneDigits[0] !== "0") return false;
+        return VALID_PREFIXES.includes(phoneDigits.slice(0, 2));
       case "localisation":
         return postal.length === 5 && location.trim().length > 0;
       case "budget":
@@ -269,7 +273,7 @@ export default function PublierProjetForm() {
     setCpPill("");
 
     if (cpDebounceRef.current) window.clearTimeout(cpDebounceRef.current);
-    cpDebounceRef.current = window.setTimeout(() => fetchCpSuggestions(value), 220);
+    cpDebounceRef.current = window.setTimeout(() => fetchCpSuggestions(value), 80);
   };
 
   const applyCpSelection = (item: CpResult) => {
@@ -349,13 +353,7 @@ export default function PublierProjetForm() {
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
     );
-  };// Auto-advance vetëm për Budget (zgjedhja është e thjeshtë)
-  useEffect(() => {
-    if (step.key !== "budget") return;
-    if (!budget) return;
-    const t = window.setTimeout(() => nextStep(), 220);
-    return () => window.clearTimeout(t);
-  }, [step.key, budget]);
+  };
 
   const goNextWithValidation = () => {
     setErrorMsg("");
@@ -388,23 +386,12 @@ export default function PublierProjetForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
 
     if (honeypot.trim() !== "") return;
-
-    const timeSpent = Date.now() - formStartRef.current;
-    if (timeSpent < 1500) {
-      setErrorMsg("Veuillez patienter un instant avant d’envoyer le formulaire.");
-      return;
-    }
-
-    const now = Date.now();
-    if (now - lastSubmitRef.current < 5000) {
-      setErrorMsg("Veuillez attendre quelques secondes avant un nouvel envoi.");
-      return;
-    }
-
     // Final validation (të domosdoshmet)
-    if (!categories.length || !name.trim() || phoneDigits.length !== 10 || postal.length !== 5 || !budget) {
+    const validPhonePrefix = phoneDigits.length === 10 && phoneDigits[0] === "0" && VALID_PREFIXES.includes(phoneDigits.slice(0, 2));
+  if (!categories.length || !name.trim() || phoneDigits.length !== 10 || !validPhonePrefix || postal.length !== 5 || !budget) {
       setErrorMsg("Veuillez remplir les champs obligatoires.");
       return;
     }
@@ -446,8 +433,7 @@ export default function PublierProjetForm() {
         return;
       }
 
-      lastSubmitRef.current = now;
-      router.push(`/suivi-projet/${encodeURIComponent(token)}`);
+      router.push(`/confirmation?token=${encodeURIComponent(token)}`);
     } catch {
       setErrorMsg("Erreur serveur. Réessayez.");
     } finally {
@@ -562,10 +548,19 @@ export default function PublierProjetForm() {
                 <label style={styles.label}>Téléphone</label>
                 <input
                   style={styles.input}
+                  type="tel"
+                  inputMode="tel"
                   placeholder="06 12 34 56 78"
                   value={phone}
                   onChange={(e) => setPhone(formatFrenchPhoneWithSpaces(e.target.value))}
                 />
+                {phoneDigits.length > 0 && (phoneDigits.length !== 10 || phoneDigits[0] !== "0" || !VALID_PREFIXES.includes(phoneDigits.slice(0, 2))) && (
+                  <div style={{ fontSize: 12, color: "#dc2626", marginTop: 4 }}>
+                    {phoneDigits.length !== 10
+                      ? "10 chiffres requis (ex: 06 12 34 56 78)"
+                      : "Numéro invalide. Utilisez 01, 02, 03, 04, 05, 06, 07 ou 09."}
+                  </div>
+                )}
                 <div style={styles.phoneHint}>
                   Visible uniquement par <b>4 artisans maximum</b>
                 </div>
@@ -582,12 +577,41 @@ export default function PublierProjetForm() {
 
                   <input
                     style={styles.input}
-                    placeholder="Ex : 75015, Paris, Dijon..."
+                    placeholder="75001"
+                    inputMode="numeric"
+                    pattern="[0-9]{5}"
+                    maxLength={5}
+                    value={postal}
+                    onKeyDown={(e) => {
+                      if (["Backspace","Tab","ArrowLeft","ArrowRight","Delete"].includes(e.key)) return;
+                      if (!/^\d$/.test(e.key)) e.preventDefault();
+                    }}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const v = onlyDigitsMax((e.clipboardData?.getData("text") ?? ""), 5);
+                      setPostal(v);
+                      if (!v) { setCpPill(""); setCpQuery(""); }
+                    }}
+                    onChange={(e) => {
+                      const v = onlyDigitsMax(e.target.value, 5);
+                      setPostal(v);
+                      if (!v) { setCpPill(""); setCpQuery(""); }
+                    }}
+                  />
+                  {postal.length > 0 && postal.length !== 5 && (
+                    <div style={{ fontSize: 12, color: "#dc2626", marginTop: 4 }}>5 chiffres requis</div>
+                  )}
+
+                  <input
+                    type="text"
+                    style={{ ...styles.input, marginTop: 8 }}
+                    placeholder="Ou recherche : Paris, Dijon..."
                     value={cpQuery}
                     onChange={(e) => onCpInputChange(e.target.value)}
                     onFocus={() => {
                       if (cpResults.length) setCpOpen(true);
                     }}
+                    aria-label="Recherche commune"
                   />
 
                   <div style={styles.cpActions}>
@@ -832,8 +856,42 @@ export default function PublierProjetForm() {
                 Continuer
               </button>
             ) : (
-              <button type="submit" style={styles.primaryBtn} disabled={loading}>
-                {loading ? "ENVOI..." : "PUBLIER MAINTENANT"}
+              <button
+                type="submit"
+                style={{
+                  ...styles.primaryBtn,
+                  ...(loading ? styles.primaryBtnLoading : null),
+                }}
+                disabled={loading}
+                aria-busy={loading}
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" opacity="0.3" />
+                      <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor" strokeWidth="3">
+                        <animateTransform
+                          attributeName="transform"
+                          type="rotate"
+                          from="0 12 12"
+                          to="360 12 12"
+                          dur="0.8s"
+                          repeatCount="indefinite"
+                        />
+                      </path>
+                    </svg>
+                    <span>ENVOI...</span>
+                  </>
+                ) : (
+                  "PUBLIER MAINTENANT"
+                )}
               </button>
             )}
           </div>
@@ -1107,7 +1165,12 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 170,
     fontWeight: 800,
     letterSpacing: 0.4,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
+  primaryBtnLoading: { opacity: 0.8, cursor: "not-allowed" },
 
   error: { color: "#ffb4b4", background: "rgba(255,0,0,0.12)", padding: 12, borderRadius: 12 },
 };

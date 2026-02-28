@@ -8,8 +8,7 @@ type ConversationRow = {
   id: string;
   project_id: string;
   artisan_id: string;
-  client_id: string | null;
-  client_token: string | null;
+  client_id: string;
   created_at: string;
 };
 
@@ -26,16 +25,17 @@ export async function POST(req: Request) {
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
+      error: authErr,
     } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
     }
 
-    // Merr projektin me client_id DHE client_token
-    const { data: project, error: projectErr } = await supabase
+    const dbClient = supabase;
+    const { data: project, error: projectErr } = await dbClient
       .from("publier_projets")
-      .select("id, client_id, client_token")
+      .select("id, client_id")
       .eq("id", projectId)
       .maybeSingle();
 
@@ -43,19 +43,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Projet introuvable." }, { status: 404 });
     }
 
-    // Kontrollo nëse ka client_id OSE client_token
-    const clientId = project.client_id ?? null;
-    const clientToken = project.client_token ?? null;
-
-    if (!clientId && !clientToken) {
+    if (!project.client_id) {
       return NextResponse.json({ ok: false, error: "Client du projet introuvable." }, { status: 400 });
     }
 
-    const isClient = user.id === clientId;
+    const isClient = user.id === project.client_id;
 
-    // Kontrollo unlock nëse është artizan
     if (ENFORCE_UNLOCK && !isClient) {
-      const { data: unlock } = await supabase
+      const { data: unlock } = await dbClient
         .from("project_unlocks")
         .select("id")
         .eq("project_id", projectId)
@@ -72,10 +67,9 @@ export async function POST(req: Request) {
     let conversation: ConversationRow | null = null;
 
     if (isClient) {
-      // Klienti — gjej conversation ekzistuese
       const { data: existingConv, error: convErr } = await serviceClient
         .from("conversations")
-        .select("id, project_id, artisan_id, client_id, client_token, created_at")
+        .select("id, project_id, artisan_id, client_id, created_at")
         .eq("project_id", projectId)
         .eq("client_id", user.id)
         .order("created_at", { ascending: false })
@@ -87,23 +81,20 @@ export async function POST(req: Request) {
       }
       conversation = existingConv ?? null;
     } else {
-      // Artizan — krijo ose gjej conversation
       const { data: upserted, error: convErr } = await serviceClient
         .from("conversations")
         .upsert(
           {
             project_id: projectId,
             artisan_id: user.id,
-            client_id: clientId,
-            client_token: clientToken,
+            client_id: project.client_id,
           },
           { onConflict: "project_id,artisan_id" }
         )
-        .select("id, project_id, artisan_id, client_id, client_token, created_at")
+        .select("id, project_id, artisan_id, client_id, created_at")
         .single();
 
       if (convErr || !upserted) {
-        console.error("[api/messages/project] conversation upsert failed:", convErr);
         return NextResponse.json(
           { ok: false, error: convErr?.message ?? "Conversation inaccessible." },
           { status: 500 }
@@ -116,23 +107,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Conversation introuvable." }, { status: 404 });
     }
 
-    // Kontrollo aksesin
-    const isPartOfConversation =
-      conversation.client_id === user.id || conversation.artisan_id === user.id;
-
-    if (!isPartOfConversation) {
+    if (conversation.client_id !== user.id && conversation.artisan_id !== user.id) {
       return NextResponse.json({ ok: false, error: "Acces refuse." }, { status: 403 });
     }
 
-    // Dërgo mesazhin
     const { data: inserted, error: msgErr } = await serviceClient
       .from("messages")
       .insert({
         conversation_id: conversation.id,
+        project_id: projectId,
         sender_id: user.id,
         body: text,
       })
-      .select("id, conversation_id, sender_id, body, created_at")
+      .select("id, conversation_id, project_id, sender_id, body, created_at")
       .single();
 
     if (msgErr || !inserted) {
@@ -141,7 +128,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, conversation, message: inserted }, { status: 200 });
   } catch (e) {
-    console.error("[api/messages/project] crash:", e);
+    console.error("[api/messages/send] crash:", e);
     return NextResponse.json({ ok: false, error: "Erreur serveur." }, { status: 500 });
   }
 }

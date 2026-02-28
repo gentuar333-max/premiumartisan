@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -38,4 +42,31 @@ button[type="submit"]:hover{
 button[type="submit"]:active{
   transform: translateY(0px) scale(0.99);
   filter: brightness(0.98);
+}
+
+/* Premium dashboard typography & rendering */
+:root {
+  --text: #111111;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --card-radius: 16px;
+}
+
+html,
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.card-premium {
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: #ffffff;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.card-premium:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }

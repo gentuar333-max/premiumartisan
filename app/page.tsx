@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
 import { useRouter } from "next/navigation";
 
@@ -55,6 +56,10 @@ export default function Page() {
     })),
   };
 
+  React.useEffect(() => {
+    router.prefetch("/publier-projet/form");
+  }, [router]);
+
   return (
     <main style={styles.page}>
       {/* HERO (BLUE) — keep title long, no hero image */}
@@ -89,9 +94,11 @@ export default function Page() {
 
             <input
               value={codePostal}
-              onChange={(e) => setCodePostal(e.target.value)}
+              onChange={(e) => setCodePostal(e.target.value.replace(/\D/g, "").slice(0, 5))}
               style={styles.input}
               inputMode="numeric"
+              pattern="[0-9]{5}"
+              maxLength={5}
               placeholder="Code postal (ex: 21000)"
               aria-label="Code postal"
             />
@@ -222,28 +229,40 @@ export default function Page() {
 
           {/* 2 PHOTOS (after Comment ça marche) */}
           <section style={styles.photosSection}>
-            <div style={styles.examplesGrid}>
-              <div style={styles.exampleCard}>
-                <img
-                  src="/images/artisan-at-work.webp"
-                  alt="Artisan au travail"
-                  style={styles.exampleImg}
-                />
-                <div style={styles.exampleBody}>
-                  <div style={styles.exampleTitle}>Chantier en cours</div>
-                  <div style={styles.exampleText}>Un artisan peintre en action, préparation et application.</div>
+            <div className="grid md:grid-cols-12 gap-6 mt-6">
+              {/* Large left */}
+              <div className="md:col-span-7">
+                <div className="relative w-full h-[420px] overflow-hidden rounded-2xl">
+                  <Image
+                    src="/landing/how-it-works-1.webp"
+                    alt="Artisan en intervention sur un chantier de rénovation"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={90}
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/10" />
+                  <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    Photo illustrative
+                  </span>
                 </div>
               </div>
 
-              <div style={styles.exampleCard}>
-                <img
-                  src="/images/painting-hero.webp"
-                  alt="Peinture intérieure"
-                  style={styles.exampleImg}
-                />
-                <div style={styles.exampleBody}>
-                  <div style={styles.exampleTitle}>Peinture intérieure</div>
-                  <div style={styles.exampleText}>Finition propre, rendu premium et durable.</div>
+              {/* Smaller right */}
+              <div className="md:col-span-5 flex md:items-center">
+                <div className="relative w-full h-[420px] overflow-hidden rounded-2xl">
+                  <Image
+                    src="/landing/how-it-works-2.webp"
+                    alt="Finition intérieure soignée après travaux de peinture"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={95}
+                    className="object-contain rounded-2xl bg-gray-50"
+                  />
+                  <div className="absolute inset-0 bg-black/10" />
+                  <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                    Photo illustrative
+                  </span>
                 </div>
               </div>
             </div>
@@ -438,20 +457,37 @@ const styles: Record<string, React.CSSProperties> = {
 
   photosSection: { padding: "14px 0 0" },
 
-  examplesGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, marginTop: 10 },
-
-  exampleCard: {
-    borderRadius: 22,
+  exampleCardHero: {
+    position: "relative",
+    borderRadius: 16,
     border: "1px solid rgba(11,16,32,0.10)",
     background: "#FFFFFF",
     overflow: "hidden",
     boxShadow: "0 22px 60px rgba(11,16,32,0.10)",
   },
 
-  exampleImg: { width: "100%", height: 260, objectFit: "cover", display: "block" },
-  exampleBody: { padding: 16, display: "grid", gap: 6 },
-  exampleTitle: { fontWeight: 950, fontSize: 16, color: "#0B1020" },
-  exampleText: { color: "rgba(11,16,32,0.72)", lineHeight: 1.5 },
+  exampleCardCompact: {
+    position: "relative",
+    width: "100%",
+    borderRadius: 16,
+    border: "1px solid rgba(11,16,32,0.10)",
+    background: "#FFFFFF",
+    overflow: "hidden",
+    boxShadow: "0 18px 44px rgba(11,16,32,0.10)",
+  },
+
+  exampleImgHero: { width: "100%", height: 360, objectFit: "cover", display: "block" },
+  exampleImgCompact: { width: "100%", height: 260, objectFit: "cover", display: "block" },
+  photoBadge: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    fontSize: 12,
+    color: "#fff",
+    background: "rgba(11,16,32,0.65)",
+    padding: "4px 8px",
+    borderRadius: 8,
+  },
 
   /* FAQ */
   faqWrap: { background: "#F7F8FB", padding: "52px 0 44px" },

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../publier-projet/supabaseClient";
+import { formatPhone } from "@/lib/formatPhone";
 
 type PublierProjetRow = {
   id: number;
@@ -82,14 +83,14 @@ export default function AdminPage() {
     <div style={styles.wrap}>
       <div style={styles.header}>
         <div>
-          <h1 style={styles.h1}>Admin – Leads (publier_projets)</h1>
+          <h1 style={styles.h1}>Admin – Demandes (publier_projets)</h1>
           <div style={styles.sub}>
             Total: <b>{projects.length}</b> • Affichés: <b>{filtered.length}</b>
           </div>
         </div>
 
         <button onClick={loadProjects} style={styles.refreshBtn}>
-          Refresh
+          Actualiser
         </button>
       </div>
 
@@ -111,7 +112,7 @@ export default function AdminPage() {
         </label>
       </div>
 
-      {loading && <p style={styles.info}>Loading...</p>}
+      {loading && <p style={styles.info}>Chargement en cours...</p>}
 
       {error && (
         <pre style={styles.error}>
@@ -145,7 +146,7 @@ export default function AdminPage() {
 
               <div style={styles.row}>
                 <span style={styles.label}>Téléphone</span>
-                <span style={styles.value}>{p.phone ?? "-"}</span>
+                <span style={styles.value}>{p.phone ? formatPhone(p.phone) : "-"}</span>
               </div>
 
               <div style={styles.row}>
