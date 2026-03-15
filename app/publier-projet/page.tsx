@@ -1,13 +1,15 @@
 // app/publier-projet/page.tsx
 import { redirect } from "next/navigation";
 
-export default function PublierProjetRedirect({
+export default async function PublierProjetRedirect({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const params_resolved = await searchParams;
+
   // ✅ NËSE forma u dërgua me sukses
-  if (searchParams?.success === "1") {
+  if (params_resolved?.success === "1") {
     return (
       <main
         style={{
@@ -36,7 +38,7 @@ export default function PublierProjetRedirect({
         >
           Merci ! Votre demande a été envoyée avec succès.
           <br />
-          Vous recevrez des réponses d’artisans selon la disponibilité.
+          Vous recevrez des réponses d'artisans selon la disponibilité.
         </p>
 
         <div
@@ -58,7 +60,7 @@ export default function PublierProjetRedirect({
               background: "white",
             }}
           >
-            Retour à l’accueil
+            Retour à l'accueil
           </a>
 
           <a
@@ -79,22 +81,21 @@ export default function PublierProjetRedirect({
     );
   }
 
-  // 🔒 Logjika jote SEO (e ruajtur 100%)
-  const params = new URLSearchParams();
+  // 🔒 Logjika SEO (e ruajtur 100%)
+  const urlParams = new URLSearchParams();
 
-  if (searchParams) {
-    Object.entries(searchParams).forEach(([key, value]) => {
+  if (params_resolved) {
+    Object.entries(params_resolved).forEach(([key, value]) => {
       if (typeof value === "string") {
-        params.set(key, value);
+        urlParams.set(key, value);
       }
     });
   }
 
-  const query = params.toString();
+  const query = urlParams.toString();
   const target = query
     ? `/publier-projet/form?${query}`
     : `/publier-projet/form`;
 
-  // Redirect normal (clean funnel)
   redirect(target);
 }

@@ -36,7 +36,28 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next") ||
-    pathname.includes(".");
+    pathname.includes(".") ||
+    // ── SEO pages clients ──
+    pathname.startsWith("/devis-peinture") ||
+    pathname.startsWith("/devis-renovation") ||
+    pathname.startsWith("/devis-cuisine") ||
+    pathname.startsWith("/devis-salle-de-bain") ||
+    pathname.startsWith("/renovation") ||
+    pathname.startsWith("/peintre-dijon") ||
+    pathname.startsWith("/travaux") ||
+    // ── SEO pages artisans ──
+    pathname.startsWith("/devis-gratuit-peintre") ||
+    pathname.startsWith("/logiciel-devis-peintre") ||
+    pathname.startsWith("/devis-facture-gratuit-peintre") ||
+    pathname.startsWith("/trouver-clients-peintre") ||
+    pathname.startsWith("/application-devis-peintre") ||
+    pathname.startsWith("/creer-devis-peintre") ||
+    pathname.startsWith("/creer-facture-artisan") ||
+    // ── Dashboard artisan public ──
+    pathname.startsWith("/artisan/dashboard") ||
+    // ── Pages confirmation/devis client ──
+    pathname.startsWith("/confirmer-projet") ||
+    pathname.startsWith("/devis/repondre");
 
   if (isPublic) {
     return response;
@@ -45,7 +66,6 @@ export async function middleware(request: NextRequest) {
   // /artisan/login - allow unauthenticated (it's the login page)
   if (pathname.startsWith("/artisan/login")) {
     if (user) {
-      // Only redirect to dashboard if user actually has artisan role
       const { data: loginProfile } = await supabase
         .from("profiles")
         .select("role")
@@ -95,8 +115,6 @@ export async function middleware(request: NextRequest) {
   // /artisan/* requires role=artisan
   if (pathname.startsWith("/artisan/")) {
     if (role !== "artisan") {
-      // Redirect to login but without the session causing a loop:
-      // clear the Supabase auth cookies so the login page doesn't think user is logged in
       const loginUrl = new URL("/artisan/login", request.url);
       const redirectResponse = NextResponse.redirect(loginUrl);
       request.cookies.getAll().forEach((c) => {

@@ -1,7 +1,7 @@
 // app/travaux/[slug]/page.tsx
 import Link from "next/link";
 import type { Metadata } from "next";
-import type React from "react";
+import type { CSSProperties } from "react";
 
 // ✅ Import RELATIV (më i sigurti në Vercel) sepse file është: app/lib/seo.ts
 import {
@@ -31,17 +31,27 @@ export function generateStaticParams() {
   return params;
 }
 
-// ✅ Next 15: params është Promise -> duhet async + await
+/**
+ * Next 14/15 compatibility:
+ * - Nganjëherë params del si objekt normal: { slug: string }
+ * - Nganjëherë si Promise<{slug:string}> (disa setups / types)
+ */
+async function getSlug(params: unknown): Promise<string> {
+  if (params && typeof params === "object" && "then" in (params as any)) {
+    const resolved = await (params as Promise<{ slug: string }>);
+    return resolved.slug;
+  }
+  return (params as { slug: string }).slug;
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string } | Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = await getSlug(params);
 
-  const parsed = parseTravauxSlug(slug);
-  const service = parsed.service;
-  const city = parsed.city;
+  const { service, city } = parseTravauxSlug(slug) ?? {};
 
   if (!service || !city) {
     return makeMetadata({
@@ -51,7 +61,7 @@ export async function generateMetadata({
     });
   }
 
-  const serviceName = service.labelShort; // Peinture / Rénovation
+  const serviceName = service.labelShort;
   const cityName = city.name;
 
   const title = `Devis ${serviceName} à ${cityName} | 4 artisans max | PremiumArtisan`;
@@ -64,17 +74,14 @@ export async function generateMetadata({
   });
 }
 
-// ✅ Next 15: params është Promise -> duhet async + await
 export default async function CityServicePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string } | Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const slug = await getSlug(params);
 
-  const parsed = parseTravauxSlug(slug);
-  const service = parsed.service;
-  const city = parsed.city;
+  const { service, city } = parseTravauxSlug(slug) ?? {};
 
   if (!service || !city) {
     return (
@@ -99,21 +106,11 @@ export default async function CityServicePage({
       q: `Quel est le prix moyen pour ${serviceName.toLowerCase()} à ${cityName} ?`,
       a: `Le prix dépend de la surface, de l’état des murs/plafonds et des finitions. Le plus fiable est de comparer 2–4 devis d’artisans locaux à ${cityName}.`,
     },
-    {
-      q: "Combien de devis vais-je recevoir ?",
-      a: "Jusqu’à 4 réponses maximum, pour rester clair et éviter le spam.",
-    },
-    {
-      q: "Est-ce gratuit ?",
-      a: "Oui, publier une demande est gratuit et sans engagement.",
-    },
-    {
-      q: "Mon numéro est-il public ?",
-      a: "Non. Le projet reste privé et est transmis uniquement aux artisans pertinents.",
-    },
+    { q: "Combien de devis vais-je recevoir ?", a: "Jusqu’à 4 réponses maximum, pour rester clair et éviter le spam." },
+    { q: "Est-ce gratuit ?", a: "Oui, publier une demande est gratuit et sans engagement." },
+    { q: "Mon numéro est-il public ?", a: "Non. Le projet reste privé et est transmis uniquement aux artisans pertinents." },
   ];
 
-  // ✅ Schema: FAQ (custom) + FAQ (nga seo.ts) + Breadcrumb + LocalBusiness + Service
   const pagePath = `/travaux/${slug}`;
   const base = SITE.baseUrl.replace(/\/$/, "");
   const pageUrl = `${base}${pagePath}`;
@@ -154,26 +151,11 @@ export default async function CityServicePage({
   return (
     <main style={styles.wrap}>
       {/* ✅ JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdCustom) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdFromEngine) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(breadcrumbJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(localBusinessJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(serviceJsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdCustom) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(faqJsonLdFromEngine) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(localBusinessJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScriptTag(serviceJsonLd) }} />
 
       <div style={styles.inner}>
         <nav style={styles.breadcrumbs} aria-label="Fil d’ariane">
@@ -193,8 +175,7 @@ export default async function CityServicePage({
         </h1>
 
         <p style={styles.lead}>
-          Gratuit, sans engagement. Jusqu’à <b>4 réponses maximum</b>, projet privé,
-          sans sollicitations inutiles.
+          Gratuit, sans engagement. Jusqu’à <b>4 réponses maximum</b>, projet privé, sans sollicitations inutiles.
         </p>
 
         <div style={styles.ctaRow}>
@@ -243,7 +224,7 @@ export default async function CityServicePage({
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, CSSProperties> = {
   wrap: {
     minHeight: "100vh",
     background: "#F7F8FB",
@@ -251,14 +232,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   inner: { maxWidth: 960, margin: "0 auto", padding: "34px 18px 44px" },
 
-  breadcrumbs: {
-    display: "flex",
-    gap: 8,
-    flexWrap: "wrap",
-    alignItems: "center",
-    fontSize: 12.5,
-    opacity: 0.9,
-  },
+  breadcrumbs: { display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", fontSize: 12.5, opacity: 0.9 },
   crumbLink: { color: "#0B1020", textDecoration: "underline", fontWeight: 800 },
   crumbSep: { opacity: 0.6 },
   crumbCurrent: { color: "rgba(11,16,32,0.75)", fontWeight: 800 },
@@ -267,14 +241,7 @@ const styles: Record<string, React.CSSProperties> = {
   lead: { fontSize: 16.5, color: "rgba(11,16,32,0.72)", lineHeight: 1.6, margin: "0 0 14px" },
 
   ctaRow: { display: "flex", gap: 12, flexWrap: "wrap", margin: "10px 0 18px" },
-  ctaPrimary: {
-    padding: "12px 16px",
-    borderRadius: 14,
-    background: "#0B1020",
-    color: "#fff",
-    fontWeight: 950,
-    textDecoration: "none",
-  },
+  ctaPrimary: { padding: "12px 16px", borderRadius: 14, background: "#0B1020", color: "#fff", fontWeight: 950, textDecoration: "none" },
   ctaSecondary: {
     padding: "12px 16px",
     borderRadius: 14,
@@ -285,13 +252,7 @@ const styles: Record<string, React.CSSProperties> = {
     textDecoration: "none",
   },
 
-  card: {
-    background: "#fff",
-    borderRadius: 18,
-    border: "1px solid rgba(11,16,32,0.10)",
-    padding: 16,
-    marginTop: 14,
-  },
+  card: { background: "#fff", borderRadius: 18, border: "1px solid rgba(11,16,32,0.10)", padding: 16, marginTop: 14 },
   h2: { fontSize: 18, fontWeight: 950, margin: "0 0 10px", color: "#0B1020" },
   ul: { margin: 0, paddingLeft: 18, color: "rgba(11,16,32,0.75)", lineHeight: 1.7 },
 

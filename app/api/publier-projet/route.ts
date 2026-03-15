@@ -1,147 +1,216 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabaseServer";
-import { ENFORCE_UNLOCK } from "@/lib/featureFlags";
+import { createSupabaseServiceClient } from "@/lib/supabaseServer";
+import crypto from "crypto";
 
 export const runtime = "nodejs";
 
-type ConversationRow = {
-  id: string;
-  project_id: string;
-  artisan_id: string;
-  client_id: string | null;
-  client_token: string | null;
-  created_at: string;
-};
+// ── Upload foto në Supabase Storage ──────────────────────────────────────────
+async function uploadPhoto(
+  supabase: ReturnType<typeof createSupabaseServiceClient>,
+  file: File,
+  projectId: string
+): Promise<string | null> {
+  try {
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = `${projectId}/photo.${ext}`; // path i thjeshtë, pa subfolder "projects/"
+    
+    console.log("[upload] starting upload:", { name: file.name, size: file.size, type: file.type, path });
+
+    // Dërgo File direkt — Supabase JS v2 e mbështet natyrshëm
+    const { data: uploadData, error } = await supabase.storage
+      .from("project-photos")
+      .upload(path, file, {
+        contentType: file.type || "image/jpeg",
+        upsert: true,
+      });
+
+    if (error) {
+      console.error("[upload] storage error:", error.message, error);
+      return null;
+    }
+
+    console.log("[upload] upload success:", uploadData);
+
+    const { data: urlData } = supabase.storage
+      .from("project-photos")
+      .getPublicUrl(path);
+
+    console.log("[upload] public url:", urlData?.publicUrl);
+    return urlData?.publicUrl ?? null;
+  } catch (e) {
+    console.error("[upload] exception:", e);
+    return null;
+  }
+}
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => null);
-    const projectId = String(body?.projectId ?? body?.id ?? "").trim();
-    const text = String(body?.body ?? "").trim();
+    let b: Record<string, string | null> = {};
+    let photoFile: File | null = null;
 
-    if (!projectId || projectId === "undefined" || !text) {
-      return NextResponse.json({ ok: false, error: "Payload invalide." }, { status: 400 });
+    // ── Provo formData() gjithmonë — Next.js App Router e mbështet natyrshëm ──
+    let fd: FormData | null = null;
+    try {
+      fd = await req.formData();
+    } catch {
+      // Nëse dështon, është JSON
     }
 
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
+    if (fd) {
+      // FormData path (me ose pa foto)
+      b = {
+        honeypot:    String(fd.get("honeypot")    ?? ""),
+        category:    String(fd.get("category")    ?? ""),
+        name:        String(fd.get("name")        ?? ""),
+        email:       String(fd.get("email")       ?? ""),
+        phone:       String(fd.get("phone")       ?? ""),
+        postal:      String(fd.get("postal")      ?? ""),
+        location:    String(fd.get("location")    ?? ""),
+        surface:     fd.get("surface")     ? String(fd.get("surface"))     : null,
+        surface_m2:  fd.get("surface_m2")  ? String(fd.get("surface_m2"))  : null,
+        piece_type:  fd.get("piece_type")  ? String(fd.get("piece_type"))  : null,
+        budget:      fd.get("budget")      ? String(fd.get("budget"))      : null,
+        description: String(fd.get("description") ?? ""),
+        image_url:   null,
+      };
+      const photoEntry = fd.get("photo");
+      if (photoEntry instanceof File && photoEntry.size > 0) {
+        photoFile = photoEntry;
+        console.log("[publier-projet] ✅ photo received:", { name: photoFile.name, size: photoFile.size, type: photoFile.type });
+      } else {
+        console.log("[publier-projet] ⚠️ no photo — photoEntry:", typeof photoEntry, photoEntry);
+      }
+    } else {
+      // JSON path (compat)
+      const json = await req.json().catch(() => null);
+      if (!json) return NextResponse.json({ ok: false, error: "Payload invalide." }, { status: 400 });
+      b = {
+        honeypot:    json.honeypot ?? "",
+        category:    (json.category ?? json.trade ?? "").toString(),
+        name:        (json.name ?? json.first_name ?? "").toString(),
+        email:       (json.email ?? "").toString(),
+        phone:       (json.phone ?? "").toString(),
+        postal:      (json.postal ?? json.postcode ?? json.cp ?? "").toString(),
+        location:    (json.location ?? json.city ?? "").toString(),
+        surface:     json.surface ?? null,
+        surface_m2:  json.surface_m2 ? String(json.surface_m2) : null,
+        piece_type:  json.piece_type ?? null,
+        budget:      json.budget ?? json.budgetRange ?? null,
+        description: (json.description ?? "").toString(),
+        image_url:   json.image_url ?? null,
+      };
     }
 
-    // Merr projektin me client_id DHE client_token
-    const { data: project, error: projectErr } = await supabase
+    // ── Honeypot ──────────────────────────────────────────────────────────
+    if (b.honeypot?.trim()) {
+      return NextResponse.json({ ok: false, error: "Spam détecté." }, { status: 400 });
+    }
+
+    // ── Validation ────────────────────────────────────────────────────────
+    if (!b.name || b.name.length < 2)
+      return NextResponse.json({ ok: false, error: "Nom invalide." }, { status: 400 });
+
+    if (!b.phone || !/^\d{10}$/.test(b.phone))
+      return NextResponse.json({ ok: false, error: "Téléphone invalide (10 chiffres requis)." }, { status: 400 });
+
+    if (!b.postal || !/^\d{5}$/.test(b.postal))
+      return NextResponse.json({ ok: false, error: "Code postal invalide (5 chiffres requis)." }, { status: 400 });
+
+    if (!b.category)
+      return NextResponse.json({ ok: false, error: "Catégorie requise." }, { status: 400 });
+
+    // ── Cooldown 24h ──────────────────────────────────────────────────────
+    const supabase = createSupabaseServiceClient();
+
+    const { data: recentProject } = await supabase
       .from("publier_projets")
-      .select("id, client_id, client_token")
-      .eq("id", projectId)
+      .select("created_at")
+      .eq("phone", b.phone)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (projectErr || !project) {
-      return NextResponse.json({ ok: false, error: "Projet introuvable." }, { status: 404 });
-    }
-
-    // Kontrollo nëse ka client_id OSE client_token
-    const clientId = project.client_id ?? null;
-    const clientToken = project.client_token ?? null;
-
-    if (!clientId && !clientToken) {
-      return NextResponse.json({ ok: false, error: "Client du projet introuvable." }, { status: 400 });
-    }
-
-    const isClient = user.id === clientId;
-
-    // Kontrollo unlock nëse është artizan
-    if (ENFORCE_UNLOCK && !isClient) {
-      const { data: unlock } = await supabase
-        .from("project_unlocks")
-        .select("id")
-        .eq("project_id", projectId)
-        .eq("artisan_id", user.id)
-        .eq("status", "paid")
-        .maybeSingle();
-
-      if (!unlock) {
-        return NextResponse.json({ ok: false, error: "Contact non debloque." }, { status: 403 });
-      }
-    }
-
-    const serviceClient = createSupabaseServiceClient();
-    let conversation: ConversationRow | null = null;
-
-    if (isClient) {
-      // Klienti — gjej conversation ekzistuese
-      const { data: existingConv, error: convErr } = await serviceClient
-        .from("conversations")
-        .select("id, project_id, artisan_id, client_id, client_token, created_at")
-        .eq("project_id", projectId)
-        .eq("client_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (convErr) {
-        return NextResponse.json({ ok: false, error: convErr.message }, { status: 500 });
-      }
-      conversation = existingConv ?? null;
-    } else {
-      // Artizan — krijo ose gjej conversation
-      const { data: upserted, error: convErr } = await serviceClient
-        .from("conversations")
-        .upsert(
-          {
-            project_id: projectId,
-            artisan_id: user.id,
-            client_id: clientId,
-            client_token: clientToken,
-          },
-          { onConflict: "project_id,artisan_id" }
-        )
-        .select("id, project_id, artisan_id, client_id, client_token, created_at")
-        .single();
-
-      if (convErr || !upserted) {
-        console.error("[api/messages/project] conversation upsert failed:", convErr);
+    if (recentProject?.created_at) {
+      const hoursSince = (Date.now() - new Date(recentProject.created_at).getTime()) / 3_600_000;
+      if (hoursSince < 24) {
+        const hoursRemaining = Math.ceil(24 - hoursSince);
         return NextResponse.json(
-          { ok: false, error: convErr?.message ?? "Conversation inaccessible." },
-          { status: 500 }
+          { ok: false, error: `Veuillez patienter ${hoursRemaining}h avant de republier.` },
+          { status: 429 }
         );
       }
-      conversation = upserted;
     }
 
-    if (!conversation) {
-      return NextResponse.json({ ok: false, error: "Conversation introuvable." }, { status: 404 });
+    // ── Génère token + prefix ─────────────────────────────────────────────
+    const clientToken        = crypto.randomUUID();
+    const projectId          = crypto.randomUUID();
+    const confirmationToken  = crypto.randomUUID();
+    const postalPrefix = b.postal!.slice(0, 2);
+
+    // ── Upload foto nëse ekziston ─────────────────────────────────────────
+    let imageUrl: string | null = b.image_url ?? null;
+    if (photoFile && photoFile.size > 0) {
+      imageUrl = await uploadPhoto(supabase, photoFile, projectId);
+      console.log("[publier-projet] photo uploaded:", imageUrl);
     }
 
-    // Kontrollo aksesin
-    const isPartOfConversation =
-      conversation.client_id === user.id || conversation.artisan_id === user.id;
-
-    if (!isPartOfConversation) {
-      return NextResponse.json({ ok: false, error: "Acces refuse." }, { status: 403 });
-    }
-
-    // Dërgo mesazhin
-    const { data: inserted, error: msgErr } = await serviceClient
-      .from("messages")
+    // ── Insert ────────────────────────────────────────────────────────────
+    const { data, error } = await supabase
+      .from("publier_projets")
       .insert({
-        conversation_id: conversation.id,
-        sender_id: user.id,
-        body: text,
+        id:               projectId,
+        client_token:     clientToken,
+        first_name:       b.name,
+        phone:            b.phone,
+        postal:           b.postal,
+        postal_prefix:    postalPrefix,
+        location:         b.location || null,
+        surface:          b.surface   || null,
+        surface_m2:       b.surface_m2 ? parseInt(b.surface_m2) : null,
+        piece_type:       b.piece_type || null,
+        budget:           b.budget    || null,
+        category:         b.category,
+        category_details: b.category,
+        description:      b.description || null,
+        image_url:        imageUrl,
+        confirmed:        false,
+        confirmation_token: confirmationToken,
       })
-      .select("id, conversation_id, sender_id, body, created_at")
+      .select("id")
       .single();
 
-    if (msgErr || !inserted) {
-      return NextResponse.json({ ok: false, error: msgErr?.message ?? "Message non envoye." }, { status: 500 });
+    if (error || !data) {
+      console.error("[publier-projet] insert error:", error?.message);
+      return NextResponse.json({ ok: false, error: "Impossible de publier le projet." }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, conversation, message: inserted }, { status: 200 });
+    console.log("[publier-projet] success", { id: data.id, hasPhoto: !!imageUrl });
+
+    // ── Dërgo email konfirmimi me link ────────────────────────────────────
+    if (b.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.email)) {
+      const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+      const confirmUrl = `${origin}/api/confirm-project?token=${confirmationToken}`;
+      fetch(`${origin}/api/send-confirmation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email:       b.email,
+          name:        b.name,
+          category:    b.category,
+          budget:      b.budget,
+          piece_type:  b.piece_type,
+          surface_m2:  b.surface_m2,
+          location:    b.location,
+          description: b.description,
+          confirm_url: confirmUrl,
+        }),
+      }).catch(err => console.error("[send-confirmation] fetch failed:", err));
+    }
+
+    return NextResponse.json({ ok: true, token: clientToken }, { status: 200 });
+
   } catch (e) {
-    console.error("[api/messages/project] crash:", e);
+    console.error("[publier-projet] crash:", e);
     return NextResponse.json({ ok: false, error: "Erreur serveur." }, { status: 500 });
   }
 }
