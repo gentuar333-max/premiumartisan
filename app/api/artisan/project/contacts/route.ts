@@ -6,17 +6,15 @@ import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/s
 export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
+  apiVersion: "2026-02-25.clover",
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-// ── PRIX PAR BUDGET ────────────────────────────────────────────────────────────
-// budget stocké dans publier_projets comme string (ex: "500_1500") ou number
 type PriceTier = {
   label: string;
-  normalPrice: number;   // en centimes
-  exclusivePrice: number; // x3
+  normalPrice: number;
+  exclusivePrice: number;
 };
 
 function getPriceTier(budget: string | number | null | undefined): PriceTier {
@@ -31,7 +29,6 @@ function getPriceTier(budget: string | number | null | undefined): PriceTier {
     { max: 60000,  tier: { label: "40 000€ – 60 000€",   normalPrice: 34900, exclusivePrice: 104700 } },
     { max: 100000, tier: { label: "60 000€ – 100 000€",  normalPrice: 49900, exclusivePrice: 149700 } },
   ];
-  // Default: 100 000€+
   const defaultTier: PriceTier = { label: "100 000€+", normalPrice: 69900, exclusivePrice: 209700 };
 
   if (budget === null || budget === undefined || budget === "") return defaultTier;
@@ -64,7 +61,6 @@ function getPriceTier(budget: string | number | null | undefined): PriceTier {
   return defaultTier;
 }
 
-// ── HELPERS ────────────────────────────────────────────────────────────────────
 async function getUnlockCount(
   svc: ReturnType<typeof createSupabaseServiceClient>,
   projectId: string
@@ -92,7 +88,6 @@ async function isProjectExclusiveLocked(
   return !!data;
 }
 
-// ── MAIN HANDLER ───────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null);
@@ -105,9 +100,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Aucun projet fourni." }, { status: 400 });
     }
 
-    // Support unique project par appel (standard flow)
     const projectId = projectIds[0];
-    const cpHint: string = String(body?.cp ?? "").trim(); // passed from frontend
+    const cpHint: string = String(body?.cp ?? "").trim();
 
     const serverSupabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
@@ -117,7 +111,6 @@ export async function POST(req: Request) {
 
     const svc = createSupabaseServiceClient();
 
-    // ── Fetch project + existing unlock en parallèle ──────────────────────
     const [projectRes, existingRes] = await Promise.all([
       svc
         .from("publier_projets")
@@ -140,15 +133,12 @@ export async function POST(req: Request) {
     }
 
     if (existing?.status === "paid") {
-      // Déjà débloqué → retourne directement le numéro
-      const phone = project.phone ?? null;
       return NextResponse.json({
         ok: true,
-        contacts: { [projectId]: { phone: phone ?? null } },
+        contacts: { [projectId]: { phone: project.phone ?? null } },
       });
     }
 
-    // ── GUARD: exclusive disponible uniquement si 0/3 ──────────────────────
     const unlockCount = await getUnlockCount(svc, projectId);
 
     if (isExclusive) {
@@ -161,7 +151,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── GUARD: locked exclusif par quelqu'un d'autre ──────────────────────
     const isLocked = await isProjectExclusiveLocked(svc, projectId);
     if (isLocked) {
       return NextResponse.json({
@@ -171,7 +160,6 @@ export async function POST(req: Request) {
       }, { status: 409 });
     }
 
-    // ── GUARD: 3/3 complet ────────────────────────────────────────────────
     if (!isExclusive && unlockCount >= 3) {
       return NextResponse.json({
         ok: false,
@@ -180,7 +168,6 @@ export async function POST(req: Request) {
       }, { status: 409 });
     }
 
-    // ── DEV BYPASS: skip Stripe ───────────────────────────────────────────
     if (String(process.env.NEXT_PUBLIC_DEV_BYPASS_UNLOCK ?? "").toLowerCase() === "true") {
       await svc.from("project_unlocks").upsert({
         project_id: projectId,
@@ -196,14 +183,12 @@ export async function POST(req: Request) {
       });
     }
 
-    // ── STRIPE CHECKOUT ───────────────────────────────────────────────────
     const tier = getPriceTier(project.budget);
     const unitAmount = isExclusive ? tier.exclusivePrice : tier.normalPrice;
     const label = isExclusive
       ? `Réservation exclusive — ${project.first_name ?? "Client"} (${tier.label})`
       : `Déblocage contact — ${project.first_name ?? "Client"} (${tier.label})`;
 
-    // Upsert un enregistrement "pending" avant le paiement
     await svc.from("project_unlocks").upsert({
       project_id: projectId,
       artisan_id: user.id,
@@ -211,7 +196,6 @@ export async function POST(req: Request) {
       exclusive: isExclusive,
     }, { onConflict: "project_id,artisan_id" });
 
-    // cp pour redirect après paiement
     const cp = cpHint || String(project.postal_prefix ?? "21").slice(0, 2);
 
     const session = await stripe.checkout.sessions.create({
