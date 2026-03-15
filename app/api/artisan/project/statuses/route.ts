@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const projectIds = Array.isArray(body?.projectIds)
       ? body.projectIds
           .map((x: unknown) => String(x ?? "").trim())
-          .filter((id) => id && id !== "undefined")
+          .filter((id: string) => id && id !== "undefined")
       : [];
 
     if (!projectIds.length) {
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     }
 
     const map: Record<string, StatusRow> = {};
-    projectIds.forEach((pid) => {
+    projectIds.forEach((pid: string) => {
       map[pid] = { project_id: pid, status: null, conversation_id: null };
     });
 
