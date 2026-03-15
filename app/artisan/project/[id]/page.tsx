@@ -101,7 +101,7 @@ export default async function Page({
 
   if (projectRes.error || !projectRes.data) notFound();
 
-  const project = projectRes.data as ProjectPublic & { phone?: string | null };
+  const project = projectRes.data as unknown as ProjectPublic & { phone?: string | null };
   const unlocked = !ENFORCE_UNLOCK || unlockRes.data?.status === "paid";
 
   let phone: string | null = null;

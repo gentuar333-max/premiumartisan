@@ -255,7 +255,7 @@ const ProjectCard = memo(function ProjectCard({
 
         {(p.piece_type || p.surface_m2) && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {formatPieceType(p.piece_type).map(label => (
+            {formatPieceType(p.piece_type ?? null).map(label => (
               <span key={label} className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs text-slate-600">
                 {label}
               </span>

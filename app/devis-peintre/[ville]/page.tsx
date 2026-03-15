@@ -1,6 +1,4 @@
 // app/devis-peintre/[ville]/page.tsx
-// Keyword group: "devis peintre [ville]", "devis gratuit peintre [ville]", "trouver peintre [ville]"
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { VILLES_DATA } from '@/app/logiciel-devis-artisan/[ville]/page';
@@ -64,36 +62,25 @@ export default async function DevisPeintreVille(
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <main className="min-h-screen bg-white">
 
-        {/* ── HERO ── */}
         <section className="bg-[#2a0a14] text-white py-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <p className="text-[#fda4af] text-sm font-medium mb-3 uppercase tracking-wide">
-              {dept} · {region}
-            </p>
+            <p className="text-[#fda4af] text-sm font-medium mb-3 uppercase tracking-wide">{dept} · {region}</p>
             <h1 className="text-4xl md:text-5xl font-bold mb-5 leading-tight">
               Devis Peintre à <span className="text-[#fda4af]">{nom}</span>
             </h1>
             <p className="text-lg text-white/70 mb-8 max-w-2xl mx-auto">
-              Décrivez votre projet une seule fois. Recevez des devis de 3 peintres locaux 
-              à {nom} et dans le {dept}. Gratuit, sans engagement.
+              Décrivez votre projet une seule fois. Recevez des devis de 3 peintres locaux à {nom} et dans le {dept}. Gratuit, sans engagement.
             </p>
-            <Link href="#formulaire"
-              className="inline-flex items-center justify-center rounded-xl bg-[#be123c] px-8 py-4 text-lg font-semibold text-white shadow-xl hover:bg-[#9f1239] transition">
+            <Link href="#formulaire" className="inline-flex items-center justify-center rounded-xl bg-[#be123c] px-8 py-4 text-lg font-semibold text-white shadow-xl hover:bg-[#9f1239] transition">
               Demander mes devis gratuits →
             </Link>
-            <p className="mt-4 text-sm text-white/40">
-              Sans engagement · 3 artisans max · Réponse sous 24h
-            </p>
+            <p className="mt-4 text-sm text-white/40">Sans engagement · 3 artisans max · Réponse sous 24h</p>
           </div>
         </section>
 
-        {/* ── TRUST ── */}
         <section className="bg-[#fdf2f5] border-b border-[#fda4af]/20 py-5 px-4">
           <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-6 text-sm text-[#6a3a4a] font-medium">
             <span>Artisans vérifiés {dept}</span>
@@ -104,57 +91,35 @@ export default async function DevisPeintreVille(
           </div>
         </section>
 
-        {/* ── FORMULAIRE ── */}
         <section id="formulaire" className="py-16 px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-              Décrivez votre projet de peinture à {nom}
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Décrivez votre projet de peinture à {nom}</h2>
             <p className="text-center text-gray-500 mb-8">Formulaire en 2 minutes · Réponse sous 24h</p>
             <PublierProjetForm />
           </div>
         </section>
 
-        {/* ── TEXTE SEO ── */}
         <section className="bg-gray-50 py-16 px-4 border-t border-gray-200">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Trouver un peintre à {nom} : comment ça marche ?
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver un peintre à {nom} : comment ça marche ?</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              PremiumArtisan met en relation les particuliers de {nom} avec des artisans peintres 
-              professionnels du {dept}. Contrairement aux plateformes nationales qui revendent 
-              vos coordonnées à des dizaines d'artisans, PremiumArtisan limite chaque projet 
-              à 3 peintres maximum. Vous recevez moins de contacts, mais des contacts plus qualifiés.
+              PremiumArtisan met en relation les particuliers de {nom} avec des artisans peintres professionnels du {dept}. Contrairement aux plateformes nationales qui revendent vos coordonnées à des dizaines d'artisans, PremiumArtisan limite chaque projet à 3 peintres maximum.
             </p>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">
-              Prix d'un peintre à {nom}
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">Prix d'un peintre à {nom}</h3>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Les tarifs d'un peintre à {nom} varient selon la surface, le type de travaux 
-              et l'état du support. En moyenne : 25–45€/m² pour la peinture intérieure, 
-              35–60€/m² pour le ravalement de façade. 
-              Obtenez jusqu'à 3 devis comparatifs pour connaître le prix exact pour votre chantier.
+              Les tarifs d'un peintre à {nom} varient selon la surface, le type de travaux et l'état du support. En moyenne : 25–45€/m² pour la peinture intérieure, 35–60€/m² pour le ravalement de façade.
             </p>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">
-              Peinture intérieure et rénovation à {nom}
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">Peinture intérieure et rénovation à {nom}</h3>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Les projets de peinture les plus fréquents à {nom} concernent la rénovation 
-              d'appartements, la peinture de maisons individuelles, la pose de papier peint, 
-              et les travaux de ravalement. Les artisans de {dept} sur PremiumArtisan 
-              interviennent sur tous ces types de chantiers.
+              Les projets de peinture les plus fréquents à {nom} concernent la rénovation d'appartements, la peinture de maisons individuelles, la pose de papier peint, et les travaux de ravalement.
             </p>
           </div>
         </section>
 
-        {/* ── VILLES VOISINES ── */}
         {voisines.length > 0 && (
           <section className="py-12 px-4 border-t border-gray-200">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
-                Devis peintre dans les communes proches de {nom}
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Devis peintre dans les communes proches de {nom}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {voisines.map(v => {
                   const vData = VILLES_DATA[v];
@@ -171,31 +136,23 @@ export default async function DevisPeintreVille(
           </section>
         )}
 
-        {/* ── CTA ARTISAN ── */}
         <section className="bg-[#fdf2f5] py-10 px-4 border-t border-[#fda4af]/20">
           <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
               <p className="font-semibold text-gray-900">Vous êtes peintre à {nom} ?</p>
               <p className="text-sm text-gray-500 mt-1">Accédez aux projets de particuliers et créez vos devis gratuitement.</p>
             </div>
-            <Link href="/artisan/dashboard"
-              className="shrink-0 inline-flex items-center justify-center rounded-xl border border-[#be123c] text-[#be123c] px-5 py-2.5 text-sm font-semibold hover:bg-[#be123c] hover:text-white transition">
+            <Link href="/artisan/dashboard" className="shrink-0 inline-flex items-center justify-center rounded-xl border border-[#be123c] text-[#be123c] px-5 py-2.5 text-sm font-semibold hover:bg-[#be123c] hover:text-white transition">
               Accès artisan →
             </Link>
           </div>
         </section>
 
-        {/* ── CTA FINAL ── */}
         <section className="bg-[#2a0a14] py-14 px-4 text-white text-center">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4">
-              Obtenez vos devis peinture à {nom}
-            </h2>
-            <p className="text-white/70 mb-8">
-              Gratuit, sans engagement. Jusqu'à 3 artisans peintres qualifiés en {dept}.
-            </p>
-            <Link href="#formulaire"
-              className="inline-flex items-center justify-center rounded-xl bg-[#be123c] px-8 py-4 text-lg font-semibold text-white hover:bg-[#9f1239] transition">
+            <h2 className="text-3xl font-bold mb-4">Obtenez vos devis peinture à {nom}</h2>
+            <p className="text-white/70 mb-8">Gratuit, sans engagement. Jusqu'à 3 artisans peintres qualifiés en {dept}.</p>
+            <Link href="#formulaire" className="inline-flex items-center justify-center rounded-xl bg-[#be123c] px-8 py-4 text-lg font-semibold text-white hover:bg-[#9f1239] transition">
               Demander mes devis →
             </Link>
           </div>

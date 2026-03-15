@@ -10,7 +10,7 @@ type ConversationRow = {
   artisan_id: string;
   client_id: string;
   created_at: string;
-  last_message_at: string | null;
+  last_message_at?: string | null;
 };
 
 type ProjectRow = {
@@ -56,7 +56,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
-    let filtered = conversations ?? [];
+    let filtered = (conversations ?? []) as ConversationRow[];
+
     if (ENFORCE_UNLOCK && role === "artisan" && filtered.length > 0) {
       const unlockRes = await dbClient
         .from("project_unlocks")

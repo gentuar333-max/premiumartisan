@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const statuses: Record<string, { unlocked: boolean; status: string | null; conversationId: string | null }> = {};
 
     await Promise.all(
-      projectIds.map(async (projectId) => {
+      projectIds.map(async (projectId: string) => {
         try {
           const state = await getUnlockStatus({
             supabase: serviceSupabase,

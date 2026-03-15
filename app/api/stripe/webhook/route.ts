@@ -6,7 +6,7 @@ import { createSupabaseServiceClient } from "@/lib/supabaseServer";
 export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
+  apiVersion: "2026-02-25.clover",
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.CheckoutSession;
+    const session = event.data.object as Stripe.Checkout.Session;
     console.log("[webhook] metadata:", session.metadata);
     const { project_id, artisan_id, exclusive } = session.metadata ?? {};
 
@@ -39,8 +39,6 @@ export async function POST(req: Request) {
     const isExclusive = exclusive === "true";
     const svc = createSupabaseServiceClient();
 
-    // ── Double-check exclusive guard antes de confirmar ────────────────
-    // Kontrollo edhe për normal unlocks — exclusive lejohet vetëm nëse 0/3
     if (isExclusive) {
       const { count } = await svc
         .from("project_unlocks")
@@ -50,8 +48,6 @@ export async function POST(req: Request) {
         .neq("artisan_id", artisan_id);
 
       if ((count ?? 0) > 0) {
-        // Race condition: quelqu'un d'autre a payé entre-temps
-        // → rembourse via Stripe et marque pending
         console.warn(`[webhook] exclusive race condition on project ${project_id}`);
         if (session.payment_intent) {
           try {
@@ -63,12 +59,10 @@ export async function POST(req: Request) {
             console.error("[webhook] refund error:", refundErr);
           }
         }
-        // Garde le status pending (ne confirme pas)
         return NextResponse.json({ ok: true, warning: "race_condition_refunded" });
       }
     }
 
-    // ── Confirme le paiement → status = "paid" ─────────────────────────
     const { error } = await svc
       .from("project_unlocks")
       .upsert({
@@ -80,7 +74,6 @@ export async function POST(req: Request) {
       }, { onConflict: "project_id,artisan_id" });
 
     if (error) {
-      // Trigger DB a rejeté (constraint) → rembourse
       console.error("[webhook] DB error (trigger blocked?):", error.message);
       if (session.payment_intent) {
         try {
@@ -94,7 +87,6 @@ export async function POST(req: Request) {
 
     console.log(`[webhook] ✅ unlock confirmed: project=${project_id} artisan=${artisan_id} exclusive=${isExclusive}`);
 
-    // Nëse exclusive → anullo të gjitha "pending" të artizanëve të tjerë
     if (isExclusive) {
       await svc
         .from("project_unlocks")
