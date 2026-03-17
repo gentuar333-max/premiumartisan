@@ -1,3 +1,5 @@
+"use client";
+
 import PublierProjetForm from "./PublierProjetForm";
 
 export default function Page() {

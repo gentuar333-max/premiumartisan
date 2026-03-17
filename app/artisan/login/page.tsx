@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -75,7 +75,7 @@ function sanitizeAuthError(msg: string): string {
   return msg;
 }
 
-export default function ArtisanLoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? searchParams.get("redirectTo") ?? "/artisan/dashboard";
@@ -184,9 +184,7 @@ export default function ArtisanLoginPage() {
           return;
         }
       } else {
-        // ── Sign in ────────────────────────────────────────────────────────
         const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-
         if (signInErr) {
           if (DEV) console.error("[artisan/login] signIn failed:", signInErr.message);
           setError(sanitizeAuthError(signInErr.message));
@@ -229,9 +227,7 @@ export default function ArtisanLoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-            PA
-          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">PA</div>
           <h1 className="text-xl font-semibold text-slate-900">Premium Artisan</h1>
         </div>
         <p className="mt-1 text-sm text-slate-600">
@@ -240,43 +236,23 @@ export default function ArtisanLoginPage() {
 
         {signupSuccess ? (
           <div className="mt-6 space-y-4">
-            <p className="text-sm text-emerald-600">
-              Compte créé. Vérifiez votre email (Inbox/Spam) pour confirmer votre inscription.
-            </p>
-            <button
-              type="button"
-              disabled={resendLoading}
+            <p className="text-sm text-emerald-600">Compte créé. Vérifiez votre email (Inbox/Spam) pour confirmer votre inscription.</p>
+            <button type="button" disabled={resendLoading}
               onClick={async () => {
-                setResendLoading(true);
-                setError(null);
+                setResendLoading(true); setError(null);
                 try {
                   const supabase = createSupabaseBrowserClient();
                   const { error: err } = await supabase.auth.resend({ type: "signup", email });
                   if (err) setError(sanitizeAuthError(err.message));
-                } catch {
-                  setError("Erreur lors du renvoi. Réessayez.");
-                } finally {
-                  setResendLoading(false);
-                }
+                } catch { setError("Erreur lors du renvoi. Réessayez."); }
+                finally { setResendLoading(false); }
               }}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-            >
-              {resendLoading && (
-                <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden>
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-              )}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
               {resendLoading ? "Envoi..." : "Renvoyer l'email"}
             </button>
             {error && <p className="text-sm text-red-600">{error}</p>}
-            <button
-              type="button"
-              onClick={() => { setSignupSuccess(false); setMode("signin"); setError(null); }}
-              className="block text-sm text-blue-600 hover:underline"
-            >
-              Retour à la connexion
-            </button>
+            <button type="button" onClick={() => { setSignupSuccess(false); setMode("signin"); setError(null); }}
+              className="block text-sm text-blue-600 hover:underline">Retour à la connexion</button>
           </div>
         ) : !showForgotForm ? (
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -284,33 +260,27 @@ export default function ArtisanLoginPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-slate-700">Prénom</label>
-                  <input id="firstName" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                    required autoComplete="given-name"
+                  <input id="firstName" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required autoComplete="given-name"
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block text-sm font-medium text-slate-700">Nom</label>
-                  <input id="lastName" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)}
-                    required autoComplete="family-name"
+                  <input id="lastName" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required autoComplete="family-name"
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
               </div>
             )}
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email</label>
-              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                required autoComplete="email"
+              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
             </div>
-
             {mode === "signup" && (
               <>
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-slate-700">Téléphone</label>
                   <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))}
-                    placeholder="06 12 34 56 78 ou +33 6 12 34 56 78" maxLength={17}
-                    required autoComplete="tel"
+                    placeholder="06 12 34 56 78 ou +33 6 12 34 56 78" maxLength={17} required autoComplete="tel"
                     className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                   {phone && !validateFrenchMobile(phone) && (
                     <p className="mt-1 text-xs text-red-600">Numéro français valide requis (06, 07 ou +33).</p>
@@ -341,7 +311,6 @@ export default function ArtisanLoginPage() {
                 </div>
               </>
             )}
-
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700">Mot de passe</label>
               <div className="relative mt-1">
@@ -351,7 +320,7 @@ export default function ArtisanLoginPage() {
                   autoComplete={mode === "signin" ? "current-password" : "new-password"}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 <button type="button" onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:bg-slate-100"
                   aria-label="Afficher le mot de passe">
                   {showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -381,18 +350,14 @@ export default function ArtisanLoginPage() {
                 </div>
               )}
             </div>
-
             {mode === "signin" && (
               <div className="text-right">
-                <button type="button" onClick={() => setShowForgotForm(true)}
-                  className="text-sm text-blue-600 hover:underline">
+                <button type="button" onClick={() => setShowForgotForm(true)} className="text-sm text-blue-600 hover:underline">
                   Mot de passe oublié ?
                 </button>
               </div>
             )}
-
             {error && <p className="text-sm text-red-600">{error}</p>}
-
             <div className="flex gap-3">
               <button type="submit" disabled={loading || (mode === "signup" && !passwordValid)}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50">
@@ -402,9 +367,7 @@ export default function ArtisanLoginPage() {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                 )}
-                {loading
-                  ? (mode === "signin" ? "Connexion..." : "Création du compte...")
-                  : mode === "signin" ? "Se connecter" : "Créer le compte"}
+                {loading ? (mode === "signin" ? "Connexion..." : "Création du compte...") : mode === "signin" ? "Se connecter" : "Créer le compte"}
               </button>
               <button type="button" onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
                 className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
@@ -414,9 +377,7 @@ export default function ArtisanLoginPage() {
           </form>
         ) : forgotSent ? (
           <div className="mt-6 space-y-4">
-            <p className="text-sm text-emerald-600">
-              Un lien de réinitialisation a été envoyé à {forgotEmail}. Consultez votre boîte mail.
-            </p>
+            <p className="text-sm text-emerald-600">Un lien de réinitialisation a été envoyé à {forgotEmail}.</p>
             <button type="button"
               onClick={() => { setShowForgotForm(false); setForgotSent(false); setForgotEmail(""); setError(null); }}
               className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
@@ -429,20 +390,14 @@ export default function ArtisanLoginPage() {
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div>
                 <label htmlFor="forgotEmail" className="block text-sm font-medium text-slate-700">Email</label>
-                <input id="forgotEmail" type="email" value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)} required placeholder="votre@email.fr"
+                <input id="forgotEmail" type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
+                  required placeholder="votre@email.fr"
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-2">
                 <button type="submit" disabled={forgotLoading}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50">
-                  {forgotLoading && (
-                    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden>
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  )}
                   {forgotLoading ? "Envoi..." : "Envoyer le lien"}
                 </button>
                 <button type="button" onClick={() => { setShowForgotForm(false); setError(null); }}
@@ -455,11 +410,17 @@ export default function ArtisanLoginPage() {
         )}
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          <Link href="/artisan/dashboard" className="text-blue-600 hover:underline">
-            Retour au dashboard
-          </Link>
+          <Link href="/artisan/dashboard" className="text-blue-600 hover:underline">Retour au dashboard</Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function ArtisanLoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-slate-50"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" /></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

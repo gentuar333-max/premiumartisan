@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function UnlockSuccessPage() {
+function UnlockSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -12,17 +12,11 @@ export default function UnlockSuccessPage() {
   );
 
   useEffect(() => {
-    if (!sessionId) {
-      return;
-    }
-
+    if (!sessionId) return;
     let cancelled = false;
-
     const finalize = async () => {
       try {
-        const res = await fetch(`/api/stripe/session-status?session_id=${encodeURIComponent(sessionId)}`, {
-          cache: "no-store",
-        });
+        const res = await fetch(`/api/stripe/session-status?session_id=${encodeURIComponent(sessionId)}`, { cache: "no-store" });
         const json = await res.json().catch(() => null);
         if (!res.ok || !json?.ok) {
           if (!cancelled) setError(json?.error || "Paiement non confirmé.");
@@ -38,12 +32,8 @@ export default function UnlockSuccessPage() {
         if (!cancelled) setError("Erreur serveur pendant la validation du paiement.");
       }
     };
-
     void finalize();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [router, searchParams]);
 
   return (
@@ -58,16 +48,25 @@ export default function UnlockSuccessPage() {
           <>
             <h1 className="text-lg font-semibold text-rose-800">Erreur</h1>
             <p className="mt-2 text-sm text-rose-700">{error}</p>
-            <button
-              type="button"
-              onClick={() => router.replace("/artisan/dashboard")}
-              className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-            >
+            <button type="button" onClick={() => router.replace("/artisan/dashboard")}
+              className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
               Retour dashboard
             </button>
           </>
         )}
       </div>
     </main>
+  );
+}
+
+export default function UnlockSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+      </div>
+    }>
+      <UnlockSuccessContent />
+    </Suspense>
   );
 }

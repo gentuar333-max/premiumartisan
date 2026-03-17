@@ -149,7 +149,7 @@ function buildUrl(base: string, params: Record<string, string | undefined>) {
 export default async function ArtisanDashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<SearchParams> | SearchParams;
+  searchParams: Promise<SearchParams>
 }) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey    = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

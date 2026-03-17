@@ -399,7 +399,7 @@ export default function DevisForm() {
       artisan_email:      data.artisanEmail,
       artisan_assurance:  data.artisanAssurance,
       artisan_police:     data.artisanPolice,
-      artisan_logo_url:   data.logoUrl || null,
+      artisan_logo_url:   null,
       client_nom:         data.clientNom,
       client_tel:         data.clientTel,
       client_adresse:     data.clientAdresse,
@@ -420,11 +420,11 @@ export default function DevisForm() {
       total_ht:           Math.round(sousTotal * 100) / 100,
       total_tva:          Math.round(tvaMontant * 100) / 100,
       total_ttc:          Math.round(totalTtc * 100) / 100,
-      acompte_pct:        data.acompteRate,
-      acompte_ttc:        Math.round(totalTtc * (data.acompteRate / 100) * 100) / 100,
+      acompte_pct:        data.acompte,
+      acompte_ttc:        Math.round(totalTtc * (data.acompte / 100) * 100) / 100,
       notes:              data.notes,
       conditions:         data.conditions,
-      signature_data:     data.signatureData || null,
+      signature_data:     signature || null,
     };
   }
 
