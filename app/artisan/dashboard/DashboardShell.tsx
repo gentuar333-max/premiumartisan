@@ -779,13 +779,8 @@ export function DashboardShell({
             Filtres
             {activeFilterCount > 0 && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-slate-400 text-[9px] font-bold text-white">{activeFilterCount}</span>}
           </button>
-          <Link href={sortRecentUrl} className={`shrink-0 px-3 py-1.5 text-sm transition rounded-lg whitespace-nowrap ${sort !== "budget_desc" ? "font-semibold text-slate-700 bg-slate-100" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>Plus récents</Link>
-          <Link href={sortBudgetUrl} className={`shrink-0 px-3 py-1.5 text-sm transition rounded-lg whitespace-nowrap ${sort === "budget_desc" ? "font-semibold text-slate-700 bg-slate-100" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>Budget élevé</Link>
           <Link href="/artisan/devis/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">+ Créer un devis</Link>
-          <Link href="/artisan/factures/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">+ Créer une facture</Link>
-          {activeFilterCount > 0 && (
-            <button type="button" onClick={handleFilterReset} className="shrink-0 text-xs text-slate-400 underline underline-offset-2 hover:text-slate-600 whitespace-nowrap">Effacer</button>
-          )}
+          <Link href="/artisan/factures/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap hidden sm:block">+ Créer une facture</Link>
           <div className="relative flex-1 min-w-[120px] max-w-xs mx-2">
             <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -843,8 +838,25 @@ export function DashboardShell({
               </button>
             </div>
             <div className="flex flex-1 flex-col gap-3 p-5">
-              <Link href="/artisan/devis/new" className="w-full rounded-xl border border-slate-900 bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-700" onClick={() => setMenuOpen(false)}>+ Créer un devis</Link>
+              {/* Sort — visible surtout sur mobile */}
+              <div className="flex gap-2">
+                <Link href={sortRecentUrl} onClick={() => setMenuOpen(false)}
+                  className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort !== "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
+                  Plus récents
+                </Link>
+                <Link href={sortBudgetUrl} onClick={() => setMenuOpen(false)}
+                  className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort === "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
+                  Budget élevé
+                </Link>
+              </div>
+              <Link href="/artisan/devis/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:hidden" onClick={() => setMenuOpen(false)}>+ Créer un devis</Link>
               <Link href="/artisan/factures/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50" onClick={() => setMenuOpen(false)}>+ Créer une facture</Link>
+              {activeFilterCount > 0 && (
+                <button type="button" onClick={() => { handleFilterReset(); setMenuOpen(false); }}
+                  className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100">
+                  Effacer les filtres ({activeFilterCount})
+                </button>
+              )}
               <div>
                 <button type="button" disabled className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400">Aide / Support</button>
                 <span className="mt-1.5 block text-xs text-slate-400">Bientôt disponible</span>
