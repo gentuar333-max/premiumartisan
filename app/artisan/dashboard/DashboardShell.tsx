@@ -24,7 +24,6 @@ import { formatPhone, phoneToWhatsApp } from "@/lib/formatPhone";
 import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
 import type { User } from "@supabase/supabase-js";
 
-// ── PIECE LABELS ───────────────────────────────────────────────────────────────
 const PIECE_LABELS: Record<string, string> = {
   salon:      "Salon / Séjour",
   cuisine:    "Cuisine",
@@ -43,8 +42,6 @@ function formatPieceType(raw: string | null): string[] {
     return PIECE_LABELS[key] ?? s.trim();
   }).filter(Boolean);
 }
-
-
 
 const BRAND_BLUE = "#2563EB";
 
@@ -148,7 +145,6 @@ function formatCategory(category?: string | null) {
   return category.replace(":", " ·").replace(" : ", " · ");
 }
 
-// ── FIRE BADGE ─────────────────────────────────────────────────────────────────
 function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
   if (isLocked) {
     return (
@@ -173,7 +169,6 @@ function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
   );
 }
 
-// ── PROJECT CARD ───────────────────────────────────────────────────────────────
 const ProjectCard = memo(function ProjectCard({
   p, categoryLabel, unlockState, contact,
   onUnlockClick, onUnlockExclusive, onPrefetch,
@@ -202,9 +197,7 @@ const ProjectCard = memo(function ProjectCard({
   const locLine = zoneLabel ? truncate(zoneLabel, 56) : "—";
   const descriptionLine = p.description?.trim() || "";
   const isUnlocked = unlockState?.status === "paid";
-  const unlockedPhone = isUnlocked
-    ? (contact?.phone ?? p.client_phone ?? p.phone ?? null)
-    : null;
+  const unlockedPhone = isUnlocked ? (contact?.phone ?? p.client_phone ?? p.phone ?? null) : null;
   const waE164 = unlockedPhone ? phoneToWhatsApp(unlockedPhone) : "";
   const isFull = projectUnlockCount >= 3;
   const isFirstSlot = projectUnlockCount === 0;
@@ -301,7 +294,6 @@ const ProjectCard = memo(function ProjectCard({
 
             {!isLockedForMe && (
               isUnlocked && waE164 ? (
-                // Débloqué — lien direct WhatsApp
                 <a href={`https://wa.me/${waE164}?text=${encodeURIComponent("Bonjour, j'ai vu votre projet sur PremiumArtisan")}`}
                   target="_blank" rel="noreferrer"
                   className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100">
@@ -312,7 +304,6 @@ const ProjectCard = memo(function ProjectCard({
                   WhatsApp
                 </a>
               ) : (
-                // Pas encore débloqué — bouton verrouillé, clique = unlock
                 <button type="button"
                   onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
                   disabled={!p.id || p.id === "undefined" || unlocking || isFull}
@@ -390,7 +381,6 @@ const ProjectCard = memo(function ProjectCard({
   );
 });
 
-// ── CHECKBOX ───────────────────────────────────────────────────────────────────
 function CheckItem({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
   return (
     <button type="button" onClick={onChange}
@@ -407,7 +397,6 @@ function CheckItem({ label, checked, onChange }: { label: string; checked: boole
   );
 }
 
-// ── FILTER PANEL ───────────────────────────────────────────────────────────────
 function FilterPanel({
   isOpen, onClose, initialCp, initialSort, initialCats,
   initialStatut, initialBudgetMin, initialBudgetMax, onApply, count,
@@ -561,7 +550,6 @@ function FilterPanel({
   );
 }
 
-// ── DASHBOARD SHELL ────────────────────────────────────────────────────────────
 export function DashboardShell({
   projects, count, cp, sort, error, categoryLabel, sortRecentUrl, sortBudgetUrl,
 }: {
@@ -581,15 +569,15 @@ export function DashboardShell({
   const [projectUnlockCounts, setProjectUnlockCounts] = useState<Record<string, number>>({});
   const [projectIsLocked, setProjectIsLocked] = useState<Record<string, boolean>>({});
   const [unlockingProjectId, setUnlockingProjectId] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null | undefined>(undefined); // undefined = duke u ngarkuar
+  const [currentUser, setCurrentUser] = useState<User | null | undefined>(undefined);
 
-  // Merr userin nga Supabase client-side
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       setCurrentUser(data.user ?? null);
     });
   }, []);
+
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "info" } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -668,8 +656,7 @@ export function DashboardShell({
   const handleFilterReset = useCallback(() => { router.push("/artisan/dashboard"); }, [router]);
 
   const onUnlockClick = useCallback(async (projectId: string) => {
-    // Nese nuk eshte i kyqur → drejto te login
-    if (currentUser === null) {
+    if (!currentUser) {
       router.push(`/artisan/login?redirect=/artisan/dashboard`);
       return;
     }
@@ -681,6 +668,10 @@ export function DashboardShell({
       });
       const json = await res.json().catch(() => null);
       if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
+      if (res.status === 401 || json?.error?.includes("authentifié")) {
+        router.push(`/artisan/login?redirect=/artisan/dashboard`);
+        return;
+      }
       if (!res.ok || !json?.ok) { setToast({ msg: json?.error || "Impossible de récupérer le numéro.", type: "error" }); return; }
       setUnlockStatuses(prev => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts(prev => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
@@ -688,10 +679,10 @@ export function DashboardShell({
       setToast({ msg: "Numéro affiché.", type: "success" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
-  }, [projects]);
+  }, [currentUser, cp, router]);
 
   const onUnlockExclusive = useCallback(async (projectId: string) => {
-    if (currentUser === null) {
+    if (!currentUser) {
       router.push(`/artisan/login?redirect=/artisan/dashboard`);
       return;
     }
@@ -702,6 +693,10 @@ export function DashboardShell({
         body: JSON.stringify({ projectIds: [projectId], exclusive: true, cp }),
       });
       const json = await res.json().catch(() => null);
+      if (res.status === 401 || json?.error?.includes("authentifié")) {
+        router.push(`/artisan/login?redirect=/artisan/dashboard`);
+        return;
+      }
       if (!res.ok || !json?.ok) {
         if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
         setToast({ msg: json?.error || "Erreur lors de la réservation exclusive.", type: "error" });
@@ -709,27 +704,23 @@ export function DashboardShell({
       }
       setUnlockStatuses(prev => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts(prev => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
-      // Exclusive → 3/3 + bllokon projektin për të gjithë të tjerët
       setProjectUnlockCounts(prev => ({ ...prev, [projectId]: 3 }));
-      setProjectIsLocked(prev => ({ ...prev, [projectId]: false })); // unë e bleva, nuk jam locked
+      setProjectIsLocked(prev => ({ ...prev, [projectId]: false }));
       setToast({ msg: "⚡ Projet réservé en exclusivité !", type: "info" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
-  }, [projects]);
+  }, [currentUser, cp, router]);
 
   useEffect(() => {
     if (unlockToast === "cancel") setToast({ msg: "Paiement annulé.", type: "error" });
     if (unlockToast === "success") {
       setToast({ msg: "Paiement confirmé ! Numéro débloqué.", type: "success" });
-
-      // Re-fetch dashboard-data pour récupérer le nouveau statut "paid" + numéro
       const successProjectId = searchParams.get("project_id");
       if (successProjectId && projects.length > 0) {
         const refetch = async () => {
           try {
             const res = await fetch("/api/artisan/project/dashboard-data", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
+              method: "POST", headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ projectIds: projects.map(p => p.id) }),
             });
             const json = await res.json().catch(() => null);
@@ -743,9 +734,8 @@ export function DashboardShell({
             setUnlockedContacts(prev => ({ ...prev, ...(json.contacts ?? {}) }));
             if (json.unlock_counts) setProjectUnlockCounts(json.unlock_counts as Record<string, number>);
             if (json.is_locked) setProjectIsLocked(json.is_locked as Record<string, boolean>);
-          } catch { /* silently ignore */ }
+          } catch { /* ignore */ }
         };
-        // Retry 3 herë — webhook Stripe mund të ketë vonesë deri 5s
         setTimeout(() => void refetch(), 1500);
         setTimeout(() => void refetch(), 4000);
         setTimeout(() => void refetch(), 8000);
@@ -767,29 +757,17 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-[#f0f2f5]">
-
-      {/* ── HEADER + NAV — një linjë si Bybit ── */}
       <header className="sticky top-0 z-30 bg-[#eaecef] border-b border-[#d5d8dc] shadow-sm">
         <div className="mx-auto flex h-[52px] max-w-7xl items-center gap-2 px-4 sm:px-6 overflow-x-auto">
-
-          {/* Logo */}
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-2 no-underline mr-2">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black text-white"
-              style={{ background: "linear-gradient(145deg,#2a0a14,#3d0f1e)" }}>
-              PA
-            </div>
+              style={{ background: "linear-gradient(145deg,#2a0a14,#3d0f1e)" }}>PA</div>
             <span className="hidden sm:block" style={{ fontFamily: "Georgia,'Times New Roman',serif", fontSize: 15, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.3px", whiteSpace: "nowrap" }}>
               Premium<span style={{ color: "#0f172a" }}>Artisan</span>
             </span>
-            {notifCount > 0 && (
-              <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{notifCount}</span>
-            )}
+            {notifCount > 0 && <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{notifCount}</span>}
           </a>
-
-          {/* Divider */}
           <span className="hidden sm:block h-4 w-px bg-slate-200 shrink-0" />
-
-          {/* Filtres */}
           <button type="button" onClick={() => setFilterOpen(true)}
             className="flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-900 whitespace-nowrap rounded-lg hover:bg-slate-50">
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={2}>
@@ -799,54 +777,17 @@ export function DashboardShell({
               <circle cx="7" cy="15" r="1.5" fill="currentColor" stroke="none"/>
             </svg>
             Filtres
-            {activeFilterCount > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-slate-400 text-[9px] font-bold text-white">{activeFilterCount}</span>
-            )}
+            {activeFilterCount > 0 && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-slate-400 text-[9px] font-bold text-white">{activeFilterCount}</span>}
           </button>
-
-          {/* Plus récents */}
-          <Link href={sortRecentUrl}
-            className={`shrink-0 px-3 py-1.5 text-sm transition rounded-lg whitespace-nowrap ${
-              sort !== "budget_desc"
-                ? "font-semibold text-slate-700 bg-slate-100"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}>
-            Plus récents
-          </Link>
-
-          {/* Budget élevé */}
-          <Link href={sortBudgetUrl}
-            className={`shrink-0 px-3 py-1.5 text-sm transition rounded-lg whitespace-nowrap ${
-              sort === "budget_desc"
-                ? "font-semibold text-slate-700 bg-slate-100"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}>
-            Budget élevé
-          </Link>
-
-          {/* Créer un devis */}
-          <Link href="/artisan/devis/new"
-            className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">
-            + Créer un devis
-          </Link>
-
-          {/* Créer une facture */}
-          <Link href="/artisan/factures/new"
-            className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">
-            + Créer une facture
-          </Link>
-
+          <Link href={sortRecentUrl} className={`shrink-0 px-3 py-1.5 text-sm transition rounded-lg whitespace-nowrap ${sort !== "budget_desc" ? "font-semibold text-slate-700 bg-slate-100" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>Plus récents</Link>
+          <Link href={sortBudgetUrl} className={`shrink-0 px-3 py-1.5 text-sm transition rounded-lg whitespace-nowrap ${sort === "budget_desc" ? "font-semibold text-slate-700 bg-slate-100" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"}`}>Budget élevé</Link>
+          <Link href="/artisan/devis/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">+ Créer un devis</Link>
+          <Link href="/artisan/factures/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">+ Créer une facture</Link>
           {activeFilterCount > 0 && (
-            <button type="button" onClick={handleFilterReset}
-              className="shrink-0 text-xs text-slate-400 underline underline-offset-2 hover:text-slate-600 whitespace-nowrap">
-              Effacer
-            </button>
+            <button type="button" onClick={handleFilterReset} className="shrink-0 text-xs text-slate-400 underline underline-offset-2 hover:text-slate-600 whitespace-nowrap">Effacer</button>
           )}
-
-          {/* Search — flex-1 */}
           <div className="relative flex-1 min-w-[120px] max-w-xs mx-2">
-            <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
             <input type="text" value={searchValue} onChange={e => setSearchValue(e.target.value)}
@@ -865,8 +806,6 @@ export function DashboardShell({
               className="h-8 w-full rounded-full border border-slate-200 bg-slate-50 pl-8 pr-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-300 focus:bg-white"
             />
           </div>
-
-          {/* Login/Logout — djathtas */}
           <button type="button"
             onClick={async () => {
               if (currentUser) {
@@ -879,15 +818,12 @@ export function DashboardShell({
             className="shrink-0 ml-auto px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-900 hover:bg-slate-50 rounded-lg whitespace-nowrap">
             {currentUser ? "Se déconnecter" : "Se connecter"}
           </button>
-
-          {/* Menu burger */}
           <button type="button" onClick={() => setMenuOpen(o => !o)} aria-label="Menu"
             className="shrink-0 flex h-8 w-8 flex-col items-center justify-center gap-[3.5px] rounded-lg border border-slate-200 bg-white transition hover:bg-slate-50">
             <span className="block h-[1.5px] w-3.5 rounded-full bg-slate-600"/>
             <span className="block h-[1.5px] w-2.5 rounded-full bg-slate-600"/>
             <span className="block h-[1.5px] w-3.5 rounded-full bg-slate-600"/>
           </button>
-
         </div>
       </header>
 
@@ -896,36 +832,21 @@ export function DashboardShell({
         initialStatut={currentStatut} initialBudgetMin={currentBudgetMin}
         initialBudgetMax={currentBudgetMax} onApply={handleFilterApply} count={count}/>
 
-      {/* Side menu */}
       {menuOpen && (
         <>
           <div role="button" tabIndex={0} onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 bg-black/40"/>
           <aside className="fixed right-0 top-0 z-50 flex h-full w-[300px] max-w-[80vw] flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <span className="text-sm font-bold text-slate-800">Menu</span>
-              <button type="button" onClick={() => setMenuOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
+              <button type="button" onClick={() => setMenuOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <div className="flex flex-1 flex-col gap-3 p-5">
-              {/* Devis link edhe në menu */}
-              <Link href="/artisan/devis/new"
-                className="w-full rounded-xl border border-slate-900 bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-700"
-                onClick={() => setMenuOpen(false)}>
-                + Créer un devis
-              </Link>
-              <Link href="/artisan/factures/new"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                onClick={() => setMenuOpen(false)}>
-                + Créer une facture
-              </Link>
+              <Link href="/artisan/devis/new" className="w-full rounded-xl border border-slate-900 bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-700" onClick={() => setMenuOpen(false)}>+ Créer un devis</Link>
+              <Link href="/artisan/factures/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50" onClick={() => setMenuOpen(false)}>+ Créer une facture</Link>
               <div>
-                <button type="button" disabled className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400">
-                  Aide / Support
-                </button>
+                <button type="button" disabled className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400">Aide / Support</button>
                 <span className="mt-1.5 block text-xs text-slate-400">Bientôt disponible</span>
               </div>
             </div>
@@ -933,7 +854,6 @@ export function DashboardShell({
         </>
       )}
 
-      {/* Content */}
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         {newHit && (
           <div className="mb-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4 text-[13px] text-blue-900">
@@ -941,25 +861,20 @@ export function DashboardShell({
             <button onClick={() => setNewHit(null)} className="ml-4 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-100">OK</button>
           </div>
         )}
-        {toast && (
-          <div className={`mb-4 rounded-xl border p-3 text-[13px] ${toastColors[toast.type]}`}>{toast.msg}</div>
-        )}
+        {toast && <div className={`mb-4 rounded-xl border p-3 text-[13px] ${toastColors[toast.type]}`}>{toast.msg}</div>}
         {error && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-800">
             <span className="font-semibold">Erreur</span> — {error}
           </div>
         )}
-
         <p className="mb-5 text-sm text-slate-600">
           <strong className="text-slate-900">{count}</strong> projet{count > 1 ? "s" : ""} en{" "}
           <span className="font-medium">{regionLabel}</span>
         </p>
-
         {count > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map(p => (
-              <ProjectCard
-                key={p.id} p={p} categoryLabel={categoryLabel}
+              <ProjectCard key={p.id} p={p} categoryLabel={categoryLabel}
                 contact={unlockedContacts[p.id]}
                 unlockState={unlockStatuses[p.id] ? { status: unlockStatuses[p.id]?.status ?? null } : undefined}
                 onUnlockClick={onUnlockClick} onUnlockExclusive={onUnlockExclusive}
@@ -973,8 +888,7 @@ export function DashboardShell({
           <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white py-16 shadow-sm">
             <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
               <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
             </div>
             <p className="mb-1 text-base font-medium text-slate-900">Aucun projet dans votre zone pour le moment</p>
