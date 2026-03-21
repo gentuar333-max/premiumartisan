@@ -49,6 +49,75 @@ export default function Page() {
     { initials: "ML", name: "Martine L.", location: "Chenôve · PMR · MaPrimeAdapt'", text: "Sofiane a transformé ma salle de bain en douche PMR à 72 ans. Il a géré le dossier MaPrimeAdapt' avec moi. Sur 7 800€ de travaux, j'ai obtenu 5 460€ d'aides.", stars: 5 },
   ];
 
+  const seoLinks = [
+    {
+      label: "🎨 Peinture", color: "#be123c", bg: "#fff1f2", border: "#fda4af",
+      links: [
+        { label: "Peinture Dijon", href: "/devis-peinture-dijon" },
+        { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
+        { label: "Peinture Longvic", href: "/devis-peinture-longvic" },
+        { label: "Peinture Talant", href: "/devis-peinture-talant" },
+        { label: "Peinture Quetigny", href: "/devis-peinture-quetigny" },
+        { label: "Peinture Fontaine-lès-Dijon", href: "/devis-peinture-fontaine-les-dijon" },
+        { label: "Peinture intérieure Dijon", href: "/devis-peinture-interieure-dijon" },
+      ],
+    },
+    {
+      label: "🔨 Rénovation", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe",
+      links: [
+        { label: "Rénovation Dijon", href: "/devis-renovation-dijon" },
+        { label: "Rénovation Chenôve", href: "/devis-renovation-chenove" },
+        { label: "Rénovation Longvic", href: "/devis-renovation-longvic" },
+        { label: "Rénovation Talant", href: "/devis-renovation-talant" },
+        { label: "Rénovation Quetigny", href: "/devis-renovation-quetigny" },
+        { label: "Rénovation Fontaine-lès-Dijon", href: "/devis-renovation-fontaine-les-dijon" },
+      ],
+    },
+    {
+      label: "🍳 Cuisine", color: "#059669", bg: "#ecfdf5", border: "#a7f3d0",
+      links: [
+        { label: "Cuisine Dijon", href: "/devis-cuisine-dijon" },
+        { label: "Cuisine Chenôve", href: "/devis-cuisine-chenove" },
+        { label: "Cuisine Longvic", href: "/devis-cuisine-longvic" },
+        { label: "Cuisine Talant", href: "/devis-cuisine-talant" },
+        { label: "Cuisine Quetigny", href: "/devis-cuisine-quetigny" },
+        { label: "Cuisine Fontaine-lès-Dijon", href: "/devis-cuisine-fontaine-les-dijon" },
+      ],
+    },
+    {
+      label: "🚿 Salle de bain", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe",
+      links: [
+        { label: "Salle de bain Dijon", href: "/devis-salle-de-bain-dijon" },
+        { label: "Salle de bain Chenôve", href: "/devis-salle-de-bain-chenove" },
+        { label: "Salle de bain Longvic", href: "/devis-salle-de-bain-longvic" },
+        { label: "Salle de bain Talant", href: "/devis-salle-de-bain-talant" },
+        { label: "Salle de bain Quetigny", href: "/devis-salle-de-bain-quetigny" },
+        { label: "Salle de bain Fontaine-lès-Dijon", href: "/devis-salle-de-bain-fontaine-les-dijon" },
+      ],
+    },
+    {
+      label: "🖼️ Papier peint", color: "#b45309", bg: "#fffbeb", border: "#fde68a",
+      links: [
+        { label: "Papier peint Dijon", href: "/devis-pose-papier-peint-dijon" },
+        { label: "Papier peint Chenôve", href: "/devis-pose-papier-peint-chenove" },
+        { label: "Papier peint Longvic", href: "/devis-pose-papier-peint-longvic" },
+        { label: "Papier peint Talant", href: "/devis-pose-papier-peint-talant" },
+        { label: "Papier peint Quetigny", href: "/devis-pose-papier-peint-quetigny" },
+        { label: "Papier peint Fontaine-lès-Dijon", href: "/devis-pose-papier-peint-fontaine-les-dijon" },
+      ],
+    },
+    {
+      label: "👷 Pour les artisans", color: "#0f172a", bg: "#f8fafc", border: "#e2e8f0",
+      links: [
+        { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
+        { label: "Logiciel devis peintre Côte-d'Or", href: "/logiciel-devis-peintre-cote-dor" },
+        { label: "Créer devis peintre gratuit", href: "/creer-devis-peintre" },
+        { label: "Créer facture artisan", href: "/creer-facture-artisan" },
+        { label: "Devis facture peintre Bourgogne", href: "/devis-facture-gratuit-peintre-bourgogne" },
+      ],
+    },
+  ];
+
   return (
     <main style={styles.page}>
 
@@ -97,9 +166,9 @@ export default function Page() {
 
           <div style={styles.quickLinks}>
             <span style={styles.quickLinksLabel}>Devis locaux :</span>
-            <Link style={styles.quickLink} href="/travaux/devis-peinture-dijon">Peinture Dijon</Link>
-            <Link style={styles.quickLink} href="/travaux/devis-peinture-beaune">Peinture Beaune</Link>
-            <Link style={styles.quickLink} href="/travaux/devis-peinture-chenove">Peinture Chenôve</Link>
+            <Link style={styles.quickLink} href="/devis-peinture-dijon">Peinture Dijon</Link>
+            <Link style={styles.quickLink} href="/devis-peinture-chenove">Peinture Chenôve</Link>
+            <Link style={styles.quickLink} href="/devis-renovation-dijon">Rénovation Dijon</Link>
           </div>
         </div>
         <div style={styles.heroSpacer} />
@@ -206,6 +275,32 @@ export default function Page() {
         </div>
       </section>
 
+      {/* ── SEO INTERNAL LINKS ── */}
+      <section style={{ background: "#f8f9fa", padding: "52px 20px" }}>
+        <div style={{ maxWidth: 1150, margin: "0 auto" }}>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "#0f172a", marginBottom: 6 }}>
+            Artisans & devis gratuits par ville — Côte-d'Or
+          </h2>
+          <p style={{ color: "#64748b", fontSize: 15, marginBottom: 36, maxWidth: 600 }}>
+            PremiumArtisan couvre Dijon, Chenôve, Longvic, Talant, Quetigny, Fontaine-lès-Dijon et toute la Côte-d'Or.
+          </p>
+          {seoLinks.map(({ label, color, bg, border, links }) => (
+            <div key={label} style={{ marginBottom: 28 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 700, color, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                {label}
+              </h3>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {links.map(({ label: lbl, href }) => (
+                  <Link key={href} href={href} style={{ display: "inline-block", padding: "7px 14px", borderRadius: 999, border: `1px solid ${border}`, background: bg, color, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                    {lbl}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── CTA FINAL ── */}
       <section style={styles.ctaSection}>
         <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "0 20px" }}>
@@ -282,13 +377,11 @@ export default function Page() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: { minHeight: "100vh", fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" },
-
   topNav: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 },
   logoText: { fontSize: 18, fontWeight: 900, color: "#fff", letterSpacing: "-0.3px" },
   topNavLinks: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" },
   topNavLink: { color: "rgba(234,240,255,0.75)", fontSize: 13, fontWeight: 600, textDecoration: "none", padding: "6px 12px", borderRadius: 8 },
   topNavLinkCta: { color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none", padding: "6px 14px", borderRadius: 8, background: "rgba(190,18,60,0.8)", border: "1px solid rgba(255,255,255,0.15)" },
-
   heroSection: { color: "#EAF0FF", background: "radial-gradient(1000px 700px at 18% 18%, rgba(45,110,255,0.28), rgba(11,16,32,0) 60%), radial-gradient(900px 600px at 78% 20%, rgba(34,211,238,0.18), rgba(11,16,32,0) 55%), linear-gradient(135deg, rgba(18,38,85,0.78), rgba(11,16,32,0) 58%), #0B1020" },
   container: { maxWidth: 1150, margin: "0 auto", padding: "48px 20px 26px", display: "grid", gridTemplateColumns: "1fr", gap: 18 },
   heroSpacer: { height: 80 },
@@ -305,13 +398,11 @@ const styles: Record<string, React.CSSProperties> = {
   quickLinks: { marginTop: 8, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", opacity: 0.9 },
   quickLinksLabel: { fontSize: 12.5, fontWeight: 800, opacity: 0.8 },
   quickLink: { fontSize: 12.5, fontWeight: 800, color: "rgba(234,240,255,0.90)", textDecoration: "underline" },
-
   whyWrap: { padding: "54px 0 60px", backgroundColor: "#D9DEE7", backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.16))" },
   sectionInner: { maxWidth: 1150, margin: "0 auto", padding: "0 20px" },
   whyCard: { borderRadius: 20, border: "1px solid rgba(17,24,39,0.10)", background: "rgba(255,255,255,0.68)", boxShadow: "0 18px 46px rgba(17,24,39,0.10)", padding: 18, backdropFilter: "blur(2px)" },
   whyTitle: { fontWeight: 950, marginBottom: 8, color: "#111827" },
   whyText: { color: "rgba(17,24,39,0.78)", lineHeight: 1.55 },
-
   proofWrap: { padding: "54px 0 60px", backgroundColor: "#D9DEE7", backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.16))" },
   reviewCard: { borderRadius: 20, border: "1px solid rgba(17,24,39,0.10)", background: "rgba(255,255,255,0.64)", padding: 18, backdropFilter: "blur(2px)" },
   reviewCardTop: { display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 },
@@ -320,24 +411,20 @@ const styles: Record<string, React.CSSProperties> = {
   reviewLocation: { fontSize: 12, color: "rgba(17,24,39,0.55)", marginTop: 2 },
   reviewStars: { marginLeft: "auto", fontSize: 13, color: "#d97706", letterSpacing: 1 },
   reviewText: { fontSize: 13, color: "rgba(17,24,39,0.78)", lineHeight: 1.7, fontStyle: "italic", margin: 0 },
-
   whiteWrap: { background: "#FFFFFF", padding: "52px 0 56px" },
   stepCard: { borderRadius: 20, border: "1px solid rgba(11,16,32,0.10)", background: "#FFFFFF", boxShadow: "0 18px 44px rgba(11,16,32,0.10)", padding: 18 },
   stepTitle: { fontWeight: 950, marginBottom: 6, color: "#0B1020" },
   stepText: { color: "rgba(11,16,32,0.72)", lineHeight: 1.5 },
   linkBtn: { display: "inline-block", padding: "10px 24px", borderRadius: 999, border: "1px solid #1a0a0e", color: "#1a0a0e", fontWeight: 700, fontSize: 14, textDecoration: "none" },
-
   faqWrap: { background: "#F7F8FB", padding: "52px 0 44px" },
   faqItem: { borderRadius: 18, border: "1px solid rgba(11,16,32,0.10)", background: "#FFFFFF", padding: "12px 14px" },
   faqQ: { cursor: "pointer", fontWeight: 950, color: "#0B1020" },
   faqA: { marginTop: 8, color: "rgba(11,16,32,0.72)", lineHeight: 1.55 },
-
   ctaSection: { color: "#EAF0FF", padding: "80px 20px", background: "radial-gradient(1000px 700px at 18% 18%, rgba(45,110,255,0.28), rgba(11,16,32,0) 60%), radial-gradient(900px 600px at 78% 20%, rgba(34,211,238,0.18), rgba(11,16,32,0) 55%), linear-gradient(135deg, rgba(18,38,85,0.78), rgba(11,16,32,0) 58%), #0B1020" },
   ctaBadge: { display: "inline-block", padding: "6px 16px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)", fontSize: 12, fontWeight: 700, marginBottom: 20, color: "rgba(234,240,255,0.8)" },
   ctaH2: { fontSize: "clamp(32px, 6vw, 48px)", fontWeight: 950, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 16, color: "#EAF0FF" },
   ctaAccent: { background: "linear-gradient(90deg, rgba(89,140,255,1), rgba(34,211,238,1))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
   ctaBtn: { display: "inline-block", padding: "16px 36px", borderRadius: 14, background: "linear-gradient(90deg, rgba(34,211,238,0.92), rgba(89,140,255,0.92))", color: "#fff", fontWeight: 950, fontSize: 16, textDecoration: "none", boxShadow: "0 18px 50px rgba(0,0,0,0.35)" },
-
   footer: { background: "#0f0a0c", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "48px 20px 24px" },
   footerLogo: { fontSize: 18, fontWeight: 900, color: "#fff", marginBottom: 10 },
   footerTagline: { fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 },
