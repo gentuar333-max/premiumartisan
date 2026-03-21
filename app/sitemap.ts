@@ -43,11 +43,47 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/creer-facture-artisan`,                   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
   ];
 
-  // Pages SEO statiques clients
+  // Pages SEO statiques clients — 30 faqe manuale
+  const VILLES_MANUAL = ["dijon","chenove","longvic","talant","quetigny","fontaine-les-dijon"];
   const seoStaticClient: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/devis-peinture-dijon`,    lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${SITE_URL}/devis-renovation-dijon`,  lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    // Peinture
+    { url: `${SITE_URL}/devis-peinture-dijon`,                 lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/devis-peinture-chenove`,               lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE_URL}/devis-peinture-longvic`,               lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-peinture-talant`,                lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-peinture-quetigny`,              lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-peinture-fontaine-les-dijon`,    lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-peinture-interieure-dijon`,      lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    // Rénovation
+    { url: `${SITE_URL}/devis-renovation-dijon`,               lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/devis-renovation-chenove`,             lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE_URL}/devis-renovation-longvic`,             lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-renovation-talant`,              lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-renovation-quetigny`,            lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-renovation-fontaine-les-dijon`,  lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    // Cuisine
+    { url: `${SITE_URL}/devis-cuisine-dijon`,                  lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE_URL}/devis-cuisine-chenove`,                lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-cuisine-longvic`,                lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-cuisine-talant`,                 lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-cuisine-quetigny`,               lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-cuisine-fontaine-les-dijon`,     lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    // Salle de bain
+    { url: `${SITE_URL}/devis-salle-de-bain-dijon`,            lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE_URL}/devis-salle-de-bain-chenove`,          lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-salle-de-bain-longvic`,          lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-salle-de-bain-talant`,           lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-salle-de-bain-quetigny`,         lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-salle-de-bain-fontaine-les-dijon`, lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    // Papier peint
+    { url: `${SITE_URL}/devis-pose-papier-peint-dijon`,               lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/devis-pose-papier-peint-chenove`,             lastModified: now, changeFrequency: "weekly", priority: 0.75 },
+    { url: `${SITE_URL}/devis-pose-papier-peint-longvic`,             lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/devis-pose-papier-peint-talant`,              lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/devis-pose-papier-peint-quetigny`,            lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/devis-pose-papier-peint-fontaine-les-dijon`,  lastModified: now, changeFrequency: "weekly", priority: 0.7 },
   ];
+  void VILLES_MANUAL;
 
   // /devis-peinture/[ville] — ancien sitemap (clients)
   const devisPeintureVille: MetadataRoute.Sitemap = VILLES_SLUGS.map((ville) => ({
