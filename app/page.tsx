@@ -1,123 +1,117 @@
-// app/page.tsx
-"use client";
-
+// app/page.tsx — SERVER COMPONENT
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import React from "react";
-import { useRouter } from "next/navigation";
+import HomeClient from "@/components/HomeClient";
 
-type ProjectType = "peinture-interieure" | "peinture-exterieure" | "plafond" | "renovation";
+export const metadata: Metadata = {
+  title: "PremiumArtisan — Trouvez un artisan fiable à Dijon & Côte-d'Or",
+  description: "Publiez votre projet gratuitement et recevez jusqu'à 3 devis d'artisans qualifiés à Dijon et en Côte-d'Or. Peinture, rénovation, cuisine, salle de bain. Gratuit, sans engagement.",
+  metadataBase: new URL("https://premiumartisan.fr"),
+  openGraph: {
+    title: "PremiumArtisan — Artisans qualifiés à Dijon",
+    description: "Trouvez un artisan fiable à Dijon. Gratuit, sans engagement.",
+    url: "https://premiumartisan.fr",
+    siteName: "PremiumArtisan",
+    locale: "fr_FR",
+    type: "website",
+  },
+};
+
+const faq = [
+  { q: "Combien de devis vais-je recevoir ?", a: "Jusqu'à 3 réponses maximum, pour éviter la surcharge et rester efficace." },
+  { q: "Mon numéro est-il partagé publiquement ?", a: "Non. Votre demande reste privée et transmise uniquement à des artisans pertinents." },
+  { q: "Le service est-il payant ?", a: "Non. Publier une demande est gratuit et sans engagement." },
+  { q: "Sous quel délai les artisans répondent-ils ?", a: "Généralement sous 24h selon la disponibilité des artisans dans votre zone." },
+  { q: "Puis-je demander peinture intérieure et plafonds ?", a: "Oui, vous pouvez préciser le type de projet et les détails dans le formulaire." },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map((x) => ({
+    "@type": "Question",
+    name: x.q,
+    acceptedAnswer: { "@type": "Answer", text: x.a },
+  })),
+};
+
+const reviews = [
+  { initials: "KO", name: "Karima O.", location: "Chenôve · HLM 4m² · douche italienne", text: "Baignoire fonte des années 70 remplacée par une douche à l'italienne. David a géré tout ça en 9 jours. 6 200€ tout compris. Notre bailleur a validé les travaux sans aucun problème.", stars: 5 },
+  { initials: "PG", name: "Patrick G.", location: "Chenôve · Locatif · remise en état", text: "Entre deux locataires, Nadia a refait la salle de bain en 4 jours. Carrelage par-dessus, nouvelle robinetterie, joints refaits. 2 400€. Le nouveau locataire a commenté spontanément la propreté lors de la visite.", stars: 5 },
+  { initials: "ML", name: "Martine L.", location: "Chenôve · PMR · MaPrimeAdapt'", text: "Sofiane a transformé ma salle de bain en douche PMR à 72 ans. Il a géré le dossier MaPrimeAdapt' avec moi. Sur 7 800€ de travaux, j'ai obtenu 5 460€ d'aides.", stars: 5 },
+];
+
+const seoLinks = [
+  {
+    label: "🎨 Peinture", color: "#be123c", bg: "#fff1f2", border: "#fda4af",
+    links: [
+      { label: "Peinture Dijon", href: "/devis-peinture-dijon" },
+      { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
+      { label: "Peinture Longvic", href: "/devis-peinture-longvic" },
+      { label: "Peinture Talant", href: "/devis-peinture-talant" },
+      { label: "Peinture Quetigny", href: "/devis-peinture-quetigny" },
+      { label: "Peinture Fontaine-lès-Dijon", href: "/devis-peinture-fontaine-les-dijon" },
+      { label: "Peinture intérieure Dijon", href: "/devis-peinture-interieure-dijon" },
+    ],
+  },
+  {
+    label: "🔨 Rénovation", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe",
+    links: [
+      { label: "Rénovation Dijon", href: "/devis-renovation-dijon" },
+      { label: "Rénovation Chenôve", href: "/devis-renovation-chenove" },
+      { label: "Rénovation Longvic", href: "/devis-renovation-longvic" },
+      { label: "Rénovation Talant", href: "/devis-renovation-talant" },
+      { label: "Rénovation Quetigny", href: "/devis-renovation-quetigny" },
+      { label: "Rénovation Fontaine-lès-Dijon", href: "/devis-renovation-fontaine-les-dijon" },
+    ],
+  },
+  {
+    label: "🍳 Cuisine", color: "#059669", bg: "#ecfdf5", border: "#a7f3d0",
+    links: [
+      { label: "Cuisine Dijon", href: "/devis-cuisine-dijon" },
+      { label: "Cuisine Chenôve", href: "/devis-cuisine-chenove" },
+      { label: "Cuisine Longvic", href: "/devis-cuisine-longvic" },
+      { label: "Cuisine Talant", href: "/devis-cuisine-talant" },
+      { label: "Cuisine Quetigny", href: "/devis-cuisine-quetigny" },
+      { label: "Cuisine Fontaine-lès-Dijon", href: "/devis-cuisine-fontaine-les-dijon" },
+    ],
+  },
+  {
+    label: "🚿 Salle de bain", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe",
+    links: [
+      { label: "Salle de bain Dijon", href: "/devis-salle-de-bain-dijon" },
+      { label: "Salle de bain Chenôve", href: "/devis-salle-de-bain-chenove" },
+      { label: "Salle de bain Longvic", href: "/devis-salle-de-bain-longvic" },
+      { label: "Salle de bain Talant", href: "/devis-salle-de-bain-talant" },
+      { label: "Salle de bain Quetigny", href: "/devis-salle-de-bain-quetigny" },
+      { label: "Salle de bain Fontaine-lès-Dijon", href: "/devis-salle-de-bain-fontaine-les-dijon" },
+    ],
+  },
+  {
+    label: "🖼️ Papier peint", color: "#b45309", bg: "#fffbeb", border: "#fde68a",
+    links: [
+      { label: "Papier peint Dijon", href: "/devis-pose-papier-peint-dijon" },
+      { label: "Papier peint Chenôve", href: "/devis-pose-papier-peint-chenove" },
+      { label: "Papier peint Longvic", href: "/devis-pose-papier-peint-longvic" },
+      { label: "Papier peint Talant", href: "/devis-pose-papier-peint-talant" },
+      { label: "Papier peint Quetigny", href: "/devis-pose-papier-peint-quetigny" },
+      { label: "Papier peint Fontaine-lès-Dijon", href: "/devis-pose-papier-peint-fontaine-les-dijon" },
+    ],
+  },
+  {
+    label: "👷 Pour les artisans", color: "#0f172a", bg: "#f8fafc", border: "#e2e8f0",
+    links: [
+      { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
+      { label: "Logiciel devis peintre Côte-d'Or", href: "/logiciel-devis-peintre-cote-dor" },
+      { label: "Créer devis peintre gratuit", href: "/creer-devis-peintre" },
+      { label: "Créer facture artisan", href: "/creer-facture-artisan" },
+      { label: "Devis facture peintre Bourgogne", href: "/devis-facture-gratuit-peintre-bourgogne" },
+    ],
+  },
+];
 
 export default function Page() {
-  const router = useRouter();
-  const [typeProjet, setTypeProjet] = React.useState<ProjectType>("peinture-interieure");
-  const [codePostal, setCodePostal] = React.useState<string>("");
-
-  const onSubmitMiniForm = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    params.set("type", typeProjet);
-    if (codePostal.trim()) params.set("cp", codePostal.trim());
-    router.push(`/publier-projet/form?${params.toString()}`);
-  };
-
-  const faq = [
-    { q: "Combien de devis vais-je recevoir ?", a: "Jusqu'à 3 réponses maximum, pour éviter la surcharge et rester efficace." },
-    { q: "Mon numéro est-il partagé publiquement ?", a: "Non. Votre demande reste privée et transmise uniquement à des artisans pertinents." },
-    { q: "Le service est-il payant ?", a: "Non. Publier une demande est gratuit et sans engagement." },
-    { q: "Sous quel délai les artisans répondent-ils ?", a: "Généralement sous 24h selon la disponibilité des artisans dans votre zone." },
-    { q: "Puis-je demander peinture intérieure et plafonds ?", a: "Oui, vous pouvez préciser le type de projet et les détails dans le formulaire." },
-  ];
-
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((x) => ({
-      "@type": "Question",
-      name: x.q,
-      acceptedAnswer: { "@type": "Answer", text: x.a },
-    })),
-  };
-
-  React.useEffect(() => {
-    router.prefetch("/publier-projet/form");
-  }, [router]);
-
-  const reviews = [
-    { initials: "KO", name: "Karima O.", location: "Chenôve · HLM 4m² · douche italienne", text: "Baignoire fonte des années 70 remplacée par une douche à l'italienne. David a géré tout ça en 9 jours. 6 200€ tout compris. Notre bailleur a validé les travaux sans aucun problème.", stars: 5 },
-    { initials: "PG", name: "Patrick G.", location: "Chenôve · Locatif · remise en état", text: "Entre deux locataires, Nadia a refait la salle de bain en 4 jours. Carrelage par-dessus, nouvelle robinetterie, joints refaits. 2 400€. Le nouveau locataire a commenté spontanément la propreté lors de la visite.", stars: 5 },
-    { initials: "ML", name: "Martine L.", location: "Chenôve · PMR · MaPrimeAdapt'", text: "Sofiane a transformé ma salle de bain en douche PMR à 72 ans. Il a géré le dossier MaPrimeAdapt' avec moi. Sur 7 800€ de travaux, j'ai obtenu 5 460€ d'aides.", stars: 5 },
-  ];
-
-  const seoLinks = [
-    {
-      label: "🎨 Peinture", color: "#be123c", bg: "#fff1f2", border: "#fda4af",
-      links: [
-        { label: "Peinture Dijon", href: "/devis-peinture-dijon" },
-        { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
-        { label: "Peinture Longvic", href: "/devis-peinture-longvic" },
-        { label: "Peinture Talant", href: "/devis-peinture-talant" },
-        { label: "Peinture Quetigny", href: "/devis-peinture-quetigny" },
-        { label: "Peinture Fontaine-lès-Dijon", href: "/devis-peinture-fontaine-les-dijon" },
-        { label: "Peinture intérieure Dijon", href: "/devis-peinture-interieure-dijon" },
-      ],
-    },
-    {
-      label: "🔨 Rénovation", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe",
-      links: [
-        { label: "Rénovation Dijon", href: "/devis-renovation-dijon" },
-        { label: "Rénovation Chenôve", href: "/devis-renovation-chenove" },
-        { label: "Rénovation Longvic", href: "/devis-renovation-longvic" },
-        { label: "Rénovation Talant", href: "/devis-renovation-talant" },
-        { label: "Rénovation Quetigny", href: "/devis-renovation-quetigny" },
-        { label: "Rénovation Fontaine-lès-Dijon", href: "/devis-renovation-fontaine-les-dijon" },
-      ],
-    },
-    {
-      label: "🍳 Cuisine", color: "#059669", bg: "#ecfdf5", border: "#a7f3d0",
-      links: [
-        { label: "Cuisine Dijon", href: "/devis-cuisine-dijon" },
-        { label: "Cuisine Chenôve", href: "/devis-cuisine-chenove" },
-        { label: "Cuisine Longvic", href: "/devis-cuisine-longvic" },
-        { label: "Cuisine Talant", href: "/devis-cuisine-talant" },
-        { label: "Cuisine Quetigny", href: "/devis-cuisine-quetigny" },
-        { label: "Cuisine Fontaine-lès-Dijon", href: "/devis-cuisine-fontaine-les-dijon" },
-      ],
-    },
-    {
-      label: "🚿 Salle de bain", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe",
-      links: [
-        { label: "Salle de bain Dijon", href: "/devis-salle-de-bain-dijon" },
-        { label: "Salle de bain Chenôve", href: "/devis-salle-de-bain-chenove" },
-        { label: "Salle de bain Longvic", href: "/devis-salle-de-bain-longvic" },
-        { label: "Salle de bain Talant", href: "/devis-salle-de-bain-talant" },
-        { label: "Salle de bain Quetigny", href: "/devis-salle-de-bain-quetigny" },
-        { label: "Salle de bain Fontaine-lès-Dijon", href: "/devis-salle-de-bain-fontaine-les-dijon" },
-      ],
-    },
-    {
-      label: "🖼️ Papier peint", color: "#b45309", bg: "#fffbeb", border: "#fde68a",
-      links: [
-        { label: "Papier peint Dijon", href: "/devis-pose-papier-peint-dijon" },
-        { label: "Papier peint Chenôve", href: "/devis-pose-papier-peint-chenove" },
-        { label: "Papier peint Longvic", href: "/devis-pose-papier-peint-longvic" },
-        { label: "Papier peint Talant", href: "/devis-pose-papier-peint-talant" },
-        { label: "Papier peint Quetigny", href: "/devis-pose-papier-peint-quetigny" },
-        { label: "Papier peint Fontaine-lès-Dijon", href: "/devis-pose-papier-peint-fontaine-les-dijon" },
-      ],
-    },
-    {
-      label: "👷 Pour les artisans", color: "#0f172a", bg: "#f8fafc", border: "#e2e8f0",
-      links: [
-        { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
-        { label: "Logiciel devis peintre Côte-d'Or", href: "/logiciel-devis-peintre-cote-dor" },
-        { label: "Créer devis peintre gratuit", href: "/creer-devis-peintre" },
-        { label: "Créer facture artisan", href: "/creer-facture-artisan" },
-        { label: "Devis facture peintre Bourgogne", href: "/devis-facture-gratuit-peintre-bourgogne" },
-      ],
-    },
-  ];
-
   return (
     <main style={styles.page}>
 
@@ -145,18 +139,8 @@ export default function Page() {
             Gratuit, sans engagement. Nous transmettons votre demande à des artisans de votre zone. Vous recevez jusqu'à <b>3 réponses maximum</b>.
           </p>
 
-          <form onSubmit={onSubmitMiniForm} style={styles.miniForm} aria-label="Mini formulaire">
-            <select value={typeProjet} onChange={(e) => setTypeProjet(e.target.value as ProjectType)} style={styles.input} aria-label="Type de projet">
-              <option value="peinture-interieure">Peinture intérieure</option>
-              <option value="peinture-exterieure">Peinture extérieure</option>
-              <option value="plafond">Murs & plafonds</option>
-              <option value="renovation">Rénovation</option>
-            </select>
-            <input value={codePostal} onChange={(e) => setCodePostal(e.target.value.replace(/\D/g, "").slice(0, 5))}
-              style={styles.input} inputMode="numeric" pattern="[0-9]{5}" maxLength={5}
-              placeholder="Code postal (ex: 21000)" aria-label="Code postal" />
-            <button type="submit" style={styles.heroPrimaryBtn}>Recevoir des devis gratuits</button>
-          </form>
+          {/* ── FORM — client component ── */}
+          <HomeClient />
 
           <div style={styles.trustBar}>
             {["Réponse sous 24h", "Projet privé", "Sans spam", "3 artisans maximum"].map(t => (
@@ -390,9 +374,6 @@ const styles: Record<string, React.CSSProperties> = {
   h1Accent: { background: "linear-gradient(90deg, rgba(89,140,255,1), rgba(34,211,238,1))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
   h1Keep: { color: "#EAF0FF" },
   sub: { margin: "0 0 10px", fontSize: 18, lineHeight: 1.55, color: "rgba(234,240,255,0.84)", maxWidth: 900 },
-  miniForm: { display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginTop: 4 },
-  input: { height: 46, padding: "0 14px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "#EAF0FF", fontWeight: 800, outline: "none", minWidth: 200 },
-  heroPrimaryBtn: { height: 46, padding: "0 16px", borderRadius: 14, border: "1px solid rgba(255,255,255,0.16)", background: "linear-gradient(90deg, rgba(34,211,238,0.92), rgba(89,140,255,0.92))", color: "#FFFFFF", fontWeight: 950, cursor: "pointer", boxShadow: "0 18px 50px rgba(0,0,0,0.35)", whiteSpace: "nowrap" },
   trustBar: { marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", color: "rgba(234,240,255,0.85)", fontSize: 13, fontWeight: 800 },
   trustItem: { padding: "8px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.05)" },
   quickLinks: { marginTop: 8, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", opacity: 0.9 },
