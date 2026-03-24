@@ -2,105 +2,177 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-// ── DONNÉES VILLES ──────────────────────────────────────────────────────────
 export const VILLES_DATA: Record<string, {
   nom: string;
   dept: string;
   region: string;
   slug: string;
   voisines: string[];
+  population?: string;
+  context?: string;
+  marche?: string;
+  conseil?: string;
+  prix?: { label: string; fourchette: string }[];
+  faq?: { q: string; a: string }[];
 }> = {
-  // Côte-d'Or
-  'dijon':                  { nom: 'Dijon',                 dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'dijon',                  voisines: ['beaune','chenove','longvic','talant'] },
-  'beaune':                 { nom: 'Beaune',                dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'beaune',                 voisines: ['dijon','nuits-saint-georges','chalon-sur-saone'] },
-  'chenove':                { nom: 'Chenôve',               dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'chenove',                voisines: ['dijon','longvic','marsannay-la-cote'] },
-  'longvic':                { nom: 'Longvic',               dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'longvic',                voisines: ['dijon','chenove','quetigny'] },
-  'talant':                 { nom: 'Talant',                dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'talant',                 voisines: ['dijon','fontaine-les-dijon','chenove'] },
-  'quetigny':               { nom: 'Quetigny',              dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'quetigny',               voisines: ['dijon','longvic','marsannay-la-cote'] },
-  'fontaine-les-dijon':     { nom: 'Fontaine-lès-Dijon',   dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'fontaine-les-dijon',     voisines: ['dijon','talant','plombieres-les-dijon'] },
-  'marsannay-la-cote':      { nom: 'Marsannay-la-Côte',    dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'marsannay-la-cote',      voisines: ['dijon','chenove','perrigny-les-dijon'] },
-  'nuits-saint-georges':    { nom: 'Nuits-Saint-Georges',  dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'nuits-saint-georges',    voisines: ['beaune','dijon','gevrey-chambertin'] },
-  'gevrey-chambertin':      { nom: 'Gevrey-Chambertin',    dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'gevrey-chambertin',      voisines: ['dijon','nuits-saint-georges','marsannay-la-cote'] },
-  'auxonne':                { nom: 'Auxonne',               dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'auxonne',                voisines: ['dijon','dole','pontailler-sur-saone'] },
-  'montbard':               { nom: 'Montbard',              dept: 'Côte-d\'Or',     region: 'Bourgogne', slug: 'montbard',               voisines: ['dijon','semur-en-auxois','chatillon-sur-seine'] },
-  // Saône-et-Loire
-  'chalon-sur-saone':       { nom: 'Chalon-sur-Saône',     dept: 'Saône-et-Loire', region: 'Bourgogne', slug: 'chalon-sur-saone',       voisines: ['beaune','macon','autun'] },
-  'macon':                  { nom: 'Mâcon',                 dept: 'Saône-et-Loire', region: 'Bourgogne', slug: 'macon',                  voisines: ['chalon-sur-saone','bourg-en-bresse','villefranche-sur-saone'] },
-  'autun':                  { nom: 'Autun',                 dept: 'Saône-et-Loire', region: 'Bourgogne', slug: 'autun',                  voisines: ['chalon-sur-saone','dijon','nevers'] },
-  'le-creusot':             { nom: 'Le Creusot',            dept: 'Saône-et-Loire', region: 'Bourgogne', slug: 'le-creusot',             voisines: ['autun','chalon-sur-saone','montceau-les-mines'] },
-  'montceau-les-mines':     { nom: 'Montceau-les-Mines',   dept: 'Saône-et-Loire', region: 'Bourgogne', slug: 'montceau-les-mines',     voisines: ['le-creusot','autun','chalon-sur-saone'] },
-  // Yonne
-  'auxerre':                { nom: 'Auxerre',               dept: 'Yonne',          region: 'Bourgogne', slug: 'auxerre',                voisines: ['sens','avallon','dijon'] },
-  'sens':                   { nom: 'Sens',                  dept: 'Yonne',          region: 'Bourgogne', slug: 'sens',                   voisines: ['auxerre','troyes','fontainebleau'] },
-  'avallon':                { nom: 'Avallon',               dept: 'Yonne',          region: 'Bourgogne', slug: 'avallon',                voisines: ['auxerre','dijon','semur-en-auxois'] },
-  // Nièvre
-  'nevers':                 { nom: 'Nevers',                dept: 'Nièvre',         region: 'Bourgogne', slug: 'nevers',                 voisines: ['moulins','bourges','chalon-sur-saone'] },
-  'cosne-cours-sur-loire':  { nom: 'Cosne-Cours-sur-Loire', dept: 'Nièvre',        region: 'Bourgogne', slug: 'cosne-cours-sur-loire',  voisines: ['nevers','auxerre','gien'] },
-  // Île-de-France
-  'paris':                  { nom: 'Paris',                 dept: 'Paris',          region: 'Île-de-France', slug: 'paris',              voisines: ['boulogne-billancourt','saint-denis','vincennes'] },
-  'boulogne-billancourt':   { nom: 'Boulogne-Billancourt', dept: 'Hauts-de-Seine', region: 'Île-de-France', slug: 'boulogne-billancourt', voisines: ['paris','issy-les-moulineaux','versailles'] },
-  'saint-denis':            { nom: 'Saint-Denis',           dept: 'Seine-Saint-Denis', region: 'Île-de-France', slug: 'saint-denis',    voisines: ['paris','aubervilliers','argenteuil'] },
-  'versailles':             { nom: 'Versailles',            dept: 'Yvelines',       region: 'Île-de-France', slug: 'versailles',         voisines: ['paris','saint-germain-en-laye','boulogne-billancourt'] },
-  // Rhône-Alpes
-  'lyon':                   { nom: 'Lyon',                  dept: 'Rhône',          region: 'Auvergne-Rhône-Alpes', slug: 'lyon',        voisines: ['villeurbanne','saint-etienne','grenoble'] },
-  'villeurbanne':           { nom: 'Villeurbanne',          dept: 'Rhône',          region: 'Auvergne-Rhône-Alpes', slug: 'villeurbanne', voisines: ['lyon','bron','decines-charpieu'] },
-  'grenoble':               { nom: 'Grenoble',              dept: 'Isère',          region: 'Auvergne-Rhône-Alpes', slug: 'grenoble',     voisines: ['lyon','chambery','valence'] },
-  'saint-etienne':          { nom: 'Saint-Étienne',         dept: 'Loire',          region: 'Auvergne-Rhône-Alpes', slug: 'saint-etienne', voisines: ['lyon','clermont-ferrand','roanne'] },
-  // PACA
-  'marseille':              { nom: 'Marseille',             dept: 'Bouches-du-Rhône', region: 'PACA',   slug: 'marseille',              voisines: ['aix-en-provence','toulon','nice'] },
-  'nice':                   { nom: 'Nice',                  dept: 'Alpes-Maritimes', region: 'PACA',    slug: 'nice',                   voisines: ['antibes','cannes','monaco'] },
-  'toulon':                 { nom: 'Toulon',                dept: 'Var',             region: 'PACA',    slug: 'toulon',                 voisines: ['marseille','nice','hyeres'] },
-  'aix-en-provence':        { nom: 'Aix-en-Provence',      dept: 'Bouches-du-Rhône', region: 'PACA',   slug: 'aix-en-provence',        voisines: ['marseille','toulon','avignon'] },
-  // Occitanie
-  'toulouse':               { nom: 'Toulouse',              dept: 'Haute-Garonne',  region: 'Occitanie', slug: 'toulouse',              voisines: ['montpellier','bordeaux','nimes'] },
-  'montpellier':            { nom: 'Montpellier',           dept: 'Hérault',        region: 'Occitanie', slug: 'montpellier',           voisines: ['toulouse','nimes','beziers'] },
-  'nimes':                  { nom: 'Nîmes',                 dept: 'Gard',           region: 'Occitanie', slug: 'nimes',                 voisines: ['montpellier','avignon','ales'] },
-  // Nouvelle-Aquitaine
-  'bordeaux':               { nom: 'Bordeaux',              dept: 'Gironde',        region: 'Nouvelle-Aquitaine', slug: 'bordeaux',      voisines: ['merignac','pessac','libourne'] },
-  'limoges':                { nom: 'Limoges',               dept: 'Haute-Vienne',   region: 'Nouvelle-Aquitaine', slug: 'limoges',       voisines: ['bordeaux','perigueux','clermont-ferrand'] },
-  // Grand Est
-  'strasbourg':             { nom: 'Strasbourg',            dept: 'Bas-Rhin',       region: 'Grand Est', slug: 'strasbourg',            voisines: ['mulhouse','colmar','nancy'] },
-  'nancy':                  { nom: 'Nancy',                 dept: 'Meurthe-et-Moselle', region: 'Grand Est', slug: 'nancy',             voisines: ['metz','strasbourg','epinal'] },
-  'metz':                   { nom: 'Metz',                  dept: 'Moselle',        region: 'Grand Est', slug: 'metz',                  voisines: ['nancy','thionville','luxembourg'] },
-  'reims':                  { nom: 'Reims',                 dept: 'Marne',          region: 'Grand Est', slug: 'reims',                 voisines: ['troyes','chalons-en-champagne','soissons'] },
-  // Hauts-de-France
-  'lille':                  { nom: 'Lille',                 dept: 'Nord',           region: 'Hauts-de-France', slug: 'lille',            voisines: ['roubaix','tourcoing','valenciennes'] },
-  'amiens':                 { nom: 'Amiens',                dept: 'Somme',          region: 'Hauts-de-France', slug: 'amiens',           voisines: ['lille','rouen','compiegne'] },
-  // Normandie
-  'rouen':                  { nom: 'Rouen',                 dept: 'Seine-Maritime', region: 'Normandie', slug: 'rouen',                 voisines: ['caen','amiens','le-havre'] },
-  'caen':                   { nom: 'Caen',                  dept: 'Calvados',       region: 'Normandie', slug: 'caen',                  voisines: ['rouen','le-mans','rennes'] },
-  // Bretagne
-  'rennes':                 { nom: 'Rennes',                dept: 'Ille-et-Vilaine', region: 'Bretagne', slug: 'rennes',               voisines: ['nantes','caen','brest'] },
-  'brest':                  { nom: 'Brest',                 dept: 'Finistère',      region: 'Bretagne',  slug: 'brest',                 voisines: ['quimper','rennes','lorient'] },
-  // Pays de la Loire
-  'nantes':                 { nom: 'Nantes',                dept: 'Loire-Atlantique', region: 'Pays de la Loire', slug: 'nantes',       voisines: ['rennes','angers','saint-nazaire'] },
-  'angers':                 { nom: 'Angers',                dept: 'Maine-et-Loire', region: 'Pays de la Loire', slug: 'angers',          voisines: ['nantes','tours','le-mans'] },
-  // Centre-Val de Loire
-  'tours':                  { nom: 'Tours',                 dept: 'Indre-et-Loire', region: 'Centre-Val de Loire', slug: 'tours',        voisines: ['angers','orleans','blois'] },
-  'orleans':                { nom: 'Orléans',               dept: 'Loiret',         region: 'Centre-Val de Loire', slug: 'orleans',       voisines: ['tours','paris','bourges'] },
-  // Auvergne
-  'clermont-ferrand':       { nom: 'Clermont-Ferrand',      dept: 'Puy-de-Dôme',   region: 'Auvergne-Rhône-Alpes', slug: 'clermont-ferrand', voisines: ['lyon','saint-etienne','limoges'] },
+  'dijon': {
+    nom: 'Dijon', dept: "Côte-d'Or", region: 'Bourgogne', slug: 'dijon',
+    voisines: ['beaune','chenove','longvic','talant'],
+    population: '160 000 habitants',
+    context: "Dijon, préfecture de la Côte-d'Or et capitale de la Bourgogne, concentre une forte demande en rénovation de logements anciens — haussmanniens, immeubles de centre-ville et pavillons des années 1970. Le marché artisanal y est dense, avec une concurrence élevée entre peintres et rénovateurs.",
+    marche: "À Dijon, un artisan peintre reçoit en moyenne 3 à 5 demandes de devis par semaine. La digitalisation des devis est devenue indispensable : les particuliers attendent un devis par email dans les 24 à 48h. Les artisans qui envoient un devis professionnel le jour même décrochent 40% de chantiers supplémentaires.",
+    conseil: "Pour un artisan à Dijon, l'outil de devis PremiumArtisan permet de gérer les demandes des quartiers Centre, Montchapet, Fontaine-d'Ouche et des communes périphériques depuis un seul tableau de bord.",
+    prix: [
+      { label: "Peinture intérieure — appartement T3", fourchette: "2 200 – 4 500€" },
+      { label: "Rénovation complète — maison 100m²", fourchette: "12 000 – 28 000€" },
+      { label: "Ravalement de façade", fourchette: "4 500 – 14 000€" },
+      { label: "Pose papier peint", fourchette: "800 – 2 200€" },
+    ],
+    faq: [
+      { q: "Quel logiciel de devis est gratuit pour un artisan à Dijon ?", a: "PremiumArtisan propose un outil de devis et facture 100% gratuit, sans abonnement, accessible en ligne depuis Dijon ou n'importe quelle commune de Côte-d'Or." },
+      { q: "Comment facturer la TVA sur les travaux à Dijon ?", a: "Pour les logements de plus de 2 ans à Dijon, la TVA est de 10% sur la main d'œuvre et les fournitures posées. Pour les constructions neuves, elle passe à 20%. PremiumArtisan applique automatiquement le bon taux." },
+      { q: "Peut-on trouver des clients particuliers à Dijon via PremiumArtisan ?", a: "Oui. PremiumArtisan diffuse les projets de particuliers de Dijon et de la Côte-d'Or aux artisans vérifiés. Vous accédez aux demandes gratuitement et payez uniquement pour les contacts qui correspondent à votre zone." },
+    ],
+  },
+  'saint-etienne': {
+    nom: 'Saint-Étienne', dept: 'Loire', region: 'Auvergne-Rhône-Alpes', slug: 'saint-etienne',
+    voisines: ['lyon','clermont-ferrand','roanne'],
+    population: '172 000 habitants',
+    context: "Saint-Étienne, ancienne capitale industrielle de la Loire, connaît depuis 10 ans une transformation profonde de son tissu urbain. Les quartiers Manufacture, Centre-Ville et Montreynaud font l'objet de nombreux programmes de rénovation. Le parc immobilier ancien — fortement représenté par des immeubles ouvriers des années 1900–1950 — génère une demande constante en peinture intérieure, ravalement et réhabilitation de logements.",
+    marche: "Le marché de la rénovation à Saint-Étienne est caractérisé par des budgets plus serrés qu'à Lyon, mais un volume de chantiers élevé. Les artisans peintres stéphanois travaillent souvent pour des bailleurs sociaux (Loire Habitat, Territoire Loire Habitat) et pour des propriétaires privés engagés dans des projets de mise en location. Un devis professionnel et rapide est décisif pour remporter un chantier face à la concurrence locale.",
+    conseil: "Pour un artisan basé à Saint-Étienne, PremiumArtisan permet de couvrir à la fois les quartiers centraux (Jacquard, Crêt-de-Roc) et les communes voisines comme Firminy, Rive-de-Gier ou Saint-Chamond, depuis un outil unique accessible sur smartphone.",
+    prix: [
+      { label: "Peinture intérieure — appartement T3 Saint-Étienne", fourchette: "1 800 – 3 800€" },
+      { label: "Ravalement de façade — immeuble années 50", fourchette: "6 000 – 18 000€" },
+      { label: "Rénovation complète — logement social", fourchette: "8 000 – 20 000€" },
+      { label: "Pose papier peint + peinture", fourchette: "700 – 1 900€" },
+    ],
+    faq: [
+      { q: "Un logiciel de devis gratuit existe-t-il pour les artisans de Saint-Étienne ?", a: "Oui. PremiumArtisan est entièrement gratuit pour les artisans de Saint-Étienne : création de devis, envoi email, suivi client et facturation, sans abonnement ni engagement." },
+      { q: "Quelle TVA appliquer sur les travaux de rénovation à Saint-Étienne ?", a: "Pour les logements de plus de 2 ans à Saint-Étienne, la TVA est de 10% sur main d'œuvre et fournitures posées. Les travaux éligibles à MaPrimeRénov' peuvent bénéficier d'un taux de 5,5% pour les gros travaux d'isolation." },
+      { q: "Comment trouver des chantiers de peinture à Saint-Étienne ?", a: "PremiumArtisan publie les projets de particuliers de Saint-Étienne et de la Loire. Les artisans consultent les demandes gratuitement et débloquent le contact du client uniquement si le projet correspond à leur activité." },
+      { q: "Un artisan stéphanois peut-il intervenir dans l'agglomération de Lyon ?", a: "Oui. Nombreux artisans de Saint-Étienne couvrent aussi Firminy, Rive-de-Gier et l'agglomération sud de Lyon. PremiumArtisan permet de filtrer les projets par zone géographique." },
+    ],
+  },
+  'beaune': {
+    nom: 'Beaune', dept: "Côte-d'Or", region: 'Bourgogne', slug: 'beaune',
+    voisines: ['dijon','nuits-saint-georges','chalon-sur-saone'],
+    context: "Beaune, capitale des vins de Bourgogne, accueille un parc immobilier diversifié : maisons de maître, propriétés viticoles et résidences récentes. La demande en rénovation haut de gamme y est forte.",
+    marche: "Les artisans de Beaune interviennent souvent sur des chantiers de prestige pour des propriétaires de domaines viticoles. Un devis professionnel, structuré et envoyé rapidement, est indispensable pour décrocher ces marchés.",
+    conseil: "PremiumArtisan permet aux artisans de Beaune de gérer leurs devis depuis leur téléphone entre deux chantiers, avec un rendu professionnel adapté à une clientèle exigeante.",
+    prix: [
+      { label: "Peinture intérieure — maison de maître", fourchette: "3 500 – 8 000€" },
+      { label: "Ravalement enduit — propriété viticole", fourchette: "8 000 – 22 000€" },
+      { label: "Rénovation appartement centre-ville", fourchette: "4 000 – 10 000€" },
+    ],
+    faq: [
+      { q: "Existe-t-il un logiciel de devis gratuit pour artisans à Beaune ?", a: "Oui. PremiumArtisan est gratuit et sans abonnement. Il permet de créer des devis professionnels depuis Beaune ou n'importe quelle commune de Côte-d'Or." },
+      { q: "Comment trouver des chantiers à Beaune et en Côte-d'Or ?", a: "PremiumArtisan diffuse les projets de particuliers de Beaune et de la Côte-d'Or. Vous accédez aux demandes gratuitement." },
+    ],
+  },
+  'chenove': {
+    nom: 'Chenôve', dept: "Côte-d'Or", region: 'Bourgogne', slug: 'chenove',
+    voisines: ['dijon','longvic','marsannay-la-cote'],
+    context: "Chenôve, commune résidentielle au sud de Dijon, est fortement représentée par des logements HLM et des résidences des années 1970. La demande en rénovation de cuisines, salles de bain et peinture intérieure y est constante.",
+    marche: "Les artisans de Chenôve travaillent régulièrement pour des bailleurs sociaux et des propriétaires privés souhaitant remettre à neuf leurs logements locatifs entre deux locataires.",
+    conseil: "Avec PremiumArtisan, les artisans de Chenôve peuvent gérer leurs devis et trouver des chantiers dans toute la Côte-d'Or depuis un outil unique.",
+    prix: [
+      { label: "Peinture intérieure HLM", fourchette: "1 200 – 3 000€" },
+      { label: "Remise en état locatif complet", fourchette: "2 500 – 6 000€" },
+      { label: "Rénovation salle de bain", fourchette: "3 500 – 9 000€" },
+    ],
+    faq: [
+      { q: "Logiciel devis artisan gratuit à Chenôve — existe-t-il ?", a: "Oui. PremiumArtisan est 100% gratuit pour les artisans de Chenôve, sans abonnement." },
+    ],
+  },
+  'lyon': {
+    nom: 'Lyon', dept: 'Rhône', region: 'Auvergne-Rhône-Alpes', slug: 'lyon',
+    voisines: ['villeurbanne','saint-etienne','grenoble'],
+    population: '520 000 habitants',
+    context: "Lyon, deuxième métropole économique française, concentre une demande massive en rénovation de logements anciens — immeubles Haussmanniens de la Presqu'île, traboules du Vieux-Lyon et résidences des arrondissements périphériques. Le marché artisanal y est très compétitif.",
+    marche: "À Lyon, un artisan peintre reçoit jusqu'à 10 demandes de devis par semaine pendant les périodes de forte activité (printemps, rentrée). La réactivité est clé : les particuliers lyonnais comparent plusieurs devis en 48h.",
+    conseil: "PremiumArtisan permet aux artisans lyonnais de couvrir les 9 arrondissements et les communes de la métropole (Villeurbanne, Caluire, Bron) depuis un tableau de bord unique.",
+    prix: [
+      { label: "Peinture intérieure — T3 Lyon 6e", fourchette: "2 800 – 5 500€" },
+      { label: "Rénovation complète — appartement 80m²", fourchette: "15 000 – 35 000€" },
+      { label: "Ravalement de façade — immeuble Presqu'île", fourchette: "12 000 – 40 000€" },
+      { label: "Pose papier peint — salon", fourchette: "900 – 2 500€" },
+    ],
+    faq: [
+      { q: "Quel logiciel de devis gratuit pour artisan à Lyon ?", a: "PremiumArtisan est gratuit, sans abonnement. Il permet de créer des devis professionnels depuis Lyon et de gérer les clients de toute la métropole." },
+      { q: "Comment trouver des chantiers de peinture à Lyon ?", a: "PremiumArtisan publie les projets de particuliers lyonnais. Vous consultez les demandes gratuitement et payez uniquement pour accéder aux coordonnées du client." },
+    ],
+  },
+  'paris': {
+    nom: 'Paris', dept: 'Paris', region: 'Île-de-France', slug: 'paris',
+    voisines: ['boulogne-billancourt','saint-denis','versailles'],
+    population: '2 100 000 habitants',
+    context: "Paris concentre la demande en rénovation la plus élevée de France. Haussmannien, art déco, immeubles des années 1960 — le parc immobilier parisien génère un volume de chantiers considérable pour les artisans peintres et rénovateurs.",
+    marche: "Le marché parisien est ultra-compétitif. Les particuliers comparent 3 à 5 devis avant de choisir. Un devis professionnel, bien structuré et envoyé rapidement, est décisif.",
+    conseil: "PremiumArtisan permet aux artisans parisiens de gérer leurs devis par arrondissement et de suivre leurs chantiers depuis un seul outil.",
+    prix: [
+      { label: "Peinture intérieure — T3 Paris", fourchette: "3 500 – 7 000€" },
+      { label: "Rénovation complète — appartement 60m²", fourchette: "18 000 – 45 000€" },
+      { label: "Ravalement de façade haussmannienne", fourchette: "20 000 – 80 000€" },
+    ],
+    faq: [
+      { q: "Logiciel devis artisan gratuit à Paris — lequel choisir ?", a: "PremiumArtisan est 100% gratuit, sans abonnement. Créez vos devis depuis Paris en moins de 3 minutes." },
+    ],
+  },
+  'marseille': {
+    nom: 'Marseille', dept: 'Bouches-du-Rhône', region: 'PACA', slug: 'marseille',
+    voisines: ['aix-en-provence','toulon','nice'],
+    population: '870 000 habitants',
+    context: "Marseille, deuxième ville de France, connaît un renouveau urbain important avec de nombreux projets de réhabilitation de logements anciens dans les quartiers Nord et dans le centre-ville.",
+    marche: "Le marché marseillais est dynamique, porté par les programmes de rénovation Anah et les projets de mise aux normes de copropriétés anciennes.",
+    conseil: "PremiumArtisan permet aux artisans marseillais de gérer leurs devis et de trouver des chantiers dans toutes les Bouches-du-Rhône.",
+    prix: [
+      { label: "Peinture intérieure — appartement T4", fourchette: "2 200 – 4 800€" },
+      { label: "Ravalement de façade", fourchette: "8 000 – 25 000€" },
+      { label: "Rénovation logement ancien", fourchette: "10 000 – 30 000€" },
+    ],
+    faq: [
+      { q: "Quel logiciel de devis pour artisan à Marseille ?", a: "PremiumArtisan est gratuit et sans abonnement pour les artisans de Marseille et des Bouches-du-Rhône." },
+    ],
+  },
 };
 
-// ── generateStaticParams ────────────────────────────────────────────────────
+// Données par défaut pour les villes sans données spécifiques
+function getDefaultData(ville: string, nom: string, dept: string, region: string) {
+  return {
+    context: `${nom}, ville de ${region}, présente un marché de la rénovation actif. Les artisans peintres et rénovateurs y interviennent régulièrement pour des particuliers et des professionnels.`,
+    marche: `À ${nom}, la demande en devis peinture et rénovation est constante tout au long de l'année. Les artisans qui envoient des devis professionnels rapidement décrochent plus de chantiers.`,
+    conseil: `PremiumArtisan permet aux artisans de ${nom} de créer leurs devis et factures gratuitement, et d'accéder aux projets de particuliers du ${dept}.`,
+    prix: [
+      { label: `Peinture intérieure — appartement T3 ${nom}`, fourchette: "1 800 – 4 200€" },
+      { label: "Rénovation complète", fourchette: "8 000 – 22 000€" },
+      { label: "Ravalement de façade", fourchette: "5 000 – 16 000€" },
+      { label: "Pose papier peint", fourchette: "600 – 1 800€" },
+    ],
+    faq: [
+      { q: `Existe-t-il un logiciel de devis gratuit pour artisans à ${nom} ?`, a: `Oui. PremiumArtisan est 100% gratuit et sans abonnement pour les artisans de ${nom} et du ${dept}.` },
+      { q: `Comment trouver des chantiers de peinture à ${nom} ?`, a: `PremiumArtisan publie les projets de particuliers de ${nom} et du ${dept}. Consultez les demandes gratuitement.` },
+      { q: `Quelle TVA appliquer sur les travaux à ${nom} ?`, a: `Pour les logements de plus de 2 ans à ${nom}, la TVA est de 10% sur la main d'œuvre. PremiumArtisan l'applique automatiquement.` },
+    ],
+  };
+}
+
 export async function generateStaticParams() {
   return Object.keys(VILLES_DATA).map((ville) => ({ ville }));
 }
 
-// ── generateMetadata ────────────────────────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: Promise<{ ville: string }> }
 ): Promise<Metadata> {
   const { ville } = await params;
   const data = VILLES_DATA[ville];
   if (!data) return { title: 'Page introuvable' };
-
   const { nom, dept } = data;
   return {
     title: `Logiciel Devis Artisan ${nom} – Devis & Facture Gratuit | PremiumArtisan`,
     description: `Créez vos devis et factures gratuitement à ${nom} (${dept}). Outil professionnel pour artisans peintres : envoi email, réponse client, facture en 1 clic. Sans abonnement.`,
     alternates: { canonical: `https://premiumartisan.fr/logiciel-devis-artisan/${ville}` },
-    keywords: `logiciel devis artisan ${nom.toLowerCase()}, devis artisan gratuit ${nom.toLowerCase()}, facture artisan ${nom.toLowerCase()}, outil devis peintre ${dept.toLowerCase()}, application devis artisan`,
+    keywords: `logiciel devis artisan ${nom.toLowerCase()}, devis artisan gratuit ${nom.toLowerCase()}, facture artisan ${nom.toLowerCase()}, outil devis peintre ${dept.toLowerCase()}`,
     openGraph: {
       title: `Logiciel Devis & Facture Gratuit – Artisans ${nom}`,
       description: `Devis et factures professionnels gratuits pour artisans à ${nom}. Sans abonnement.`,
@@ -112,7 +184,6 @@ export async function generateMetadata(
   };
 }
 
-// ── PAGE ────────────────────────────────────────────────────────────────────
 export default async function LogicielDevisArtisanVille(
   { params }: { params: Promise<{ ville: string }> }
 ) {
@@ -124,45 +195,71 @@ export default async function LogicielDevisArtisanVille(
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Page introuvable</h1>
-          <Link href="/artisan/dashboard" className="text-[#be123c] underline">
-            Retour au dashboard
-          </Link>
+          <Link href="/artisan/dashboard" className="text-[#be123c] underline">Retour au dashboard</Link>
         </div>
       </main>
     );
   }
 
   const { nom, dept, region, voisines } = data;
+  const extra = {
+    context: data.context,
+    marche: data.marche,
+    conseil: data.conseil,
+    prix: data.prix,
+    faq: data.faq,
+    population: data.population,
+    ...(!data.context ? getDefaultData(ville, nom, dept, region) : {}),
+  };
 
   const schema = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": `Logiciel devis artisan ${nom}`,
-    "description": `Outil gratuit de création de devis et factures pour artisans peintres à ${nom}, ${dept}.`,
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-    "provider": { "@type": "Organization", "name": "PremiumArtisan", "url": "https://premiumartisan.fr" },
-    "areaServed": { "@type": "City", "name": nom },
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": `Logiciel devis artisan ${nom}`,
+        "description": `Outil gratuit de création de devis et factures pour artisans peintres à ${nom}, ${dept}.`,
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "provider": { "@type": "Organization", "name": "PremiumArtisan", "url": "https://premiumartisan.fr" },
+        "areaServed": { "@type": "City", "name": nom },
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": (extra.faq || []).map(f => ({
+          "@type": "Question",
+          "name": f.q,
+          "acceptedAnswer": { "@type": "Answer", "text": f.a },
+        })),
+      },
+    ],
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <main className="min-h-screen bg-white">
+
+        {/* ── BREADCRUMB ── */}
+        <nav className="bg-gray-50 border-b border-gray-200 px-4 py-3">
+          <div className="max-w-4xl mx-auto flex items-center gap-2 text-sm text-gray-500">
+            <Link href="/" className="hover:text-[#be123c]">Accueil</Link>
+            <span>›</span>
+            <Link href="/artisan/dashboard" className="hover:text-[#be123c]">Artisans</Link>
+            <span>›</span>
+            <span className="text-gray-900 font-medium">Logiciel devis {nom}</span>
+          </div>
+        </nav>
 
         {/* ── HERO ── */}
         <section className="bg-[#2a0a14] text-white py-20 px-4">
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-[#fda4af] text-sm font-medium mb-3 uppercase tracking-wide">
-              {dept} · {region}
+              {dept} · {region}{extra.population ? ` · ${extra.population}` : ''}
             </p>
             <h1 className="text-4xl md:text-5xl font-bold mb-5 leading-tight">
-              Logiciel devis artisan<br />
-              à <span className="text-[#fda4af]">{nom}</span>
+              Logiciel devis artisan<br />à <span className="text-[#fda4af]">{nom}</span>
             </h1>
             <p className="text-lg text-white/70 mb-8 max-w-xl mx-auto">
               Créez vos devis et factures professionnels gratuitement à {nom}.
@@ -185,16 +282,52 @@ export default async function LogicielDevisArtisanVille(
         {/* ── TRUST ── */}
         <section className="bg-[#fdf2f5] border-b border-[#fda4af]/20 py-5 px-4">
           <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-6 text-sm text-[#6a3a4a] font-medium">
-            <span>Devis illimités</span>
-            <span>Factures illimitées</span>
-            <span>Envoi email client</span>
-            <span>Projets clients {dept}</span>
-            <span>Sans abonnement</span>
+            {["Devis illimités", "Factures illimitées", "Envoi email client", `Projets clients ${dept}`, "Sans abonnement"].map(t => (
+              <span key={t}>✓ {t}</span>
+            ))}
           </div>
         </section>
 
+        {/* ── CONTEXTE LOCAL ── */}
+        <section className="py-16 px-4 bg-white">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              Le marché de la rénovation à {nom}
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-5 text-base">
+              {extra.context}
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-5 text-base">
+              {extra.marche}
+            </p>
+            <p className="text-gray-600 leading-relaxed text-base">
+              {extra.conseil}
+            </p>
+          </div>
+        </section>
+
+        {/* ── PRIX LOCAUX ── */}
+        {extra.prix && extra.prix.length > 0 && (
+          <section className="bg-gray-50 py-14 px-4 border-t border-gray-200">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+                Prix indicatifs des travaux à {nom} en 2026
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {extra.prix.map((p, i) => (
+                  <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5 flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">{p.label}</span>
+                    <span className="text-base font-bold text-[#be123c] ml-4 shrink-0">{p.fourchette}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-4 text-center">Fourchettes indicatives basées sur les projets publiés sur PremiumArtisan.</p>
+            </div>
+          </section>
+        )}
+
         {/* ── FONCTIONNEMENT ── */}
-        <section className="py-16 px-4">
+        <section className="py-16 px-4 bg-white border-t border-gray-100">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
               Créer un devis peinture à {nom} en 3 minutes
@@ -205,14 +338,12 @@ export default async function LogicielDevisArtisanVille(
             <div className="space-y-4">
               {[
                 { n: '1', t: 'Saisissez les informations client', d: `Nom, adresse, email. Les données sont enregistrées pour vos prochains devis à ${nom} et dans le ${dept}.` },
-                { n: '2', t: 'Ajoutez les lignes de travaux', d: 'Préparation des supports, fournitures, main d\'œuvre au m². TVA 10% (rénovation) ou 20% selon le type de chantier.' },
+                { n: '2', t: 'Ajoutez les lignes de travaux', d: "Préparation des supports, fournitures, main d'œuvre au m². TVA 10% (rénovation) ou 20% selon le type de chantier." },
                 { n: '3', t: 'Envoyez par email au client', d: 'Votre client reçoit le devis et peut accepter ou refuser en un clic. Vous êtes notifié en temps réel.' },
                 { n: '4', t: 'Générez la facture', d: 'Devis accepté ? Transformez-le en facture automatiquement. Numérotation séquentielle, mentions légales incluses.' },
               ].map(s => (
                 <div key={s.n} className="flex gap-5 items-start p-5 rounded-2xl border border-gray-100 bg-gray-50">
-                  <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#2a0a14] text-white font-black">
-                    {s.n}
-                  </div>
+                  <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#2a0a14] text-white font-black">{s.n}</div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">{s.t}</h3>
                     <p className="text-gray-600 text-sm leading-relaxed">{s.d}</p>
@@ -233,44 +364,22 @@ export default async function LogicielDevisArtisanVille(
               <div className="rounded-2xl border-2 border-[#be123c] bg-white p-7">
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Devis professionnel</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {[
-                    'Lignes de travaux détaillées',
-                    'TVA 10% ou 20% au choix',
-                    'Acompte configurable',
-                    'Date de validité',
-                    'Envoi email direct',
-                    'Réponse client intégrée',
-                    'Illimité — 0€',
-                  ].map(f => (
-                    <li key={f} className="flex items-center gap-2">
-                      <span className="text-emerald-500 font-bold">✓</span> {f}
-                    </li>
+                  {['Lignes de travaux détaillées','TVA 10% ou 20% au choix','Acompte configurable','Date de validité','Envoi email direct','Réponse client intégrée','Illimité — 0€'].map(f => (
+                    <li key={f} className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> {f}</li>
                   ))}
                 </ul>
-                <Link href="/artisan/dashboard"
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#be123c] px-5 py-3 text-sm font-semibold text-white hover:bg-[#9f1239] transition">
+                <Link href="/artisan/dashboard" className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#be123c] px-5 py-3 text-sm font-semibold text-white hover:bg-[#9f1239] transition">
                   Créer un devis →
                 </Link>
               </div>
               <div className="rounded-2xl border-2 border-gray-200 bg-white p-7">
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Facture conforme</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {[
-                    'Générée depuis le devis accepté',
-                    'Numérotation automatique',
-                    'Mentions légales incluses',
-                    'SIRET, assurance décennale',
-                    'Conditions de règlement',
-                    'Pénalités de retard',
-                    'Illimité — 0€',
-                  ].map(f => (
-                    <li key={f} className="flex items-center gap-2">
-                      <span className="text-emerald-500 font-bold">✓</span> {f}
-                    </li>
+                  {['Générée depuis le devis accepté','Numérotation automatique','Mentions légales incluses','SIRET, assurance décennale','Conditions de règlement','Pénalités de retard','Illimité — 0€'].map(f => (
+                    <li key={f} className="flex items-center gap-2"><span className="text-emerald-500 font-bold">✓</span> {f}</li>
                   ))}
                 </ul>
-                <Link href="/artisan/dashboard"
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                <Link href="/artisan/dashboard" className="mt-6 inline-flex w-full items-center justify-center rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                   Accéder au dashboard →
                 </Link>
               </div>
@@ -278,43 +387,53 @@ export default async function LogicielDevisArtisanVille(
           </div>
         </section>
 
-        {/* ── TEXTE SEO LOCAL ── */}
-        <section className="py-16 px-4">
+        {/* ── MENTIONS OBLIGATOIRES ── */}
+        <section className="py-16 px-4 bg-white border-t border-gray-100">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Logiciel de devis artisan à {nom} : ce qu'il faut savoir
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Mentions obligatoires d&apos;un devis artisan à {nom}
             </h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Les artisans peintres et rénovateurs à {nom} utilisent souvent des logiciels de devis 
-              payants comme Obat ou Batiprix. PremiumArtisan propose une alternative 100% gratuite, 
-              sans abonnement, adaptée aux artisans du {dept} qui veulent gérer leurs devis 
-              et factures sans coût fixe mensuel.
+              Tout devis établi par un artisan peintre ou rénovateur à {nom} doit obligatoirement mentionner : 
+              le numéro SIRET de l'artisan, ses coordonnées complètes (adresse, téléphone, email), 
+              les coordonnées du client, la date d'émission et la date de validité du devis, 
+              une description détaillée des travaux prévus, la quantité et le prix unitaire HT de chaque prestation, 
+              le taux de TVA applicable et le montant TTC final.
             </p>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">
-              Devis peinture à {nom} : les mentions obligatoires
-            </h3>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Un devis d'artisan peintre à {nom} doit contenir : le numéro SIRET, 
-              les coordonnées complètes des deux parties, la description détaillée des travaux, 
-              le prix unitaire HT, le taux de TVA applicable (10% pour rénovation sur logement 
-              de plus de 2 ans), le montant TTC, et la date de validité. 
-              PremiumArtisan inclut automatiquement toutes ces mentions.
+              Pour les travaux de rénovation sur des logements de plus de 2 ans à {nom}, 
+              la TVA est de 10% sur la main d'œuvre et les fournitures directement liées aux travaux. 
+              Pour les constructions neuves ou les locaux professionnels, le taux normal de 20% s'applique.
             </p>
-            <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">
-              Trouver des clients peinture à {nom}
-            </h3>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              En plus de l'outil de devis, PremiumArtisan permet aux artisans peintres de {nom} 
-              d'accéder aux projets de particuliers du {dept}. 
-              Vous consultez les demandes gratuitement et payez uniquement 
-              pour les contacts qui correspondent à votre zone d'intervention et votre activité.
+            <p className="text-gray-600 leading-relaxed">
+              PremiumArtisan intègre automatiquement toutes ces mentions dans chaque devis généré, 
+              garantissant la conformité légale pour les artisans exerçant à {nom} et dans le {dept}.
             </p>
           </div>
         </section>
 
+        {/* ── FAQ ── */}
+        {extra.faq && extra.faq.length > 0 && (
+          <section className="bg-gray-50 py-16 px-4 border-t border-gray-200">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                Questions fréquentes — Devis artisan à {nom}
+              </h2>
+              <div className="space-y-4">
+                {extra.faq.map((f, i) => (
+                  <div key={i} className="rounded-2xl border border-gray-200 bg-white p-6">
+                    <h3 className="font-semibold text-gray-900 mb-2">{f.q}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{f.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── VILLES VOISINES ── */}
         {voisines.length > 0 && (
-          <section className="bg-gray-50 py-12 px-4 border-t border-gray-200">
+          <section className="bg-white py-12 px-4 border-t border-gray-200">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
                 Disponible aussi dans les communes proches de {nom}
@@ -335,12 +454,31 @@ export default async function LogicielDevisArtisanVille(
           </section>
         )}
 
+        {/* ── LIENS SEO ── */}
+        <section className="bg-gray-50 py-12 px-4 border-t border-gray-200">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Autres services PremiumArtisan</h2>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { label: `Devis peinture ${nom}`, href: `/devis-peintre/${ville}` },
+                { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
+                { label: "Créer devis peintre gratuit", href: "/creer-devis-peintre" },
+                { label: "Créer facture artisan", href: "/creer-facture-artisan" },
+                { label: "Logiciel devis Dijon", href: "/logiciel-devis-artisan/dijon" },
+              ].map(({ label, href }) => (
+                <Link key={href} href={href}
+                  className="inline-block px-4 py-2 rounded-full border border-gray-200 bg-white text-sm text-gray-700 font-medium hover:border-[#be123c] hover:text-[#be123c] transition">
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA FINAL ── */}
         <section className="bg-[#2a0a14] py-16 px-4 text-white text-center">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4">
-              Commencez gratuitement à {nom}
-            </h2>
+            <h2 className="text-3xl font-bold mb-4">Commencez gratuitement à {nom}</h2>
             <p className="text-white/70 mb-8">
               Devis et factures illimités. Projets clients en {dept}.
               Aucun abonnement, aucune carte bancaire.
