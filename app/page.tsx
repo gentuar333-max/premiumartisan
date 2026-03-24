@@ -44,7 +44,7 @@ const reviews = [
 
 const seoLinks = [
   {
-    label: "🎨 Peinture", color: "#be123c", bg: "#fff1f2", border: "#fda4af",
+    label: "🎨 Peinture",
     links: [
       { label: "Peinture Dijon", href: "/devis-peinture-dijon" },
       { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
@@ -56,7 +56,7 @@ const seoLinks = [
     ],
   },
   {
-    label: "🔨 Rénovation", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe",
+    label: "🔨 Rénovation",
     links: [
       { label: "Rénovation Dijon", href: "/devis-renovation-dijon" },
       { label: "Rénovation Chenôve", href: "/devis-renovation-chenove" },
@@ -67,7 +67,7 @@ const seoLinks = [
     ],
   },
   {
-    label: "🍳 Cuisine", color: "#059669", bg: "#ecfdf5", border: "#a7f3d0",
+    label: "🍳 Cuisine",
     links: [
       { label: "Cuisine Dijon", href: "/devis-cuisine-dijon" },
       { label: "Cuisine Chenôve", href: "/devis-cuisine-chenove" },
@@ -78,7 +78,7 @@ const seoLinks = [
     ],
   },
   {
-    label: "🚿 Salle de bain", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe",
+    label: "🚿 Salle de bain",
     links: [
       { label: "Salle de bain Dijon", href: "/devis-salle-de-bain-dijon" },
       { label: "Salle de bain Chenôve", href: "/devis-salle-de-bain-chenove" },
@@ -89,7 +89,7 @@ const seoLinks = [
     ],
   },
   {
-    label: "🖼️ Papier peint", color: "#b45309", bg: "#fffbeb", border: "#fde68a",
+    label: "🖼️ Papier peint",
     links: [
       { label: "Papier peint Dijon", href: "/devis-pose-papier-peint-dijon" },
       { label: "Papier peint Chenôve", href: "/devis-pose-papier-peint-chenove" },
@@ -100,7 +100,7 @@ const seoLinks = [
     ],
   },
   {
-    label: "👷 Pour les artisans", color: "#0f172a", bg: "#f8fafc", border: "#e2e8f0",
+    label: "👷 Pour les artisans",
     links: [
       { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
       { label: "Logiciel devis peintre Côte-d'Or", href: "/logiciel-devis-peintre-cote-dor" },
@@ -118,13 +118,13 @@ export default function Page() {
       {/* ── HERO ── */}
       <section style={styles.heroSection}>
         <div style={styles.container}>
+          {/* Nav — sans "Espace artisan" */}
           <div style={styles.topNav}>
             <span style={styles.logoText}>Premium<span style={{ color: "#fda4af" }}>Artisan</span></span>
             <div style={styles.topNavLinks}>
               <Link href="/comment-ca-marche" style={styles.topNavLink}>Comment ça marche</Link>
               <Link href="/about" style={styles.topNavLink}>À propos</Link>
               <Link href="/faq" style={styles.topNavLink}>FAQ</Link>
-              <Link href="/artisan/dashboard" style={styles.topNavLinkCta}>Espace artisan →</Link>
             </div>
           </div>
 
@@ -139,7 +139,6 @@ export default function Page() {
             Gratuit, sans engagement. Nous transmettons votre demande à des artisans de votre zone. Vous recevez jusqu'à <b>3 réponses maximum</b>.
           </p>
 
-          {/* ── FORM — client component ── */}
           <HomeClient />
 
           <div style={styles.trustBar}>
@@ -259,7 +258,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ── SEO INTERNAL LINKS ── */}
+      {/* ── SEO INTERNAL LINKS — ngjyra gri/të bardha ── */}
       <section style={{ background: "#f8f9fa", padding: "52px 20px" }}>
         <div style={{ maxWidth: 1150, margin: "0 auto" }}>
           <h2 style={{ fontSize: 26, fontWeight: 900, color: "#0f172a", marginBottom: 6 }}>
@@ -268,14 +267,18 @@ export default function Page() {
           <p style={{ color: "#64748b", fontSize: 15, marginBottom: 36, maxWidth: 600 }}>
             PremiumArtisan couvre Dijon, Chenôve, Longvic, Talant, Quetigny, Fontaine-lès-Dijon et toute la Côte-d'Or.
           </p>
-          {seoLinks.map(({ label, color, bg, border, links }) => (
-            <div key={label} style={{ marginBottom: 28 }}>
-              <h3 style={{ fontSize: 13, fontWeight: 700, color, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          {seoLinks.map(({ label, links }) => (
+            <div key={label} style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 12, fontWeight: 700, color: "#64748b", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 {label}
               </h3>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {links.map(({ label: lbl, href }) => (
-                  <Link key={href} href={href} style={{ display: "inline-block", padding: "7px 14px", borderRadius: 999, border: `1px solid ${border}`, background: bg, color, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                  <Link key={href} href={href} style={{
+                    display: "inline-block", padding: "6px 14px", borderRadius: 999,
+                    border: "1px solid #e2e8f0", background: "#ffffff",
+                    color: "#374151", fontSize: 13, fontWeight: 500, textDecoration: "none"
+                  }}>
                     {lbl}
                   </Link>
                 ))}
@@ -327,7 +330,7 @@ export default function Page() {
             <div>
               <p style={styles.footerColTitle}>Artisans</p>
               <div style={styles.footerLinks}>
-                <Link href="/artisan/dashboard" style={styles.footerLink}>Tableau de bord</Link>
+                <Link href="/artisan/dashboard" style={styles.footerLink}>Espace artisan</Link>
                 <Link href="/artisan/devis/new" style={styles.footerLink}>Créer un devis</Link>
                 <Link href="/artisan/factures/new" style={styles.footerLink}>Créer une facture</Link>
               </div>

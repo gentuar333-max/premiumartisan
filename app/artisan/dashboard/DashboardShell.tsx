@@ -169,6 +169,13 @@ function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
   );
 }
 
+const WaIcon = () => (
+  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.529 5.856L0 24l6.335-1.508A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.502-5.201-1.381l-.373-.221-3.861.919.976-3.768-.242-.387A9.959 9.959 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+  </svg>
+);
+
 const ProjectCard = memo(function ProjectCard({
   p, categoryLabel, unlockState, contact,
   onUnlockClick, onUnlockExclusive, onPrefetch,
@@ -283,6 +290,8 @@ const ProjectCard = memo(function ProjectCard({
         )}
 
         <div className="mt-3 flex flex-col gap-2">
+
+          {/* ── Rreshti kryesor: Voir le projet + brez WhatsApp/Voir le numéro ── */}
           <div className="flex flex-wrap items-center gap-2">
             {p.id && p.id !== "undefined" ? (
               <Link prefetch href={`/artisan/project/${p.id}`} className="shrink-0 text-sm text-slate-600 underline underline-offset-4 hover:text-slate-900">
@@ -292,62 +301,89 @@ const ProjectCard = memo(function ProjectCard({
               <span className="shrink-0 text-sm text-slate-400">Voir le projet</span>
             )}
 
-            {!isLockedForMe && (
-              isUnlocked && waE164 ? (
-                <a href={`https://wa.me/${waE164}?text=${encodeURIComponent("Bonjour, j'ai vu votre projet sur PremiumArtisan")}`}
-                  target="_blank" rel="noreferrer"
-                  className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100">
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.529 5.856L0 24l6.335-1.508A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.502-5.201-1.381l-.373-.221-3.861.919.976-3.768-.242-.387A9.959 9.959 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-                  </svg>
-                  WhatsApp
-                </a>
-              ) : (
-                <button type="button"
+            {/* Locked for me — asgjë */}
+            {isLockedForMe && null}
+
+            {/* Pa blerë, jo plot, jo rezervuar — WhatsApp (i kyçur) + Voir le numéro në brez */}
+            {!isLockedForMe && !isUnlocked && !isFull && (
+              <div className="ml-auto flex items-center gap-2">
+                {/* WhatsApp i kyçur */}
+                <button
+                  type="button"
                   onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
-                  disabled={!p.id || p.id === "undefined" || unlocking || isFull}
-                  className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50">
-                  <svg className="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.555 4.122 1.529 5.856L0 24l6.335-1.508A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.502-5.201-1.381l-.373-.221-3.861.919.976-3.768-.242-.387A9.959 9.959 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-                  </svg>
+                  disabled={!p.id || p.id === "undefined" || unlocking}
+                  className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <WaIcon />
                   WhatsApp
                   <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                   </svg>
                 </button>
-              )
+                {/* Voir le numéro */}
+                <button
+                  type="button"
+                  onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
+                  disabled={!p.id || p.id === "undefined" || unlocking}
+                  className="inline-flex shrink-0 flex-col items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(16,185,129,0.28)] transition hover:from-emerald-400 hover:to-emerald-600 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {unlocking ? (
+                    <>
+                      <span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />
+                      Déblocage...
+                    </>
+                  ) : (
+                    <>
+                      <span>Voir le numéro</span>
+                      <span className="text-[11px] font-normal opacity-90">{price.normal}€</span>
+                    </>
+                  )}
+                </button>
+              </div>
             )}
 
-            {!isLockedForMe && !isUnlocked && !isFull && (
-              <button type="button"
-                onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
-                disabled={!p.id || p.id === "undefined" || unlocking}
-                className="ml-auto inline-flex shrink-0 flex-col items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(16,185,129,0.28)] transition hover:from-emerald-400 hover:to-emerald-600 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70">
-                {unlocking ? (
-                  <><span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />Déblocage...</>
-                ) : (
-                  <><span>Voir le numéro</span><span className="text-[11px] font-normal opacity-90">{price.normal}€</span></>
-                )}
-              </button>
+            {/* Débloqué — WhatsApp actif + badge Débloqué en brez */}
+            {!isLockedForMe && isUnlocked && (
+              <div className="ml-auto flex items-center gap-2">
+                {waE164 ? (
+                  <a
+                    href={`https://wa.me/${waE164}?text=${encodeURIComponent("Bonjour, j'ai vu votre projet sur PremiumArtisan")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100"
+                  >
+                    <WaIcon />
+                    WhatsApp
+                  </a>
+                ) : null}
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  Débloqué
+                </span>
+              </div>
             )}
 
-            {isUnlocked && !isLockedForMe && (
-              <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+            {/* Complet — 3/3 */}
+            {isFull && !isUnlocked && !isLockedForMe && (
+              <div className="ml-auto flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
-                Débloqué
-              </span>
+                3 / 3 artisans — complet
+              </div>
             )}
           </div>
 
+          {/* ── Bouton exclusif ── */}
           {isFirstSlot && !isUnlocked && !isLockedForMe && (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
               disabled={!p.id || p.id === "undefined" || unlocking}
-              className="flex w-full items-center gap-2 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:from-amber-100 hover:to-orange-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
+              className="flex w-full items-center gap-2 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:from-amber-100 hover:to-orange-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            >
               <span className="text-base leading-none">⚡</span>
               <span>Réserver en exclusivité</span>
               <span className="ml-auto flex flex-col items-end">
@@ -357,9 +393,13 @@ const ProjectCard = memo(function ProjectCard({
             </button>
           )}
 
+          {/* ── Projet réservé ── */}
           {isLockedForMe && (
-            <button type="button" disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-400">
+            <button
+              type="button"
+              disabled
+              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-400"
+            >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
@@ -367,14 +407,6 @@ const ProjectCard = memo(function ProjectCard({
             </button>
           )}
 
-          {isFull && !isUnlocked && !isLockedForMe && (
-            <div className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-              3 / 3 artisans — complet
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -485,9 +517,11 @@ function FilterPanel({
               <div className="relative">
                 <input type="text" value={zone} onChange={e => setZone(e.target.value)} placeholder="21, Lyon, Dijon…"
                   className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-600"/>
-                {zone && <button type="button" onClick={() => setZone("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>}
+                {zone && (
+                  <button type="button" onClick={() => setZone("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                )}
               </div>
             </div>
             <div className="py-4">
@@ -570,6 +604,8 @@ export function DashboardShell({
   const [projectIsLocked, setProjectIsLocked] = useState<Record<string, boolean>>({});
   const [unlockingProjectId, setUnlockingProjectId] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null | undefined>(undefined);
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "info" } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -577,9 +613,6 @@ export function DashboardShell({
       setCurrentUser(data.user ?? null);
     });
   }, []);
-
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "info" } | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const currentCats = (searchParams.get("cat") ?? "").split(",").filter(Boolean);
   const currentStatut = searchParams.get("statut") ?? "";
@@ -656,10 +689,7 @@ export function DashboardShell({
   const handleFilterReset = useCallback(() => { router.push("/artisan/dashboard"); }, [router]);
 
   const onUnlockClick = useCallback(async (projectId: string) => {
-    if (!currentUser) {
-      router.push(`/artisan/login?redirect=/artisan/dashboard`);
-      return;
-    }
+    if (!currentUser) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
     try {
       setUnlockingProjectId(projectId);
       const res = await fetch("/api/artisan/project/contacts", {
@@ -668,10 +698,7 @@ export function DashboardShell({
       });
       const json = await res.json().catch(() => null);
       if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
-      if (res.status === 401 || json?.error?.includes("authentifié")) {
-        router.push(`/artisan/login?redirect=/artisan/dashboard`);
-        return;
-      }
+      if (res.status === 401 || json?.error?.includes("authentifié")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
       if (!res.ok || !json?.ok) { setToast({ msg: json?.error || "Impossible de récupérer le numéro.", type: "error" }); return; }
       setUnlockStatuses(prev => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts(prev => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
@@ -682,10 +709,7 @@ export function DashboardShell({
   }, [currentUser, cp, router]);
 
   const onUnlockExclusive = useCallback(async (projectId: string) => {
-    if (!currentUser) {
-      router.push(`/artisan/login?redirect=/artisan/dashboard`);
-      return;
-    }
+    if (!currentUser) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
     try {
       setUnlockingProjectId(projectId);
       const res = await fetch("/api/artisan/project/contacts", {
@@ -693,10 +717,7 @@ export function DashboardShell({
         body: JSON.stringify({ projectIds: [projectId], exclusive: true, cp }),
       });
       const json = await res.json().catch(() => null);
-      if (res.status === 401 || json?.error?.includes("authentifié")) {
-        router.push(`/artisan/login?redirect=/artisan/dashboard`);
-        return;
-      }
+      if (res.status === 401 || json?.error?.includes("authentifié")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
       if (!res.ok || !json?.ok) {
         if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
         setToast({ msg: json?.error || "Erreur lors de la réservation exclusive.", type: "error" });
@@ -779,8 +800,14 @@ export function DashboardShell({
             Filtres
             {activeFilterCount > 0 && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-slate-400 text-[9px] font-bold text-white">{activeFilterCount}</span>}
           </button>
-          <Link href="/artisan/devis/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">+ Créer un devis</Link>
-          <Link href="/artisan/factures/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap hidden sm:block">+ Créer une facture</Link>
+          {/* ── + Créer un devis ── */}
+          <Link href="/artisan/devis/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">
+            + Créer un devis
+          </Link>
+          {/* ── + Créer une facture — visible gjithmonë ── */}
+          <Link href="/artisan/factures/new" className="shrink-0 px-3 py-1.5 text-sm text-slate-500 transition hover:text-slate-700 hover:bg-slate-100 rounded-lg whitespace-nowrap">
+            + Créer une facture
+          </Link>
           <div className="relative flex-1 min-w-[120px] max-w-xs mx-2">
             <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -838,7 +865,6 @@ export function DashboardShell({
               </button>
             </div>
             <div className="flex flex-1 flex-col gap-3 p-5">
-              {/* Sort — visible surtout sur mobile */}
               <div className="flex gap-2">
                 <Link href={sortRecentUrl} onClick={() => setMenuOpen(false)}
                   className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort !== "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
@@ -849,8 +875,12 @@ export function DashboardShell({
                   Budget élevé
                 </Link>
               </div>
-              <Link href="/artisan/devis/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:hidden" onClick={() => setMenuOpen(false)}>+ Créer un devis</Link>
-              <Link href="/artisan/factures/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50" onClick={() => setMenuOpen(false)}>+ Créer une facture</Link>
+              <Link href="/artisan/devis/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50" onClick={() => setMenuOpen(false)}>
+                + Créer un devis
+              </Link>
+              <Link href="/artisan/factures/new" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50" onClick={() => setMenuOpen(false)}>
+                + Créer une facture
+              </Link>
               {activeFilterCount > 0 && (
                 <button type="button" onClick={() => { handleFilterReset(); setMenuOpen(false); }}
                   className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100">
