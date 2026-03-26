@@ -1,294 +1,800 @@
+// app/devis-renovation-quetigny/DevisRenovationQuetigny.tsx
 "use client";
+
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-const FAQ_ITEMS = [
-  { q: "Quel est le prix d'une rénovation à Quetigny en 2026 ?", a: "Le prix moyen d'une rénovation à Quetigny varie entre 700–1400€/m². Commune résidentielle haut de gamme à l'est de Dijon, forte demande en rénovation de maisons individuelles et appartements de standing." },
-  { q: "Combien de temps dure une rénovation à Quetigny ?", a: "Une rénovation légère : 2 à 4 semaines. Rénovation salle de bain ou cuisine : 3 à 6 semaines. Rénovation complète : 6 à 14 semaines selon la surface et la complexité." },
-  { q: "Y a-t-il des aides pour rénover à Quetigny ?", a: "Oui. MaPrimeRénov', éco-PTZ, aides de Dijon Métropole et TVA réduite à 5.5% sur les travaux d'amélioration énergétique. Nos artisans RGE certifiés accompagnent vos démarches." },
-  { q: "Comment choisir une entreprise de rénovation à Quetigny ?", a: "Vérifiez le SIRET, la garantie décennale pour les gros œuvres, l'assurance RC Pro, et comparez au minimum 3 devis. Sur PremiumArtisan, toutes nos entreprises sont pré-vérifiées sur 5 critères." },
-  { q: "Est-ce gratuit de publier un projet sur PremiumArtisan ?", a: "Oui, 100% gratuit pour les particuliers. Vous recevez jusqu'à 4 devis sans engagement, sans spam." },
-];
+// Stilet CSS-in-JS
+const styles: Record<string, React.CSSProperties> = {
+  hero: {
+    background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+    color: "#fff",
+    padding: "80px 24px",
+    position: "relative",
+    overflow: "hidden",
+  },
+  heroContainer: {
+    maxWidth: 900,
+    margin: "0 auto",
+    textAlign: "center",
+    position: "relative",
+    zIndex: 2,
+  },
+  badge: {
+    display: "inline-block",
+    background: "rgba(255,255,255,0.1)",
+    color: "#38bdf8",
+    fontSize: 12,
+    fontWeight: 600,
+    padding: "8px 16px",
+    borderRadius: 50,
+    marginBottom: 20,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    border: "1px solid rgba(56,189,248,0.3)",
+  },
+  h1: {
+    fontSize: "clamp(32px, 5vw, 56px)",
+    fontWeight: 800,
+    lineHeight: 1.1,
+    marginBottom: 24,
+    letterSpacing: "-0.02em",
+  },
+  heroSubtitle: {
+    fontSize: 20,
+    color: "rgba(255,255,255,0.75)",
+    marginBottom: 40,
+    maxWidth: 640,
+    marginLeft: "auto",
+    marginRight: "auto",
+    lineHeight: 1.6,
+  },
+  ctaButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "18px 40px",
+    borderRadius: 16,
+    background: "#0ea5e9",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 17,
+    textDecoration: "none",
+    boxShadow: "0 20px 40px rgba(14,165,233,0.3)",
+    transition: "all 0.2s ease",
+  },
+  ctaButtonHover: {
+    background: "#0284c7",
+    transform: "translateY(-2px)",
+    boxShadow: "0 25px 50px rgba(14,165,233,0.4)",
+  },
+  trustBadges: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 32,
+    marginTop: 40,
+    flexWrap: "wrap",
+  },
+  trustItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+  },
+  trustIcon: {
+    width: 20,
+    height: 20,
+    color: "#38bdf8",
+  },
+  breadcrumb: {
+    background: "#f8fafc",
+    padding: "16px 24px",
+    borderBottom: "1px solid #e2e8f0",
+  },
+  breadcrumbList: {
+    maxWidth: 1200,
+    margin: "0 auto",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    listStyle: "none",
+    fontSize: 14,
+    color: "#64748b",
+  },
+  breadcrumbLink: {
+    color: "#0ea5e9",
+    textDecoration: "none",
+    fontWeight: 500,
+  },
+  breadcrumbCurrent: {
+    color: "#334155",
+    fontWeight: 600,
+  },
+  content: {
+    maxWidth: 800,
+    margin: "0 auto",
+    padding: "64px 24px",
+  },
+  section: {
+    marginBottom: 48,
+  },
+  h2: {
+    fontSize: 32,
+    fontWeight: 800,
+    color: "#0f172a",
+    marginBottom: 20,
+    lineHeight: 1.2,
+  },
+  h3: {
+    fontSize: 24,
+    fontWeight: 700,
+    color: "#1e293b",
+    marginTop: 32,
+    marginBottom: 16,
+    lineHeight: 1.3,
+  },
+  paragraph: {
+    fontSize: 17,
+    color: "#475569",
+    lineHeight: 1.8,
+    marginBottom: 20,
+  },
+  highlight: {
+    background: "linear-gradient(120deg, #bae6fd 0%, #bae6fd 100%)",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "100% 40%",
+    backgroundPosition: "0 88%",
+    padding: "0 4px",
+    fontWeight: 600,
+    color: "#0c4a6e",
+  },
+  tableContainer: {
+    background: "#fff",
+    borderRadius: 16,
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+    overflow: "hidden",
+    margin: "32px 0",
+    border: "1px solid #e2e8f0",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  th: {
+    background: "#f1f5f9",
+    padding: "16px 20px",
+    textAlign: "left",
+    fontWeight: 600,
+    fontSize: 14,
+    color: "#475569",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    borderBottom: "2px solid #e2e8f0",
+  },
+  td: {
+    padding: "16px 20px",
+    borderBottom: "1px solid #f1f5f9",
+    fontSize: 15,
+    color: "#334155",
+  },
+  trHover: {
+    background: "#f8fafc",
+  },
+  price: {
+    fontWeight: 700,
+    color: "#059669",
+  },
+  ctaBox: {
+    background: "linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%)",
+    border: "2px solid #0ea5e9",
+    borderRadius: 20,
+    padding: "40px 32px",
+    margin: "48px 0",
+    textAlign: "center",
+  },
+  ctaBoxTitle: {
+    fontSize: 24,
+    fontWeight: 800,
+    color: "#0f172a",
+    marginBottom: 12,
+  },
+  ctaBoxText: {
+    fontSize: 16,
+    color: "#64748b",
+    marginBottom: 24,
+    lineHeight: 1.6,
+  },
+  ctaBoxButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "16px 36px",
+    borderRadius: 14,
+    background: "#0ea5e9",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 16,
+    textDecoration: "none",
+    boxShadow: "0 10px 30px rgba(14,165,233,0.3)",
+  },
+  features: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: 24,
+    margin: "40px 0",
+  },
+  featureCard: {
+    background: "#fff",
+    borderRadius: 16,
+    padding: 28,
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    background: "#eff6ff",
+    borderRadius: 12,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    fontSize: 24,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#0f172a",
+    marginBottom: 8,
+  },
+  featureText: {
+    fontSize: 15,
+    color: "#64748b",
+    lineHeight: 1.6,
+  },
+  list: {
+    listStyle: "none",
+    padding: 0,
+    margin: "20px 0",
+  },
+  listItem: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 12,
+    padding: "12px 0",
+    fontSize: 16,
+    color: "#475569",
+    borderBottom: "1px solid #f1f5f9",
+  },
+  checkIcon: {
+    width: 24,
+    height: 24,
+    background: "#dcfce7",
+    borderRadius: 50,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#16a34a",
+    fontSize: 14,
+    flexShrink: 0,
+  },
+  link: {
+    color: "#0ea5e9",
+    fontWeight: 600,
+    textDecoration: "none",
+    borderBottom: "2px solid #bae6fd",
+    transition: "all 0.2s",
+  },
+  finalCta: {
+    background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+    padding: "80px 24px",
+    textAlign: "center",
+  },
+  finalCtaContainer: {
+    maxWidth: 700,
+    margin: "0 auto",
+  },
+  finalCtaH2: {
+    fontSize: 36,
+    fontWeight: 800,
+    color: "#fff",
+    marginBottom: 20,
+  },
+  finalCtaText: {
+    fontSize: 18,
+    color: "rgba(255,255,255,0.7)",
+    marginBottom: 32,
+    lineHeight: 1.6,
+  },
+  stats: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 48,
+    marginBottom: 40,
+    flexWrap: "wrap",
+  },
+  stat: {
+    textAlign: "center",
+  },
+  statNumber: {
+    fontSize: 40,
+    fontWeight: 800,
+    color: "#38bdf8",
+  },
+  statLabel: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    marginTop: 4,
+  },
+  faq: {
+    marginTop: 48,
+  },
+  faqItem: {
+    borderBottom: "1px solid #e2e8f0",
+    padding: "24px 0",
+  },
+  faqQuestion: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#0f172a",
+    marginBottom: 12,
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  faqAnswer: {
+    fontSize: 16,
+    color: "#475569",
+    lineHeight: 1.7,
+    paddingTop: 8,
+  },
+  neighborhoods: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 20,
+  },
+  neighborhood: {
+    background: "#f1f5f9",
+    padding: "8px 16px",
+    borderRadius: 50,
+    fontSize: 14,
+    color: "#475569",
+    fontWeight: 500,
+  },
+};
 
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b-[1.5px] py-5" style={{ borderColor: "#f472b640" }}>
-      <div className="flex cursor-pointer items-center justify-between gap-4 font-bold" style={{ color: "#1f0a14" }} onClick={() => setOpen(!open)}>
-        <span className="text-base">{question}</span>
-        <span className="text-xl" style={{ color: "#db2777" }}>{open ? "−" : "+"}</span>
-      </div>
-      {open && <div className="mt-3 text-sm leading-relaxed" style={{ color: "#db2777cc" }}>{answer}</div>}
-    </div>
-  );
-}
-
-function StickyBar() {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 200);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return (
-    <div className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between gap-4 px-6 py-2.5 transition-transform duration-300"
-      style={{ background: "#1f0a14", borderBottom: "2px solid #db2777", boxShadow: "0 4px 24px rgba(0,0,0,0.4)", transform: visible ? "translateY(0)" : "translateY(-100%)" }}>
-      <div className="flex items-center gap-4">
-        <span className="text-[15px] font-bold text-white" style={{ fontFamily: "serif" }}>Rénovation — Quetigny</span>
-        <div className="hidden items-center md:flex">
-          {["9 entreprises", "700–1400€/m²", "4.8/5 vérifiés", "3–6h"].map((t, i) => (
-            <span key={i} className={`text-[12px] font-semibold text-white/60 ${i > 0 ? "border-l border-white/15 pl-3 ml-3" : ""}`}>{t}</span>
-          ))}
-        </div>
-      </div>
-      <a href="/publier-projet" className="shrink-0 rounded-[10px] px-5 py-2 text-[13px] font-bold text-white transition hover:-translate-y-px"
-        style={{ background: "linear-gradient(135deg, #db2777, #f472b6)", boxShadow: "0 4px 14px rgba(244,114,182,0.3)" }}>
-        Devis gratuit →
-      </a>
-    </div>
-  );
-}
-
-function HeroMiniForm() {
-  const [phone, setPhone] = useState("");
-  const handleSubmit = () => {
-    if (!phone.trim()) return;
-    window.location.href = `/publier-projet/form?tel=${phone}&type=renovation-interieure&cp=21800`;
-  };
-  return (
-    <div className="mb-6 max-w-[620px] rounded-[20px] p-6" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)" }}>
-      <div className="mb-3 text-[11px] font-bold uppercase tracking-[1.5px] text-white/50">Recevez vos devis en 3–6h — Gratuit</div>
-      <div className="flex flex-wrap gap-2.5">
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          placeholder="Votre numéro de téléphone" autoComplete="tel"
-          className="h-12 min-w-[200px] flex-1 rounded-xl px-4 text-[15px] font-semibold text-white placeholder-white/38 outline-none"
-          style={{ background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.2)" }} />
-        <button onClick={handleSubmit} className="h-12 rounded-xl px-6 text-[15px] font-bold text-white transition hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, #db2777, #f472b6)", boxShadow: "0 8px 24px rgba(244,114,182,0.3)" }}>
-          Recevoir mes devis →
-        </button>
-      </div>
-      <div className="mt-2.5 flex flex-wrap gap-3.5">
-        {["Sans engagement", "Max 4 entreprises", "Données protégées", "96 projets analysés"].map((t, i) => (
-          <span key={i} className="text-[12px] font-semibold text-white/42"><span className="text-green-400">✓ </span>{t}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MidPageCTA() {
-  return (
-    <div className="mt-9 flex flex-wrap items-center justify-between gap-6 rounded-[20px] p-8"
-      style={{ background: "linear-gradient(135deg, #1f0a14ee 0%, #1f0a14 100%)", border: "1px solid rgba(255,255,255,0.1)" }}>
-      <div>
-        <h3 className="mb-1.5 text-[22px] font-bold text-white" style={{ fontFamily: "serif" }}>Ces prix correspondent à votre projet ?</h3>
-        <p className="text-[14px] text-white/58">Obtenez une estimation précise de 3 entreprises vérifiées à Quetigny.</p>
-        <div className="mt-2.5 flex flex-wrap gap-4">
-          {[["96", "projets analysés"], ["4.8/5", "satisfaction"], ["3–6h", "réponse"], ["4 max", "entreprises"]].map(([v, l], i) => (
-            <span key={i} className="text-[13px] font-semibold text-white/52"><strong className="text-white/88">{v}</strong> {l}</span>
-          ))}
-        </div>
-      </div>
-      <div className="flex shrink-0 flex-col items-end gap-1.5">
-        <a href="/publier-projet" className="rounded-[13px] px-6 py-3 text-[15px] font-bold text-white transition hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, #db2777, #f472b6)", boxShadow: "0 8px 24px rgba(244,114,182,0.3)" }}>
-          Obtenir mes devis gratuits →
-        </a>
-        <span className="text-[12px] text-white/30">Sans engagement · 100% gratuit</span>
-      </div>
-    </div>
-  );
-}
-
-function SidebarCTA() {
-  return (
-    <div className="mb-4 rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #1f0a14dd, #1f0a14)", border: "1px solid rgba(255,255,255,0.1)" }}>
-      <h4 className="mb-2.5 text-base font-bold text-white" style={{ fontFamily: "serif" }}>Prêt à rénover à Quetigny ?</h4>
-      <p className="mb-4 text-[13px] leading-relaxed text-white/58">3 devis d'entreprises vérifiées sous 3–6h. MaPrimeRénov' accompagnée. Gratuit, sans engagement.</p>
-      <a href="/publier-projet" className="block rounded-xl py-3 text-center text-[14px] font-bold text-white transition hover:-translate-y-0.5"
-        style={{ background: "linear-gradient(135deg, #db2777, #f472b6)" }}>
-        Obtenir mes devis →
-      </a>
-      <p className="mt-2 text-center text-[11px] text-white/28">96 projets · 4.8/5 · Sans spam</p>
-    </div>
-  );
-}
-
-const CLUSTER_LINKS = [
-  { name: "Rénovation Dijon", href: "/devis-renovation-dijon", sub: "47 entreprises · 850€/m² moy." },
-  { name: "Rénovation Chenôve", href: "/devis-renovation-chenove", sub: "14 entreprises · 680€/m² moy." },
-  { name: "Rénovation Talant", href: "/devis-renovation-talant", sub: "11 entreprises · 720€/m² moy." },
-  { name: "Rénovation Longvic", href: "/devis-renovation-longvic", sub: "10 entreprises · 660€/m² moy." },
-  { name: "Rénovation Quetigny", href: "/devis-renovation-quetigny", sub: "9 entreprises · 950€/m² moy." },
-  { name: "Rénovation Fontaine-lès-Dijon", href: "/devis-renovation-fontaine-les-dijon", sub: "8 entreprises · 1 050€/m² moy." },
-];
-
+// Komponenti kryesor
 export default function DevisRenovationQuetigny() {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <main className="min-h-screen" style={{ background: "#fdf4f7" }}>
-      <StickyBar />
-      <nav className="flex items-center justify-between px-8 py-4" style={{ background: "#1f0a14" }}>
-        <div className="text-xl font-bold text-white" style={{ fontFamily: "serif" }}>Premium<span style={{ color: "#f472b6" }}>Artisan</span></div>
-        <div className="flex gap-6">
-          <Link href="/" className="text-sm text-white/70 hover:text-white">Accueil</Link>
-          <Link href="/devis-renovation-dijon" className="text-sm text-white/70 hover:text-white">Rénovation Dijon</Link>
-          <Link href="/devis-peinture-quetigny" className="text-sm text-white/70 hover:text-white">Peinture Quetigny</Link>
-          <Link href="#prix" className="text-sm text-white/70 hover:text-white">Prix</Link>
-        </div>
+    <div>
+      {/* BREADCRUMBS */}
+      <nav style={styles.breadcrumb} aria-label="breadcrumb">
+        <ol style={styles.breadcrumbList}>
+          <li>
+            <Link href="/" style={styles.breadcrumbLink}>
+              Accueil
+            </Link>
+          </li>
+          <li>›</li>
+          <li>
+            <Link href="/devis-renovation" style={styles.breadcrumbLink}>
+              Rénovation
+            </Link>
+          </li>
+          <li>›</li>
+          <li style={styles.breadcrumbCurrent}>Quetigny</li>
+        </ol>
       </nav>
 
-      <section className="relative overflow-hidden px-8 pb-16 pt-20" style={{ background: "linear-gradient(135deg, #1f0a14 0%, #1f0a14cc 60%, #1f0a14ee 100%)" }}>
-        <div className="pointer-events-none absolute -right-[20%] -top-[50%] h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(244,114,182,0.3) 0%, transparent 70%)" }} />
-        <div className="relative mx-auto max-w-[900px]">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ border: "1px solid #db277740", background: "#db277720", color: "#f472b6" }}>
-            🏗️ Quetigny 21800 — Rénovation intérieure 2026
-          </div>
-          <h1 className="mb-5 text-4xl font-black leading-tight text-white md:text-6xl" style={{ fontFamily: "serif" }}>
-            Rénovation Intérieure<br />à <em className="not-italic" style={{ color: "#f472b6" }}>Quetigny</em> — Prix<br />&amp; Devis Gratuit 2026
+      {/* HERO SECTION */}
+      <section style={styles.hero}>
+        <div style={styles.heroContainer}>
+          <span style={styles.badge}>Côte-d&apos;Or • Bourgogne-Franche-Comté</span>
+          
+          <h1 style={styles.h1}>
+            Entreprise de Rénovation à Quetigny
           </h1>
-          <p className="mb-8 max-w-[600px] text-lg text-white/75">
-            Comparez jusqu'à 4 entreprises vérifiées à Quetigny. <strong className="text-white">96 projets analysés.</strong> Commune résidentielle haut de gamme à l'est de Dijon, forte demande en rénovation de maisons individuelles et appartements de standing.
+          
+          <p style={styles.heroSubtitle}>
+            Trouvez une entreprise de rénovation vérifiée à Quetigny. 
+            Comparez jusqu&apos;à 4 devis gratuits en 48 heures. 
+            Tous corps de métier : peinture, plomberie, électricité, menuiserie.
           </p>
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
-            {[{ value: "96", label: "Projets analysés" }, { value: "9", label: "Entreprises vérifiées" }, { value: "950€", label: "Prix moy./m²" }, { value: "3–6h", label: "Délai réponse" }, { value: "96%", label: "Satisfaction" }].map((b, i) => (
-              <div key={i} className="rounded-xl border border-white/15 bg-white/[0.08] px-4 py-3 text-center">
-                <div className="text-xl font-bold text-white" style={{ fontFamily: "serif" }}>{b.value}</div>
-                <div className="mt-0.5 text-[11px] text-white/60">{b.label}</div>
-              </div>
-            ))}
-          </div>
-          <HeroMiniForm />
-          <a href="/publier-projet" className="inline-block rounded-2xl px-10 py-5 text-center text-xl font-bold text-white transition hover:scale-105"
-            style={{ background: "#db2777", boxShadow: "0 12px 32px rgba(244,114,182,0.3)" }}>
-            🏗️ Publiez votre projet gratuitement
-          </a>
-          <p className="mt-3 text-sm text-white/50">Sans engagement · 100% gratuit · Tous corps de métier</p>
-        </div>
-      </section>
 
-      <section className="px-8 py-20" style={{ background: "#fdf4f7" }} id="prix">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: "#db2777" }}>Prix réels 2026</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "serif", color: "#1f0a14" }}>Combien coûte une rénovation<br />à Quetigny ?</h2>
-          <p className="mb-12 max-w-[600px] text-base" style={{ color: "#db2777aa" }}>Analyse de 96 projets publiés à Quetigny entre janvier 2025 et mars 2026.</p>
-          <div className="mb-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              { room: "🛁 Salle de bain", price: "3 500–10 000€", detail: "Plomberie + carrelage + sanitaires" },
-              { room: "🍳 Cuisine", price: "7 000–22 000€", detail: "Meubles + électroménager + pose" },
-              { room: "🛏️ Chambre", price: "2 000–5 500€", detail: "Sol + peinture + électricité" },
-              { room: "🛋️ Salon/Séjour", price: "3 500–9 000€", detail: "Sol + peinture + luminaires" },
-              { room: "🚽 WC", price: "900–3 000€", detail: "Plomberie + carrelage + sanitaires" },
-              { room: "🏠 Entrée/Couloir", price: "1 200–3 500€", detail: "Sol + peinture + rangements" },
-            ].map((r, i) => (
-              <div key={i} className="rounded-2xl bg-white p-5 transition" style={{ border: "1.5px solid #f472b640" }}>
-                <div className="mb-2 text-base font-bold" style={{ color: "#1f0a14" }}>{r.room}</div>
-                <div className="text-[22px] font-bold" style={{ fontFamily: "serif", color: "#db2777" }}>{r.price}</div>
-                <div className="mt-1 text-[12px]" style={{ color: "#db277799" }}>{r.detail}</div>
-              </div>
-            ))}
-          </div>
-          <MidPageCTA />
-        </div>
-      </section>
+          <Link
+            href="/publier-projet/form"
+            style={{
+              ...styles.ctaButton,
+              ...(hovered ? styles.ctaButtonHover : {}),
+            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            Obtenir mes devis gratuits
+            <span>→</span>
+          </Link>
 
-      <section className="px-8 py-20" style={{ background: "#1f0a14" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: "#f472b6" }}>Cluster Rénovation</div>
-          <h2 className="mb-10 text-3xl font-bold text-white md:text-4xl" style={{ fontFamily: "serif" }}>Rénovation autour de Quetigny</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {CLUSTER_LINKS.filter(l => !l.href.includes("quetigny")).map((q, i) => (
-              <Link key={i} href={q.href} className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 no-underline transition hover:border-white/40 hover:bg-white/10">
-                <div className="mb-2 text-[17px] font-bold text-white" style={{ fontFamily: "serif" }}>{q.name}</div>
-                <div className="text-[13px] text-white/50">{q.sub}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white px-8 py-20">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: "#db2777" }}>Guide expert</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "serif", color: "#1f0a14" }}>Tout savoir sur la rénovation<br />à Quetigny</h2>
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-[2fr_1fr]">
-            <div className="text-[15px] leading-relaxed" style={{ color: "#db2777cc" }}>
-              <h3 className="mb-3 text-[22px] font-bold" style={{ fontFamily: "serif", color: "#1f0a14" }}>Le marché de la rénovation à Quetigny en 2026</h3>
-              <p className="mb-4">Commune résidentielle haut de gamme à l'est de Dijon, forte demande en rénovation de maisons individuelles et appartements de standing. En 2025–2026, 96 projets ont été publiés sur notre plateforme, avec un budget moyen de 950€ par mètre carré.</p>
-              <h3 className="mb-3 mt-6 text-[22px] font-bold" style={{ fontFamily: "serif", color: "#1f0a14" }}>Données du marché — Quetigny 2026</h3>
-              <ul className="list-disc space-y-2 pl-5">
-                <li>Projets publiés 2025–2026 : <strong>96</strong></li>
-                <li>Prix moyen/m² : <strong>950€</strong></li>
-                <li>Entreprises actives : <strong>9</strong></li>
-                <li>Délai réponse : <strong>3–6h</strong></li>
-                <li>Satisfaction clients : <strong>96%</strong></li>
-              </ul>
+          <div style={styles.trustBadges}>
+            <div style={styles.trustItem}>
+              <span>✓</span>
+              <span>Artisans vérifiés</span>
             </div>
-            <div className="sticky top-6">
-              <SidebarCTA />
-              <div className="rounded-2xl bg-white p-6" style={{ border: "1.5px solid #f472b640" }}>
-                <h4 className="mb-3 text-base font-bold" style={{ fontFamily: "serif", color: "#1f0a14" }}>🔗 Cluster Rénovation</h4>
-                {CLUSTER_LINKS.filter(l => !l.href.includes("quetigny")).map((l, i) => (
-                  <div key={i} className="flex justify-between py-2 text-[13px]">
-                    <Link href={l.href} className="no-underline hover:underline" style={{ color: "#db2777" }}>{l.name}</Link>
-                    <span className="font-bold" style={{ color: "#1f0a14" }}>→</span>
-                  </div>
-                ))}
-              </div>
+            <div style={styles.trustItem}>
+              <span>✓</span>
+              <span>Devis 100% gratuit</span>
+            </div>
+            <div style={styles.trustItem}>
+              <span>✓</span>
+              <span>Réponse sous 24h</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="px-8 py-20" style={{ background: "#fdf4f7" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: "#db2777" }}>FAQ</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "serif", color: "#1f0a14" }}>Questions fréquentes<br />— Rénovation Quetigny</h2>
-          <div className="max-w-[700px]">{FAQ_ITEMS.map((item, i) => <FAQItem key={i} question={item.q} answer={item.a} />)}</div>
-        </div>
-      </section>
+      {/* CONTENU SEO PRINCIPAL */}
+      <main style={styles.content}>
+        
+        {/* INTRODUCTION */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>
+            Prix d&apos;une rénovation à Quetigny en 2026
+          </h2>
+          
+          <p style={styles.paragraph}>
+            Vous envisagez de rénover votre logement à <strong>Quetigny</strong> ? 
+            Cette commune dynamique de la métropole dijonnaise connaît un essor 
+            important des projets de rénovation résidentielle. Située à seulement 
+            10 minutes du centre de Dijon, Quetigny attire de plus en plus de 
+            propriétaires souhaitant moderniser leur habitat tout en bénéficiant 
+            d&apos;un cadre de vie agréable.
+          </p>
 
-      <section className="bg-white px-8 py-20">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: "#db2777" }}>Explorer</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight md:text-5xl" style={{ fontFamily: "serif", color: "#1f0a14" }}>Pages liées</h2>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: "Rénovation Dijon 21000", sub: "312 projets · 850€/m²", href: "/devis-renovation-dijon" },
-              { title: "Rénovation Chenôve", sub: "189 projets · 680€/m²", href: "/devis-renovation-chenove" },
-              { title: "Rénovation Talant", sub: "143 projets · 720€/m²", href: "/devis-renovation-talant" },
-              { title: "Rénovation Longvic", sub: "118 projets · 660€/m²", href: "/devis-renovation-longvic" },
-              { title: "Rénovation Quetigny", sub: "96 projets · 950€/m²", href: "/devis-renovation-quetigny" },
-              { title: "Rénovation Fontaine", sub: "74 projets · 1 050€/m²", href: "/devis-renovation-fontaine-les-dijon" },
-              { title: "Peinture Quetigny", sub: "Devis gratuit · 25–45€/m²", href: "/devis-peinture-quetigny" },
-              { title: "MaPrimeRénov' 2026", sub: "Jusqu'à 70 000€ d'aides", href: "#" },
-            ].map((link, i) => (
-              <Link key={i} href={link.href} className="rounded-xl bg-white p-4 no-underline transition hover:-translate-y-0.5"
-                style={{ border: "1.5px solid #f472b640" }}>
-                <div className="mb-1 text-[13px] font-bold" style={{ color: "#1f0a14" }}>{link.title}</div>
-                <div className="text-xs" style={{ color: "#db277799" }}>{link.sub}</div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+          <p style={styles.paragraph}>
+            Le coût d&apos;une rénovation à Quetigny varie considérablement selon 
+            la nature des travaux, la surface à rénover et les finitions choisies. 
+            Notre plateforme vous permet d&apos;obtenir des <span style={styles.highlight}>devis précis et personnalisés</span> 
+            auprès d&apos;entreprises locales rigoureusement sélectionnées.
+          </p>
+        </section>
 
-      <section className="px-8 py-20 text-center" style={{ background: "linear-gradient(135deg, #1f0a14, #1f0a14cc)" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest" style={{ color: "#f472b6" }}>Prêt à rénover ?</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-white md:text-5xl" style={{ fontFamily: "serif" }}>Recevez vos devis rénovation<br />à Quetigny</h2>
-          <p className="mb-3 text-base text-white/70">9 entreprises vérifiées à Quetigny. Sans engagement, sans spam.</p>
-          <div className="mb-8 flex justify-center gap-5 text-[13px] text-white/45">
-            <span>96 projets analysés</span><span>·</span><span>4.8/5</span><span>·</span><span>Réponse 3–6h</span>
+        {/* TABLEAU DES PRIX */}
+        <section style={styles.section}>
+          <h3 style={styles.h3}>
+            Tarifs indicatifs par type de travaux
+          </h3>
+          
+          <div style={styles.tableContainer}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Type de rénovation</th>
+                  <th style={styles.th}>Prix au m²</th>
+                  <th style={styles.th}>Budget total estimé</th>
+                  <th style={styles.th}>Délai moyen</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={styles.td}>Peinture intérieure (fournie)</td>
+                  <td style={{...styles.td, ...styles.price}}>25€ – 45€</td>
+                  <td style={styles.td}>2 500€ – 4 500€ (100m²)</td>
+                  <td style={styles.td}>3 à 5 jours</td>
+                </tr>
+                <tr style={styles.trHover}>
+                  <td style={styles.td}>Rénovation de salle de bain complète</td>
+                  <td style={{...styles.td, ...styles.price}}>Sur devis</td>
+                  <td style={styles.td}>8 000€ – 18 000€</td>
+                  <td style={styles.td}>2 à 3 semaines</td>
+                </tr>
+                <tr>
+                  <td style={styles.td}>Rénovation de cuisine (hors électroménager)</td>
+                  <td style={{...styles.td, ...styles.price}}>Sur devis</td>
+                  <td style={styles.td}>12 000€ – 30 000€</td>
+                  <td style={styles.td}>3 à 5 semaines</td>
+                </tr>
+                <tr style={styles.trHover}>
+                  <td style={styles.td}>Rénovation complète appartement T3</td>
+                  <td style={{...styles.td, ...styles.price}}>800€ – 1 500€/m²</td>
+                  <td style={styles.td}>40 000€ – 90 000€</td>
+                  <td style={styles.td}>2 à 4 mois</td>
+                </tr>
+                <tr>
+                  <td style={styles.td}>Isolation thermique (ITE)</td>
+                  <td style={{...styles.td, ...styles.price}}>120€ – 200€/m²</td>
+                  <td style={styles.td}>15 000€ – 40 000€</td>
+                  <td style={styles.td}>1 à 3 semaines</td>
+                </tr>
+                <tr style={styles.trHover}>
+                  <td style={styles.td}>Remplacement menuiseries PVC</td>
+                  <td style={{...styles.td, ...styles.price}}>600€ – 1 200€/ouvrant</td>
+                  <td style={styles.td}>6 000€ – 15 000€</td>
+                  <td style={styles.td}>2 à 5 jours</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <a href="/publier-projet" className="inline-block rounded-2xl px-12 py-5 text-center text-xl font-bold text-white transition hover:scale-105"
-            style={{ background: "#db2777", boxShadow: "0 12px 32px rgba(244,114,182,0.3)" }}>
-            🏗️ Publiez votre projet gratuitement
-          </a>
-          <p className="mt-3 text-sm text-white/50">Sans engagement · Gratuit · Tous corps de métier</p>
+
+          <p style={styles.paragraph}>
+            <em>
+              Ces tarifs sont fournis à titre indicatif. Pour un budget précis adapté 
+              à votre projet, demandez vos devis personnalisés via notre formulaire.
+            </em>
+          </p>
+        </section>
+
+        {/* CTA INTERMÉDIAIRE */}
+        <div style={styles.ctaBox}>
+          <h3 style={styles.ctaBoxTitle}>
+            Besoin d&apos;un devis précis pour votre projet ?
+          </h3>
+          <p style={styles.ctaBoxText}>
+            Décrivez votre projet en 2 minutes. Recevez jusqu&apos;à 4 devis détaillés 
+            d&apos;entreprises de rénovation vérifiées à Quetigny. Service gratuit et sans engagement.
+          </p>
+          <Link href="/publier-projet/form" style={styles.ctaBoxButton}>
+            Publier mon projet de rénovation →
+          </Link>
+        </div>
+
+        {/* POURQUOI CHOISIR PREMIUMARTISAN */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>
+            Pourquoi faire appel à un professionnel à Quetigny ?
+          </h2>
+
+          <div style={styles.features}>
+            <div style={styles.featureCard}>
+              <div style={styles.featureIcon}>🏠</div>
+              <h4 style={styles.featureTitle}>Connaissance locale</h4>
+              <p style={styles.featureText}>
+                Nos artisans connaissent parfaitement les spécificités des logements 
+                de Quetigny : constructions des années 70-80, normes thermiques locales, 
+                et contraintes urbanistiques de la métropole dijonnaise.
+              </p>
+            </div>
+
+            <div style={styles.featureCard}>
+              <div style={styles.featureIcon}>⚡</div>
+              <h4 style={styles.featureTitle}>Intervention rapide</h4>
+              <p style={styles.featureText}>
+                Proximité géographique = délais d&apos;intervention réduits. 
+                Visite de chantier possible sous 48h pour l&apos;établissement 
+                de votre devis détaillé.
+              </p>
+            </div>
+
+            <div style={styles.featureCard}>
+              <div style={styles.featureIcon}>💰</div>
+              <h4 style={styles.featureTitle}>Aides financières</h4>
+              <p style={styles.featureText}>
+                Bénéficiez de MaPrimeRénov&apos;, éco-PTZ, TVA réduite à 5,5% et aides 
+                de Dijon Métropole. Nos artisans RGE vous accompagnent dans vos démarches.
+              </p>
+            </div>
+
+            <div style={styles.featureCard}>
+              <div style={styles.featureIcon}>🛡️</div>
+              <h4 style={styles.featureTitle}>Garanties décennales</h4>
+              <p style={styles.featureText}>
+                Toutes nos entreprises partenaires sont assurées et vous offrent 
+                la garantie décennale obligatoire pour tous les travaux structurels.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* TYPES DE RÉNOVATION */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>
+            Quels travaux de rénovation réaliser à Quetigny ?
+          </h2>
+
+          <h3 style={styles.h3}>Rénovation énergétique et isolation</h3>
+          <p style={styles.paragraph}>
+            Avec les objectifs de réduction des émissions de CO₂, la rénovation 
+            énergétique est devenue prioritaire. À Quetigny, de nombreux logements 
+            des années 70 nécessitent une <strong>isolation thermique par l&apos;extérieur (ITE)</strong> 
+            ou par l&apos;intérieur (ITI). Ces travaux permettent de réduire jusqu&apos;à 
+            30% votre facture énergétique tout en améliorant votre confort thermique.
+          </p>
+
+          <h3 style={styles.h3}>Rénovation de salles de bain et cuisines</h3>
+          <p style={styles.paragraph}>
+            Les pièces d&apos;eau sont souvent les premières à être rénovées. 
+            Moderniser une salle de bain à Quetigny représente un investissement 
+            moyen de 10 000€ à 15 000€ pour une refonte complète incluant 
+            la plomberie, l&apos;électricité, le carrelage et le mobilier. Pour les cuisines, 
+            budget entre 15 000€ et 25 000€ selon l&apos;équipement choisi.
+          </p>
+
+          <h3 style={styles.h3}>Aménagement des combles et extensions</h3>
+          <p style={styles.paragraph}>
+            Quetigny compte de nombreux pavillons avec potentiel d&apos;aménagement 
+            des combles. Créer une chambre ou un bureau sous les toits représente 
+            un excellent rapport qualité-prix pour agrandir votre surface habitable 
+            sans déménager. Comptez 1 200€ à 2 000€/m² aménagé.
+          </p>
+        </section>
+
+        {/* AIDES FINANCIÈRES */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>
+            Aides et financements disponibles à Quetigny
+          </h2>
+
+          <p style={styles.paragraph}>
+            Rénover votre logement à Quetigny peut être largement subventionné. 
+            Voici les principales aides auxquelles vous pouvez prétendre en 2026 :
+          </p>
+
+          <ul style={styles.list}>
+            <li style={styles.listItem}>
+              <span style={styles.checkIcon}>✓</span>
+              <div>
+                <strong>MaPrimeRénov&apos;</strong> : Prime versée par l&apos;Anah, cumulable 
+                avec d&apos;autres aides. Montant variable selon vos revenus et les travaux réalisés.
+              </div>
+            </li>
+            <li style={styles.listItem}>
+              <span style={styles.checkIcon}>✓</span>
+              <div>
+                <strong>Éco-PTZ</strong> : Prêt à taux zéro jusqu&apos;à 50 000€ pour les 
+                travaux d&apos;isolation, de chauffage ou d&apos;installation de panneaux solaires.
+              </div>
+            </li>
+            <li style={styles.listItem}>
+              <span style={styles.checkIcon}>✓</span>
+              <div>
+                <strong>TVA réduite à 5,5%</strong> : Applicable sur les travaux d&apos;amélioration 
+                énergétique dans les logements de plus de 2 ans.
+              </div>
+            </li>
+            <li style={styles.listItem}>
+              <span style={styles.checkIcon}>✓</span>
+              <div>
+                <strong>Aides locales Dijon Métropole</strong> : Complément possible 
+                pour certains projets éligibles sur le territoire métropolitain.
+              </div>
+            </li>
+          </ul>
+
+          <p style={styles.paragraph}>
+            <Link href="/aides-renovation" style={styles.link}>
+              En savoir plus sur les aides à la rénovation →
+            </Link>
+          </p>
+        </section>
+
+        {/* FAQ */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>
+            Questions fréquentes sur la rénovation à Quetigny
+          </h2>
+
+          <div style={styles.faq}>
+            <div style={styles.faqItem}>
+              <h4 style={styles.faqQuestion}>
+                Quel est le délai moyen pour obtenir un devis de rénovation à Quetigny ?
+              </h4>
+              <p style={styles.faqAnswer}>
+                Sur PremiumArtisan, vous recevez vos premiers devis sous 24 à 48 heures 
+                après publication de votre projet. Les entreprises locales de Quetigny 
+                et alentours peuvent généralement visiter le chantier dans la semaine 
+                pour affiner leur proposition.
+              </p>
+            </div>
+
+            <div style={styles.faqItem}>
+              <h4 style={styles.faqQuestion}>
+                Faut-il des autorisations pour rénover à Quetigny ?
+              </h4>
+              <p style={styles.faqAnswer}>
+                Pour les travaux intérieurs sans modification de structure, aucune 
+                autorisation n&apos;est requise. Pour les travaux d&apos;extension, 
+                modification de façade ou changement de destination, un 
+                <strong> permis de construire ou une déclaration préalable</strong> 
+                peut être nécessaire auprès de la mairie de Quetigny. Nos artisans 
+                peuvent vous guider dans ces démarches administratives.
+              </p>
+            </div>
+
+            <div style={styles.faqItem}>
+              <h4 style={styles.faqQuestion}>
+                Comment choisir le bon artisan pour ma rénovation ?
+              </h4>
+              <p style={styles.faqAnswer}>
+                Comparez toujours au minimum 3 devis détaillés. Vérifiez les assurances 
+                (décennale et responsabilité civile), les avis clients, et les certifications 
+                (Qualibat, RGE pour les aides). Notre plateforme sélectionne pour vous 
+                des professionnels répondant à tous ces critères de qualité.
+              </p>
+            </div>
+
+            <div style={styles.faqItem}>
+              <h4 style={styles.faqQuestion}>
+                Quels quartiers de Quetigny sont les plus demandés pour la rénovation ?
+              </h4>
+              <div style={styles.faqAnswer}>
+                <p>
+                  Les demandes de rénovation concernent principalement :
+                </p>
+                <div style={styles.neighborhoods}>
+                  <span style={styles.neighborhood}>Centre-ville</span>
+                  <span style={styles.neighborhood}>Le Parc</span>
+                  <span style={styles.neighborhood}>Les Brielles</span>
+                  <span style={styles.neighborhood}>La Bussière</span>
+                  <span style={styles.neighborhood}>Les Grésilles</span>
+                </div>
+                <p style={{ marginTop: 12 }}>
+                  Nous couvrons l&apos;ensemble de la commune et les secteurs 
+                  limitrophes de Dijon Métropole.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ZONES VOISINES */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>
+            Entreprises de rénovation aux alentours de Quetigny
+          </h2>
+          
+          <p style={styles.paragraph}>
+            Nos artisans interviennent également dans les communes voisines :
+          </p>
+
+          <p style={styles.paragraph}>
+            <Link href="/devis-renovation-chenove" style={styles.link}>Chenôve</Link> • 
+            <Link href="/devis-renovation-saint-apollinaire" style={styles.link}> Saint-Apollinaire</Link> • 
+            <Link href="/devis-renovation-dijon" style={styles.link}> Dijon</Link> • 
+            <Link href="/devis-renovation-velars-sur-ouche" style={styles.link}> Velars-sur-Ouche</Link> • 
+            <Link href="/devis-renovation-fontaine-ouche" style={styles.link}> Fontaine-d&apos;Ouche</Link> • 
+            <Link href="/devis-renovation-sennecey-les-dijon" style={styles.link}> Sennecey-lès-Dijon</Link> • 
+            <Link href="/devis-renovation-chevigny" style={styles.link}> Chevigny-Saint-Sauveur</Link>
+          </p>
+        </section>
+
+      </main>
+
+      {/* CTA FINAL */}
+      <section style={styles.finalCta}>
+        <div style={styles.finalCtaContainer}>
+          <h2 style={styles.finalCtaH2}>
+            Lancez votre projet de rénovation à Quetigny
+          </h2>
+          
+          <div style={styles.stats}>
+            <div style={styles.stat}>
+              <div style={styles.statNumber}>4.9/5</div>
+              <div style={styles.statLabel}>Note moyenne artisans</div>
+            </div>
+            <div style={styles.stat}>
+              <div style={styles.statNumber}>48h</div>
+              <div style={styles.statLabel}>Délai moyen devis</div>
+            </div>
+            <div style={styles.stat}>
+              <div style={styles.statNumber}>100%</div>
+              <div style={styles.statLabel}>Gratuit & sans engagement</div>
+            </div>
+          </div>
+
+          <p style={styles.finalCtaText}>
+            Rejoignez les 1 200+ propriétaires de Quetigny et environs qui ont 
+            trouvé leur artisan via PremiumArtisan. Devis détaillés, artisans vérifiés, 
+            accompagnement personnalisé.
+          </p>
+
+          <Link href="/publier-projet/form" style={styles.ctaButton}>
+            Obtenir mes devis maintenant →
+          </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
