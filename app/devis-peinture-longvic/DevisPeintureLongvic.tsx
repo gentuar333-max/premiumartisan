@@ -1,470 +1,1059 @@
-// Longvic component
+// app/devis-peinture-longvic/DevisPeintureLongvic.tsx
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
 
-const FAQ_ITEMS = [
-  { q: "Quel est le prix de la peinture intérieure à Longvic en 2026 ?", a: "Le prix moyen à Longvic varie entre 27€ et 41€/m². Pour un appartement de 60m², comptez entre 1 350€ et 2 500€ tout compris. Longvic bénéficie de tarifs légèrement inférieurs à Dijon centre grâce à la proximité des artisans locaux." },
-  { q: "Longvic est-elle bien couverte par les artisans peintres ?", a: "Oui. Longvic bénéficie d'une excellente couverture grâce à sa proximité avec l'aéroport Dijon-Bourgogne et la zone industrielle. 8 artisans peintres vérifiés sont actifs sur la commune et interviennent aussi sur Chenôve, Dijon sud et Sennecey-lès-Dijon." },
-  { q: "Quel délai pour obtenir un devis peinture à Longvic ?", a: "En moyenne 4 à 6h sur PremiumArtisan. Les artisans de Longvic sont réactifs car la commune est bien desservie et les déplacements sont rapides depuis la zone sud de Dijon." },
-  { q: "Y a-t-il des spécificités pour les chantiers peinture à Longvic ?", a: "Oui. Le parc immobilier de Longvic comprend de nombreux logements sociaux (OPAC) et maisons de ville construits entre 1960 et 1990. Ces biens nécessitent souvent un traitement préalable : rebouchage, sous-couche anti-humidité, parfois traitement anti-moisissures dans les pièces humides." },
-  { q: "Les artisans de Longvic interviennent-ils sur Dijon et alentours ?", a: "Oui, les artisans basés à Longvic couvrent Dijon, Chenôve, Sennecey-lès-Dijon, Perrigny-lès-Dijon et les communes de la plaine de Saône jusqu'à 30 km." },
-  { q: "Comment obtenir le meilleur prix pour des travaux de peinture à Longvic ?", a: "Publiez votre projet sur PremiumArtisan pour recevoir jusqu'à 4 devis comparatifs. Les projets publiés à Longvic économisent en moyenne 14% par rapport au premier devis obtenu. Planifier hors saison (octobre–mars) permet d'obtenir des tarifs encore plus avantageux." },
-];
-
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b-[1.5px] border-[#e8ddd0] py-5">
-      <div className="flex cursor-pointer items-center justify-between gap-4 font-bold text-[#1a1714]" onClick={() => setOpen(!open)}>
-        <span className="text-base">{question}</span>
-        <span className="text-xl">{open ? "−" : "+"}</span>
-      </div>
-      {open && <div className="mt-3 text-sm leading-relaxed text-[#6b5a4a]">{answer}</div>}
-    </div>
-  );
-}
+const styles: Record<string, React.CSSProperties> = {
+  // HERO ME GRADIENT TË RI
+  hero: {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#fff",
+    padding: "100px 24px 80px",
+    position: "relative",
+    overflow: "hidden",
+  },
+  heroPattern: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+    opacity: 0.4,
+  },
+  heroContainer: {
+    maxWidth: 1000,
+    margin: "0 auto",
+    textAlign: "center",
+    position: "relative",
+    zIndex: 2,
+  },
+  locationBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    background: "rgba(255,255,255,0.15)",
+    backdropFilter: "blur(10px)",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 600,
+    padding: "10px 20px",
+    borderRadius: 50,
+    marginBottom: 24,
+    border: "1px solid rgba(255,255,255,0.2)",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+  },
+  h1: {
+    fontSize: "clamp(36px, 6vw, 64px)",
+    fontWeight: 900,
+    lineHeight: 1.05,
+    marginBottom: 24,
+    letterSpacing: "-0.03em",
+    textShadow: "0 4px 20px rgba(0,0,0,0.2)",
+  },
+  heroSubtitle: {
+    fontSize: 21,
+    color: "rgba(255,255,255,0.9)",
+    marginBottom: 40,
+    maxWidth: 700,
+    marginLeft: "auto",
+    marginRight: "auto",
+    lineHeight: 1.6,
+    fontWeight: 400,
+  },
+  ctaButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "20px 48px",
+    borderRadius: 16,
+    background: "#fff",
+    color: "#667eea",
+    fontWeight: 800,
+    fontSize: 18,
+    textDecoration: "none",
+    boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    position: "relative",
+    overflow: "hidden",
+  },
+  statsBar: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 48,
+    marginTop: 56,
+    flexWrap: "wrap",
+  },
+  statItem: {
+    textAlign: "center",
+  },
+  statNumber: {
+    fontSize: 36,
+    fontWeight: 900,
+    color: "#fff",
+    lineHeight: 1,
+  },
+  statLabel: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.7)",
+    marginTop: 6,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+  },
+  
+  // BREADCRUMBS
+  breadcrumb: {
+    background: "#f8fafc",
+    borderBottom: "1px solid #e2e8f0",
+    padding: "16px 24px",
+  },
+  breadcrumbList: {
+    maxWidth: 1200,
+    margin: "0 auto",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    listStyle: "none",
+    fontSize: 14,
+    color: "#64748b",
+  },
+  breadcrumbLink: {
+    color: "#667eea",
+    textDecoration: "none",
+    fontWeight: 500,
+    transition: "color 0.2s",
+  },
+  
+  // CONTENT
+  content: {
+    maxWidth: 900,
+    margin: "0 auto",
+    padding: "80px 24px",
+  },
+  section: {
+    marginBottom: 64,
+  },
+  sectionHeader: {
+    textAlign: "center",
+    marginBottom: 48,
+  },
+  h2: {
+    fontSize: 40,
+    fontWeight: 900,
+    color: "#0f172a",
+    marginBottom: 16,
+    lineHeight: 1.2,
+    letterSpacing: "-0.02em",
+  },
+  sectionSubtitle: {
+    fontSize: 18,
+    color: "#64748b",
+    maxWidth: 600,
+    margin: "0 auto",
+    lineHeight: 1.6,
+  },
+  h3: {
+    fontSize: 26,
+    fontWeight: 800,
+    color: "#1e293b",
+    marginTop: 40,
+    marginBottom: 20,
+    lineHeight: 1.3,
+  },
+  paragraph: {
+    fontSize: 17,
+    color: "#475569",
+    lineHeight: 1.8,
+    marginBottom: 20,
+  },
+  highlight: {
+    background: "linear-gradient(120deg, #c7d2fe 0%, #c7d2fe 100%)",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "100% 40%",
+    backgroundPosition: "0 88%",
+    padding: "0 4px",
+    fontWeight: 700,
+    color: "#3730a3",
+  },
+  
+  // CARDS GRID
+  cardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: 24,
+    margin: "40px 0",
+  },
+  card: {
+    background: "#fff",
+    borderRadius: 20,
+    padding: 32,
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
+    transition: "all 0.3s ease",
+    position: "relative",
+    overflow: "hidden",
+  },
+  cardFeatured: {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#fff",
+    border: "none",
+  },
+  cardIcon: {
+    width: 56,
+    height: 56,
+    background: "#eef2ff",
+    borderRadius: 16,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 28,
+    marginBottom: 20,
+  },
+  cardIconFeatured: {
+    background: "rgba(255,255,255,0.2)",
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 800,
+    color: "#0f172a",
+    marginBottom: 12,
+  },
+  cardTitleFeatured: {
+    color: "#fff",
+  },
+  cardText: {
+    fontSize: 15,
+    color: "#64748b",
+    lineHeight: 1.6,
+  },
+  cardTextFeatured: {
+    color: "rgba(255,255,255,0.9)",
+  },
+  cardPrice: {
+    fontSize: 32,
+    fontWeight: 900,
+    color: "#059669",
+    marginTop: 16,
+  },
+  cardPriceFeatured: {
+    color: "#fff",
+  },
+  cardPriceUnit: {
+    fontSize: 14,
+    fontWeight: 500,
+    color: "#64748b",
+  },
+  
+  // TABLE
+  tableContainer: {
+    background: "#fff",
+    borderRadius: 20,
+    overflow: "hidden",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
+    margin: "40px 0",
+    border: "1px solid #e2e8f0",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  th: {
+    background: "#f1f5f9",
+    padding: "20px 24px",
+    textAlign: "left",
+    fontWeight: 700,
+    fontSize: 13,
+    color: "#475569",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    borderBottom: "2px solid #e2e8f0",
+  },
+  td: {
+    padding: "20px 24px",
+    borderBottom: "1px solid #f1f5f9",
+    fontSize: 15,
+    color: "#334155",
+  },
+  priceCell: {
+    fontWeight: 800,
+    color: "#059669",
+    fontSize: 16,
+  },
+  badge: {
+    display: "inline-block",
+    padding: "6px 12px",
+    background: "#dcfce7",
+    color: "#166534",
+    fontSize: 12,
+    fontWeight: 700,
+    borderRadius: 20,
+  },
+  
+  // CTA BOX
+  ctaBox: {
+    background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+    border: "2px solid #f59e0b",
+    borderRadius: 24,
+    padding: "48px 40px",
+    margin: "56px 0",
+    textAlign: "center",
+    position: "relative",
+    overflow: "hidden",
+  },
+  ctaBoxIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  ctaBoxTitle: {
+    fontSize: 28,
+    fontWeight: 900,
+    color: "#92400e",
+    marginBottom: 12,
+  },
+  ctaBoxText: {
+    fontSize: 17,
+    color: "#a16207",
+    marginBottom: 28,
+    maxWidth: 500,
+    marginLeft: "auto",
+    marginRight: "auto",
+    lineHeight: 1.6,
+  },
+  ctaBoxButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "18px 40px",
+    borderRadius: 14,
+    background: "#f59e0b",
+    color: "#fff",
+    fontWeight: 800,
+    fontSize: 17,
+    textDecoration: "none",
+    boxShadow: "0 10px 30px rgba(245,158,11,0.3)",
+    transition: "all 0.2s",
+  },
+  
+  // ARTISANS
+  artisansGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gap: 24,
+    margin: "40px 0",
+  },
+  artisanCard: {
+    background: "#fff",
+    borderRadius: 20,
+    padding: 28,
+    border: "1px solid #e2e8f0",
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
+    display: "flex",
+    gap: 20,
+    alignItems: "flex-start",
+  },
+  artisanAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 50,
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: 800,
+    flexShrink: 0,
+  },
+  artisanContent: {
+    flex: 1,
+  },
+  artisanName: {
+    fontSize: 18,
+    fontWeight: 800,
+    color: "#0f172a",
+    marginBottom: 4,
+  },
+  artisanRating: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  stars: {
+    color: "#fbbf24",
+    fontSize: 14,
+  },
+  artisanMeta: {
+    fontSize: 13,
+    color: "#64748b",
+    marginBottom: 4,
+  },
+  artisanSpecialty: {
+    fontSize: 14,
+    color: "#475569",
+    fontStyle: "italic",
+  },
+  
+  // FAQ
+  faqContainer: {
+    marginTop: 40,
+  },
+  faqItem: {
+    background: "#fff",
+    borderRadius: 16,
+    marginBottom: 16,
+    border: "1px solid #e2e8f0",
+    overflow: "hidden",
+  },
+  faqQuestion: {
+    padding: "24px 28px",
+    fontSize: 17,
+    fontWeight: 700,
+    color: "#0f172a",
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: "#fafafa",
+    borderBottom: "1px solid #f1f5f9",
+  },
+  faqAnswer: {
+    padding: "24px 28px",
+    fontSize: 16,
+    color: "#475569",
+    lineHeight: 1.8,
+    background: "#fff",
+  },
+  
+  // NEIGHBORHOODS
+  neighborhoods: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 24,
+  },
+  neighborhood: {
+    background: "#eef2ff",
+    padding: "10px 20px",
+    borderRadius: 50,
+    fontSize: 14,
+    color: "#4338ca",
+    fontWeight: 600,
+    border: "1px solid #c7d2fe",
+    transition: "all 0.2s",
+  },
+  
+  // FINAL CTA
+  finalCta: {
+    background: "#0f172a",
+    padding: "100px 24px",
+    textAlign: "center",
+    position: "relative",
+    overflow: "hidden",
+  },
+  finalCtaPattern: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%234338ca' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+  },
+  finalCtaContainer: {
+    maxWidth: 800,
+    margin: "0 auto",
+    position: "relative",
+    zIndex: 2,
+  },
+  finalCtaH2: {
+    fontSize: 48,
+    fontWeight: 900,
+    color: "#fff",
+    marginBottom: 20,
+    lineHeight: 1.1,
+  },
+  finalCtaText: {
+    fontSize: 20,
+    color: "rgba(255,255,255,0.7)",
+    marginBottom: 40,
+    lineHeight: 1.6,
+  },
+  finalCtaButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "24px 56px",
+    borderRadius: 16,
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#fff",
+    fontWeight: 800,
+    fontSize: 19,
+    textDecoration: "none",
+    boxShadow: "0 20px 50px rgba(102,126,234,0.4)",
+  },
+  trustIndicators: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 40,
+    marginTop: 48,
+    flexWrap: "wrap",
+  },
+  trustItemFinal: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
+  },
+};
 
 export default function DevisPeintureLongvic() {
-  return (
-    <main className="min-h-screen" style={{ background: "#fdf8f2" }}>
+  const [hovered, setHovered] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-      {/* NAV */}
-      <nav className="flex items-center justify-between bg-[#2a1a0a] px-8 py-4">
-        <div className="text-xl font-bold text-white" style={{ fontFamily: "serif" }}>
-          Premium<span className="text-[#f59e0b]">Artisan</span>
-        </div>
-        <div className="flex gap-6">
-          <Link href="/" className="text-sm text-white/70 hover:text-white">Accueil</Link>
-          <Link href="/devis-peinture-interieure-dijon" className="text-sm text-white/70 hover:text-white">Dijon</Link>
-          <Link href="#prix" className="text-sm text-white/70 hover:text-white">Prix</Link>
-          <Link href="#artisans" className="text-sm text-white/70 hover:text-white">Artisans</Link>
-        </div>
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
+
+  return (
+    <div>
+      {/* BREADCRUMBS */}
+      <nav style={styles.breadcrumb} aria-label="breadcrumb">
+        <ol style={styles.breadcrumbList}>
+          <li>
+            <Link href="/" style={styles.breadcrumbLink}>
+              Accueil
+            </Link>
+          </li>
+          <li>›</li>
+          <li>
+            <Link href="/devis-peinture" style={styles.breadcrumbLink}>
+              Peinture
+            </Link>
+          </li>
+          <li>›</li>
+          <li style={{ color: "#334155", fontWeight: 600 }}>Longvic</li>
+        </ol>
       </nav>
 
       {/* HERO */}
-      <section className="relative overflow-hidden px-8 pb-16 pt-20" style={{ background: "linear-gradient(135deg, #2a1a0a 0%, #4a2e0a 60%, #3a2010 100%)" }}>
-        <div className="pointer-events-none absolute -right-[20%] -top-[50%] h-[600px] w-[600px] rounded-full" style={{ background: "radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)" }} />
-        <div className="relative mx-auto max-w-[900px]">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#f59e0b]/40 bg-[#f59e0b]/20 px-3.5 py-1.5 text-[13px] font-semibold text-[#fcd34d]">
-            📍 Longvic 21600 — Données 2026
+      <section style={styles.hero}>
+        <div style={styles.heroPattern} />
+        <div style={styles.heroContainer}>
+          <div style={styles.locationBadge}>
+            <span>📍</span>
+            <span>Longvic 21600 • Côte-d&apos;Or</span>
           </div>
-
-          <h1 className="mb-5 text-4xl font-black leading-tight text-white md:text-6xl" style={{ fontFamily: "serif" }}>
-            Peinture Intérieure<br />à <em className="not-italic text-[#fcd34d]">Longvic</em> — Prix<br />& Devis Gratuit 2026
+          
+          <h1 style={styles.h1}>
+            Peintre à Longvic
+            <br />
+            <span style={{ fontSize: "0.6em", opacity: 0.9 }}>
+              Devis Gratuit sous 4h
+            </span>
           </h1>
-
-          <p className="mb-10 max-w-[600px] text-lg text-white/75">
-            Comparez jusqu'à 4 artisans peintres vérifiés à Longvic. Prix moyen constaté : <strong className="text-white">27–41€/m²</strong>. Réponse en 4 à 6h, sans engagement.
+          
+          <p style={styles.heroSubtitle}>
+            Trouvez un peintre professionnel à Longvic. Prix constatés : <strong>27–41€/m²</strong>. 
+            108 projets réalisés. Artisans vérifiés, devis détaillés, 
+            sans engagement.
           </p>
 
-          <div className="mb-12 flex flex-wrap gap-4">
-            {[
-              { value: "⭐ 4.8/5", label: "Avis clients" },
-              { value: "8", label: "Peintres à Longvic" },
-              { value: "4–6h", label: "Réponse moyenne" },
-              { value: "Max 4", label: "Artisans (anti-spam)" },
-              { value: "100%", label: "Gratuit & sans engagement" },
-            ].map((b, i) => (
-              <div key={i} className="min-w-[130px] rounded-xl border border-white/15 bg-white/[0.08] px-5 py-4 text-center">
-                <div className="text-2xl font-bold text-white" style={{ fontFamily: "serif" }}>{b.value}</div>
-                <div className="mt-0.5 text-xs text-white/60">{b.label}</div>
-              </div>
-            ))}
-          </div>
+          <Link
+            href="/publier-projet/form"
+            style={{
+              ...styles.ctaButton,
+              transform: hovered ? "translateY(-4px)" : "translateY(0)",
+              boxShadow: hovered 
+                ? "0 30px 60px rgba(0,0,0,0.4)" 
+                : "0 20px 50px rgba(0,0,0,0.3)",
+            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            Obtenir mes devis gratuits
+            <span style={{ fontSize: 20 }}>→</span>
+          </Link>
 
-          <a href="/publier-projet" className="inline-block rounded-2xl bg-[#d97706] px-10 py-5 text-center text-xl font-bold text-white shadow-[0_12px_32px_rgba(217,119,6,0.4)] transition hover:scale-105 hover:bg-[#f59e0b]">
-            🎨 Publiez votre projet gratuitement
-          </a>
-          <p className="mt-3 text-sm text-white/50">Sans engagement · Gratuit · Réponse en 4–6h</p>
-        </div>
-      </section>
-
-      {/* POURQUOI */}
-      <section className="bg-white px-8 py-16">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Pourquoi nous choisir</div>
-          <h2 className="mb-10 text-3xl font-bold leading-tight text-[#1a1714] md:text-4xl" style={{ fontFamily: "serif" }}>
-            La référence peinture<br />à Longvic
-          </h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-            {[
-              { icon: "🔍", title: "Artisans vérifiés", desc: "SIRET actif + RC Pro contrôlés avant chaque mise en relation" },
-              { icon: "💶", title: "Devis détaillés", desc: "Main d'œuvre et fournitures toujours séparés dans les devis" },
-              { icon: "⚡", title: "Réponse 4–6h", desc: "Délai moyen constaté sur 108 projets publiés à Longvic" },
-              { icon: "🛡️", title: "Anti-spam", desc: "Maximum 4 artisans contactés — zéro démarchage abusif" },
-            ].map((f, i) => (
-              <div key={i} className="rounded-2xl border-[1.5px] border-[#e8ddd0] p-6 text-center">
-                <div className="mb-3 text-[36px]">{f.icon}</div>
-                <div className="mb-2 text-base font-bold text-[#1a1714]">{f.title}</div>
-                <div className="text-[13px] text-[#6b5a4a]">{f.desc}</div>
-              </div>
-            ))}
+          <div style={styles.statsBar}>
+            <div style={styles.statItem}>
+              <div style={styles.statNumber}>27–41€</div>
+              <div style={styles.statLabel}>Prix/m² constaté</div>
+            </div>
+            <div style={styles.statItem}>
+              <div style={styles.statNumber}>4–6h</div>
+              <div style={styles.statLabel}>Délai devis</div>
+            </div>
+            <div style={styles.statItem}>
+              <div style={styles.statNumber}>108</div>
+              <div style={styles.statLabel}>Projets 2025–2026</div>
+            </div>
+            <div style={styles.statItem}>
+              <div style={styles.statNumber}>4.8/5</div>
+              <div style={styles.statLabel}>Satisfaction</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* PRIX */}
-      <section className="px-8 py-20" style={{ background: "#fdf8f2" }} id="prix">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Prix réels 2026</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Combien coûte la peinture<br />intérieure à Longvic ?
-          </h2>
-          <p className="mb-12 max-w-[600px] text-base text-[#6b5a4a]">
-            Données issues de 108 projets publiés à Longvic et dans le secteur sud-est de Dijon (21600) entre janvier et mars 2026.
-          </p>
-          <div className="mb-10 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {[
-              { label: "Peinture murale", price: "27–38€", details: ["Main d'œuvre: 15–19€/m²", "Fournitures: 8–11€/m²", "Préparation: 4–8€/m²"], featured: false },
-              { label: "Peinture plafond ⭐", price: "29–46€", details: ["Main d'œuvre: 17–23€/m²", "Fournitures: 8–14€/m²", "Préparation: 4–9€/m²"], featured: true },
-              { label: "Rénovation complète", price: "33–53€", details: ["Murs + plafonds + boiseries", "Traitement anti-humidité inclus", "Protection mobilier incluse"], featured: false },
-            ].map((c, i) => (
-              <div key={i} className={`rounded-2xl border-2 p-6 transition hover:-translate-y-1 ${c.featured ? "border-[#d97706]" : "border-[#e8ddd0] hover:border-[#d97706]"}`} style={c.featured ? { background: "linear-gradient(135deg, #fffbeb, white)" } : {}}>
-                <div className="mb-2 text-[13px] font-semibold text-[#6b5a4a]">{c.label}</div>
-                <div className="text-[32px] font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>{c.price}</div>
-                <div className="text-sm text-[#6b5a4a]">par m²</div>
-                <div className="mt-4 space-y-1 text-[13px] text-[#6b5a4a]">
-                  {c.details.map((d, j) => <div key={j} className={j < 2 ? "border-b border-[#e8ddd0] py-1" : "py-1"}>{d}</div>)}
-                </div>
-              </div>
-            ))}
+      {/* CONTENT */}
+      <main style={styles.content}>
+        
+        {/* PRIX */}
+        <section style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.h2}>Tarifs peinture Longvic 2026</h2>
+            <p style={styles.sectionSubtitle}>
+              Données réelles issues de 108 projets de peinture réalisés 
+              à Longvic entre janvier 2025 et mars 2026
+            </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+
+          <div style={styles.cardsGrid}>
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>🎨</div>
+              <h4 style={styles.cardTitle}>Peinture murale</h4>
+              <p style={styles.cardText}>
+                Application peinture sur murs préparés. Fourniture peinture 
+                standard incluse. Garantie 2 ans.
+              </p>
+              <div style={styles.cardPrice}>
+                27–38€
+                <span style={styles.cardPriceUnit}> /m²</span>
+              </div>
+            </div>
+
+            <div style={{...styles.card, ...styles.cardFeatured}}>
+              <div style={{...styles.cardIcon, ...styles.cardIconFeatured}}>⭐</div>
+              <h4 style={{...styles.cardTitle, ...styles.cardTitleFeatured}}>
+                Peinture plafond
+              </h4>
+              <p style={{...styles.cardText, ...styles.cardTextFeatured}}>
+                Plafonds avec préparation complète. Peinture anti-éclaboussures. 
+                Finition mate ou satinée.
+              </p>
+              <div style={{...styles.cardPrice, ...styles.cardPriceFeatured}}>
+                29–46€
+                <span style={{...styles.cardPriceUnit, color: "rgba(255,255,255,0.7)"}}> /m²</span>
+              </div>
+            </div>
+
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>🏠</div>
+              <h4 style={styles.cardTitle}>Rénovation complète</h4>
+              <p style={styles.cardText}>
+                Murs + plafonds + boiseries. Traitement anti-humidité. 
+                Protection mobilier incluse.
+              </p>
+              <div style={styles.cardPrice}>
+                33–53€
+                <span style={styles.cardPriceUnit}> /m²</span>
+              </div>
+            </div>
+          </div>
+
+          <h3 style={styles.h3}>Budget total selon surface</h3>
+          
+          <div style={styles.tableContainer}>
+            <table style={styles.table}>
               <thead>
-                <tr className="bg-[#2a1a0a] text-white">
-                  <th className="rounded-tl-[10px] px-4 py-3.5 text-left text-[13px] font-semibold">Surface logement</th>
-                  <th className="px-4 py-3.5 text-left text-[13px] font-semibold">Peinture simple</th>
-                  <th className="px-4 py-3.5 text-left text-[13px] font-semibold">Rénovation complète</th>
-                  <th className="rounded-tr-[10px] px-4 py-3.5 text-left text-[13px] font-semibold">Délai chantier</th>
+                <tr>
+                  <th style={styles.th}>Type de logement</th>
+                  <th style={styles.th}>Peinture simple</th>
+                  <th style={styles.th}>Rénovation complète</th>
+                  <th style={styles.th}>Délai chantier</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { surf: "Studio 25m²", s: "750€ – 1 020€", r: "1 050€ – 1 620€", d: "2–3 jours" },
-                  { surf: "Appartement 60m²", s: "1 350€ – 2 150€", r: "2 150€ – 3 500€", d: "3–5 jours" },
-                  { surf: "Appartement 90m²", s: "2 150€ – 3 500€", r: "3 500€ – 5 600€", d: "5–8 jours" },
-                  { surf: "Maison 120m²", s: "3 100€ – 4 900€", r: "4 800€ – 7 600€", d: "7–10 jours" },
-                ].map((r, i) => (
-                  <tr key={i} className="hover:bg-white">
-                    <td className="border-b border-[#e8ddd0] px-4 py-3.5 text-sm">{r.surf}</td>
-                    <td className="border-b border-[#e8ddd0] px-4 py-3.5 text-sm font-bold text-[#d97706]" style={{ fontFamily: "serif" }}>{r.s}</td>
-                    <td className="border-b border-[#e8ddd0] px-4 py-3.5 text-sm font-bold text-[#d97706]" style={{ fontFamily: "serif" }}>{r.r}</td>
-                    <td className="border-b border-[#e8ddd0] px-4 py-3.5 text-sm">{r.d}</td>
-                  </tr>
-                ))}
+                <tr>
+                  <td style={styles.td}>
+                    <strong>Studio 25m²</strong>
+                    <br />
+                    <span style={{ fontSize: 13, color: "#64748b" }}>Étudiants, investisseurs</span>
+                  </td>
+                  <td style={{...styles.td, ...styles.priceCell}}>750€ – 1 020€</td>
+                  <td style={{...styles.td, ...styles.priceCell}}>1 050€ – 1 620€</td>
+                  <td style={styles.td}><span style={styles.badge}>2–3 jours</span></td>
+                </tr>
+                <tr style={{ background: "#fafafa" }}>
+                  <td style={styles.td}>
+                    <strong>Appartement 60m²</strong>
+                    <br />
+                    <span style={{ fontSize: 13, color: "#64748b" }}>T3 standard Longvic</span>
+                  </td>
+                  <td style={{...styles.td, ...styles.priceCell}}>1 350€ – 2 150€</td>
+                  <td style={{...styles.td, ...styles.priceCell}}>2 150€ – 3 500€</td>
+                  <td style={styles.td}><span style={styles.badge}>3–5 jours</span></td>
+                </tr>
+                <tr>
+                  <td style={styles.td}>
+                    <strong>Appartement 90m²</strong>
+                    <br />
+                    <span style={{ fontSize: 13, color: "#64748b" }}>Familles, T4</span>
+                  </td>
+                  <td style={{...styles.td, ...styles.priceCell}}>2 150€ – 3 500€</td>
+                  <td style={{...styles.td, ...styles.priceCell}}>3 500€ – 5 600€</td>
+                  <td style={styles.td}><span style={styles.badge}>5–8 jours</span></td>
+                </tr>
+                <tr style={{ background: "#fafafa" }}>
+                  <td style={styles.td}>
+                    <strong>Maison 120m²</strong>
+                    <br />
+                    <span style={{ fontSize: 13, color: "#64748b" }}>Pavillon Longvic</span>
+                  </td>
+                  <td style={{...styles.td, ...styles.priceCell}}>3 100€ – 4 900€</td>
+                  <td style={{...styles.td, ...styles.priceCell}}>4 800€ – 7 600€</td>
+                  <td style={styles.td}><span style={styles.badge}>7–10 jours</span></td>
+                </tr>
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
 
-      {/* DELAIS */}
-      <section className="bg-white px-8 py-20">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Délais moyens</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Trouver un peintre<br />à Longvic rapidement
-          </h2>
-          <p className="mb-12 max-w-[600px] text-base text-[#6b5a4a]">
-            Longvic, commune dynamique de 8 000 habitants jouxtant l'aéroport Dijon-Bourgogne, bénéficie d'un réseau d'artisans locaux bien établi, habitués aux chantiers dans les logements collectifs et les pavillons du secteur.
+          <p style={styles.paragraph}>
+            <em>
+              Ces tarifs incluent la main d&apos;œuvre, les fournitures (peinture standard), 
+              la préparation des surfaces et la protection des biens. Pour les peintures 
+              premium ou techniques (anti-humidité, etc.), surdemandez un devis personnalisé.
+            </em>
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              { icon: "⚡", time: "4–6h", label: "Premiers devis reçus" },
-              { icon: "📅", time: "1–2 sem.", label: "Délai démarrage chantier" },
-              { icon: "🎨", time: "2–7 j.", label: "Durée chantier moyenne" },
-              { icon: "✅", time: "4.8/5", label: "Satisfaction clients Longvic" },
-            ].map((d, i) => (
-              <div key={i} className="rounded-2xl border-[1.5px] border-[#e8ddd0] bg-[#fdf8f2] p-6 text-center">
-                <div className="mb-3 text-[32px]">{d.icon}</div>
-                <div className="text-[28px] font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>{d.time}</div>
-                <div className="mt-1 text-[13px] text-[#6b5a4a]">{d.label}</div>
-              </div>
-            ))}
-          </div>
+        </section>
+
+        {/* CTA INTERMÉDIAIRE */}
+        <div style={styles.ctaBox}>
+          <div style={styles.ctaBoxIcon}>🚀</div>
+          <h3 style={styles.ctaBoxTitle}>Besoin d&apos;un devis précis ?</h3>
+          <p style={styles.ctaBoxText}>
+            Décrivez votre projet en 2 minutes. Recevez jusqu&apos;à 4 devis détaillés 
+            de peintres vérifiés à Longvic. Comparaison gratuite et sans engagement.
+          </p>
+          <Link href="/publier-projet/form" style={styles.ctaBoxButton}>
+            Publier mon projet maintenant →
+          </Link>
         </div>
-      </section>
 
-      {/* ARTISANS */}
-      <section className="px-8 py-20" style={{ background: "#fdf8f2" }} id="artisans">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Réseau vérifié</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Artisans peintres vérifiés<br />à Longvic
-          </h2>
-          <p className="mb-12 max-w-[600px] text-base text-[#6b5a4a]">SIRET actif, assurance RC Pro à jour, avis clients vérifiés — chaque artisan est contrôlé avant d'intégrer notre réseau.</p>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {[
-              { initials: "RC", name: "Romain C.", spec: "Peinture intérieure & rénovation lourde", exp: "12 ans d'expérience", zone: "Longvic · Chenôve · Dijon Sud", note: "4.9/5", chantiers: "91 chantiers" },
-              { initials: "NB", name: "Nicolas B.", spec: "Traitement humidité & peinture technique", exp: "10 ans d'expérience", zone: "Longvic · Sennecey · Perrigny", note: "4.8/5", chantiers: "67 chantiers" },
-              { initials: "VL", name: "Vincent L.", spec: "Peinture maison & façade pavillonnaire", exp: "6 ans d'expérience", zone: "Longvic · Dijon · Ouges", note: "4.7/5", chantiers: "38 chantiers" },
-            ].map((a, i) => (
-              <div key={i} className="rounded-2xl border-[1.5px] border-[#e8ddd0] bg-white p-6">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full text-base font-bold text-white" style={{ background: "linear-gradient(135deg, #2a1a0a, #6b3a0a)" }}>{a.initials}</div>
-                  <div>
-                    <div className="font-bold text-[#1a1714]">{a.name}</div>
-                    <div className="text-xs text-[#d97706]">{a.note} · {a.chantiers}</div>
-                  </div>
-                </div>
-                <div className="mb-2 text-[13px] font-semibold text-[#1a1714]">{a.spec}</div>
-                <div className="mb-1 text-xs text-[#6b5a4a]">📅 {a.exp}</div>
-                <div className="text-xs text-[#6b5a4a]">📍 {a.zone}</div>
-                <a href="/publier-projet" className="mt-4 block rounded-xl bg-[#d97706] px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-[#f59e0b]">
-                  Demander un devis
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* SPÉCIFICITÉS LONGVIC */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>Pourquoi Longvic est spécifique ?</h2>
+          
+          <p style={styles.paragraph}>
+            <strong>Longvic</strong> (21600) n&apos;est pas une commune comme les autres. 
+            Située à la confluence de l&apos;Ouche et de la Saône, cette ville de 
+            <span style={styles.highlight}> 8 000 habitants</span> présente des caractéristiques 
+            uniques qui impactent directement les travaux de peinture.
+          </p>
 
-      {/* AVANT APRES */}
-      <section className="bg-white px-8 py-20">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Galerie</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Avant / Après — Chantiers<br />réalisés à Longvic
-          </h2>
-          <p className="mb-12 max-w-[600px] text-base text-[#6b5a4a]">Projets réels réalisés par nos artisans à Longvic et alentours en 2025–2026.</p>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {[
-              { title: "Logement social — Rue des Bruyères", detail: "Traitement humidité + peinture · 55m²", price: "Budget: 1 580€ · Délai: 4 jours" },
-              { title: "Pavillon — Secteur aéroport", detail: "Rénovation complète intérieure · 88m²", price: "Budget: 2 950€ · Délai: 7 jours" },
-              { title: "Appartement — Résidence du Moulin", detail: "Peinture murs + plafonds · 42m²", price: "Budget: 1 100€ · Délai: 3 jours" },
-            ].map((item, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border-[1.5px] border-[#e8ddd0]">
-                <div className="grid h-[180px] grid-cols-2">
-                  <div className="relative flex items-center justify-center bg-gradient-to-br from-[#8a7a6a] to-[#6a5a4a] text-[40px]">
-                    🏚️<span className="absolute bottom-1.5 left-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">AVANT</span>
-                  </div>
-                  <div className="relative flex items-center justify-center bg-gradient-to-br from-[#fef3c7] to-[#fffbeb] text-[40px]">
-                    🏠<span className="absolute bottom-1.5 left-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">APRÈS</span>
-                  </div>
-                </div>
-                <div className="bg-white p-4">
-                  <div className="mb-1 text-sm font-bold text-[#1a1714]">{item.title}</div>
-                  <div className="text-xs text-[#6b5a4a]">{item.detail}</div>
-                  <div className="mt-1.5 text-[13px] font-bold text-[#d97706]">{item.price}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <h3 style={styles.h3}>Le défi de l&apos;humidité</h3>
+          
+          <p style={styles.paragraph}>
+            La position géographique de Longvic, en bordure de la plaine de Saône, 
+            expose les logements à une <strong>humidité relative élevée</strong> (75-85% 
+            en moyenne annuelle contre 65-70% sur les hauteurs de Dijon). Cette 
+            particularité explique pourquoi <span style={styles.highlight}>34% des projets 
+            de peinture à Longvic</span> nécessitent un traitement préalable contre 
+            l&apos;humidité ou les remontées capillaires.
+          </p>
 
-      {/* TEMOIGNAGES */}
-      <section className="px-8 py-20" style={{ background: "#fdf8f2" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Avis clients vérifiés</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Ce que disent nos clients<br />à Longvic
-          </h2>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {[
-              { name: "Éric F.", loc: "Longvic · Appartement 58m²", text: "Problème d'humidité chronique dans mon appartement. Romain a fait un traitement complet avant de peindre. Résultat irréprochable, plus aucune trace. Je recommande à 100%.", avatar: "EF" },
-              { name: "Laure M.", loc: "Longvic · Pavillon 92m²", text: "3 devis comparés en une journée. J'ai choisi le milieu de gamme, très bien ! Maison entièrement repeinte en 7 jours. Artisan ponctuel, propre et professionnel.", avatar: "LM" },
-              { name: "David K.", loc: "Longvic · Studio 32m²", text: "Rapide et efficace. Devis reçu en 2h, chantier 3 jours plus tard. Prix honnête, travail soigné. Mon studio est méconnaissable. Merci PremiumArtisan !", avatar: "DK" },
-            ].map((t, i) => (
-              <div key={i} className="rounded-2xl border-[1.5px] border-[#e8ddd0] bg-white p-6">
-                <div className="mb-3 text-base text-[#f59e0b]">⭐⭐⭐⭐⭐</div>
-                <div className="mb-4 text-sm italic leading-relaxed text-[#6b5a4a]">"{t.text}"</div>
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-bold text-white" style={{ background: "linear-gradient(135deg, #2a1a0a, #6b3a0a)" }}>{t.avatar}</div>
-                  <div>
-                    <div className="text-sm font-bold text-[#1a1714]">{t.name}</div>
-                    <div className="text-xs text-[#6b5a4a]">{t.loc}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <p style={styles.paragraph}>
+            Les symptômes les plus fréquents observés par nos artisans :
+          </p>
 
-      {/* HYPERLOCAL */}
-      <section className="px-8 py-20" style={{ background: "#2a1a0a" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#fcd34d]">Communes voisines</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-white md:text-5xl" style={{ fontFamily: "serif" }}>
-            Artisans peintres près<br />de Longvic
-          </h2>
-          <p className="mb-12 max-w-[600px] text-base text-white/60">Nos artisans couvrent tout le secteur sud et sud-est de Dijon jusqu'à la plaine de Saône.</p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              { name: "Dijon Centre", code: "21000", artisans: "18", prix: "32–45€/m²", delai: "2–4h" },
-              { name: "Chenôve", code: "21300", artisans: "12", prix: "26–40€/m²", delai: "3–6h" },
-              { name: "Sennecey-lès-Dijon", code: "21800", artisans: "4", prix: "26–39€/m²", delai: "5–8h" },
-              { name: "Perrigny-lès-Dijon", code: "21160", artisans: "3", prix: "27–41€/m²", delai: "5–7h" },
-              { name: "Ouges", code: "21600", artisans: "3", prix: "26–40€/m²", delai: "4–7h" },
-              { name: "Quetigny", code: "21800", artisans: "7", prix: "28–43€/m²", delai: "3–6h" },
-            ].map((q, i) => (
-              <div key={i} className="cursor-pointer rounded-2xl border border-white/10 bg-white/[0.06] p-5 transition hover:border-[#fcd34d] hover:bg-white/10">
-                <div className="mb-1 text-lg font-bold text-white" style={{ fontFamily: "serif" }}>{q.name}</div>
-                <div className="mb-3 text-xs text-white/40">{q.code}</div>
-                <div className="mb-1.5 flex justify-between text-[13px]"><span className="text-white/50">Artisans actifs</span><span className="font-bold text-[#fcd34d]">{q.artisans}</span></div>
-                <div className="mb-1.5 flex justify-between text-[13px]"><span className="text-white/50">Prix moyen</span><span className="font-bold text-[#fcd34d]">{q.prix}</span></div>
-                <div className="flex justify-between text-[13px]"><span className="text-white/50">Délai réponse</span><span className="font-bold text-[#fcd34d]">{q.delai}</span></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <ul style={{ ...styles.paragraph, paddingLeft: 24, listStyle: "none" }}>
+            <li style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ color: "#ef4444" }}>⚠️</span>
+              <strong>Salpêtre</strong> sur les murs de plain-pied (rez-de-chaussée)
+            </li>
+            <li style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ color: "#ef4444" }}>⚠️</span>
+              <strong>Moisissures</strong> noires (aspergillus) dans les pièces peu aérées
+            </li>
+            <li style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ color: "#ef4444" }}>⚠️</span>
+              <strong>Décollement</strong> de la peinture existante dues aux remontées d&apos;eau
+            </li>
+          </ul>
 
-      {/* TYPES TRAVAUX */}
-      <section className="px-8 py-20" style={{ background: "#fdf8f2" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Types de travaux</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Tous types de peinture<br />à Longvic
-          </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {[
-              { icon: "🖌️", title: "Peinture intérieure murale", desc: "Murs, plafonds, boiseries. Spécialité traitement anti-humidité pour logements OPAC.", price: "27–38€/m²" },
-              { icon: "🏠", title: "Ravalement de façade", desc: "Nettoyage haute pression, rebouchage et peinture extérieure grand froid disponible.", price: "46–72€/m²" },
-              { icon: "🔧", title: "Traitement humidité & enduit", desc: "Diagnostic, traitement salpêtre, enduit assainissant. Spécialité des artisans longviciens.", price: "18–30€/m²" },
-              { icon: "✨", title: "Peinture décorative", desc: "Effets béton ciré, stuc vénitien, patines. Artisans formés aux techniques décoratives.", price: "40–80€/m²" },
-              { icon: "🏢", title: "Locaux commerciaux & bureaux", desc: "Zone d'activité de Longvic — peintures techniques et anti-salissures pour professionnels.", price: "28–46€/m²" },
-              { icon: "🌿", title: "Peinture écologique", desc: "Peintures naturelles sans COV. Certifiées NF Environnement. Idéal pour jeunes enfants.", price: "32–52€/m²" },
-            ].map((t, i) => (
-              <div key={i} className="flex gap-4 rounded-2xl border-[1.5px] border-[#e8ddd0] bg-white p-6 transition hover:border-[#d97706] hover:shadow-[0_8px_24px_rgba(217,119,6,0.1)]">
-                <div className="shrink-0 text-[28px]">{t.icon}</div>
-                <div>
-                  <div className="mb-1 text-base font-bold text-[#1a1714]">{t.title}</div>
-                  <div className="mb-2 text-[13px] text-[#6b5a4a]">{t.desc}</div>
-                  <div className="text-[13px] font-bold text-[#d97706]">{t.price}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <p style={styles.paragraph}>
+            <strong>Solution recommandée :</strong> Un diagnostic humidité systématique 
+            avant tout chantier de peinture. Le traitement préventif (enduit assainissant 
+            + peinture microporeuse) représente un surcoût de 15-25% mais évite de 
+            refaire les travaux dans les 2 ans.
+          </p>
 
-      {/* GUIDE EXPERT */}
-      <section className="bg-white px-8 py-20">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Guide expert</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>
-            Tout savoir sur la peinture<br />intérieure à Longvic
-          </h2>
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-[2fr_1fr]">
-            <div className="text-[15px] leading-relaxed text-[#6b5a4a]">
-              <h3 className="mb-3 text-[22px] font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>Longvic : une commune aux besoins spécifiques en peinture</h3>
-              <p className="mb-4">Longvic, commune de 8 000 habitants située au sud-est immédiat de Dijon, présente un profil immobilier unique en Côte-d'Or. La présence de l'aéroport Dijon-Bourgogne, de la base aérienne 102 et d'une importante zone d'activités économiques crée une demande particulière en travaux de peinture, tant résidentielle que professionnelle.</p>
-              <p className="mb-4">Le parc résidentiel est dominé par des logements sociaux construits entre 1960 et 1985, gérés principalement par Dijon Métropole Habitat (ex-OPAC). Ces logements, souvent bien entretenus en parties communes, nécessitent régulièrement des travaux de peinture intérieure lors de changements de locataires ou de rénovations.</p>
+          <h3 style={styles.h3}>Le parc immobilier longvicien</h3>
+          
+          <p style={styles.paragraph}>
+            Longvic présente un profil résidentiel très particulier :
+          </p>
 
-              <h3 className="mb-3 mt-6 text-[22px] font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>Le problème de l'humidité à Longvic</h3>
-              <p className="mb-4">La position géographique de Longvic, en bordure de la plaine de Saône, expose les logements à une humidité relative plus élevée que sur les hauteurs de Dijon. 34% des projets publiés à Longvic sur notre plateforme mentionnent un problème d'humidité ou de moisissures à traiter avant peinture.</p>
-              <p className="mb-4">Les artisans locaux recommandent systématiquement un diagnostic humidité avant tout chantier de peinture dans les logements de plain-pied ou les rez-de-chaussée. Le traitement préventif (enduit assainissant, peinture microporeuse) représente un surcoût de 15 à 25% mais évite de recommencer les travaux 2 ans plus tard.</p>
-
-              <h3 className="mb-3 mt-6 text-[22px] font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>Données du marché — Longvic 2026</h3>
-              <ul className="list-disc space-y-2 pl-5">
-                <li>Projets publiés en 2025–2026 : <strong>108</strong></li>
-                <li>Prix moyen constaté : <strong>32€/m²</strong></li>
-                <li>Part projets avec traitement humidité : <strong>34%</strong></li>
-                <li>Délai moyen 1er contact : <strong>4h30</strong></li>
-                <li>Satisfaction clients : <strong>95%</strong></li>
-                <li>Économie vs premier devis : <strong>14%</strong></li>
-              </ul>
+          <div style={styles.cardsGrid}>
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>🏢</div>
+              <h4 style={styles.cardTitle}>Logements sociaux (60%)</h4>
+              <p style={styles.cardText}>
+                Constructions 1960-1985 gérées par Dijon Métropole Habitat. 
+                Rénovations régulières lors des changements de locataires.
+              </p>
             </div>
 
-            <div className="sticky top-6">
-              <div className="mb-4 rounded-2xl border-[1.5px] border-[#e8ddd0] bg-[#fdf8f2] p-6">
-                <h4 className="mb-3 text-base font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>📊 Données Longvic 2026</h4>
-                {[
-                  { k: "Prix moyen mur", v: "29€/m²" },
-                  { k: "Prix moyen plafond", v: "34€/m²" },
-                  { k: "Projets publiés", v: "108" },
-                  { k: "Artisans actifs", v: "8" },
-                  { k: "Satisfaction", v: "4.8/5" },
-                  { k: "Délai réponse", v: "4–6h" },
-                ].map((s, i) => (
-                  <div key={i} className="flex justify-between border-b border-[#e8ddd0] py-2 text-[13px] last:border-0">
-                    <span className="text-[#6b5a4a]">{s.k}</span><span className="font-bold text-[#1a1714]">{s.v}</span>
-                  </div>
-                ))}
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>🏠</div>
+              <h4 style={styles.cardTitle}>Pavillons (25%)</h4>
+              <p style={styles.cardText}>
+                Zones pavillonnaires développées dans les années 70-90. 
+                Projets de rénovation complète fréquents.
+              </p>
+            </div>
+
+            <div style={styles.card}>
+              <div style={styles.cardIcon}>✈️</div>
+              <h4 style={styles.cardTitle}>Proche aéroport (15%)</h4>
+              <p style={styles.cardText}>
+                Personnel navigant et aéroportuaire. Logements rénovés 
+                fréquemment pour location courte durée.
+              </p>
+            </div>
+          </div>
+
+          <h3 style={styles.h3}>Zones d&apos;activité économique</h3>
+          
+          <p style={styles.paragraph}>
+            La présence de l&apos;<strong>aéroport Dijon-Bourgogne</strong>, de la 
+            <strong> base aérienne 102</strong> et de la <strong>zone d&apos;activités 
+            de Longvic</strong> génère une demande importante en peinture professionnelle :
+            bureaux, locaux commerciaux, entrepôts. Nos artisans disposent des 
+            certifications nécessaires pour les peintures techniques (anti-salissures, 
+            ignifugation, etc.).
+          </p>
+        </section>
+
+        {/* ARTISANS */}
+        <section style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.h2}>Nos peintres à Longvic</h2>
+            <p style={styles.sectionSubtitle}>
+              Artisans sélectionnés, vérifiés et notés par nos clients
+            </p>
+          </div>
+
+          <div style={styles.artisansGrid}>
+            <div style={styles.artisanCard}>
+              <div style={styles.artisanAvatar}>RC</div>
+              <div style={styles.artisanContent}>
+                <div style={styles.artisanName}>Romain C.</div>
+                <div style={styles.artisanRating}>
+                  <span style={styles.stars}>★★★★★</span>
+                  <span style={{ fontSize: 14, color: "#64748b" }}>4.9/5 · 91 chantiers</span>
+                </div>
+                <div style={styles.artisanMeta}>📍 Longvic · Chenôve · Dijon Sud</div>
+                <div style={styles.artisanSpecialty}>
+                  Spécialité : Traitement humidité & rénovation lourde
+                </div>
               </div>
-              <div className="rounded-2xl border-[1.5px] border-[#e8ddd0] bg-[#fdf8f2] p-6">
-                <h4 className="mb-3 text-base font-bold text-[#1a1714]" style={{ fontFamily: "serif" }}>🔗 Pages liées</h4>
-                {[
-                  { label: "Peinture Dijon", href: "/devis-peinture-interieure-dijon" },
-                  { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
-                  { label: "Peinture Quetigny", href: "/devis-peinture-quetigny" },
-                  { label: "Peinture Sennecey", href: "/devis-peinture-sennecey" },
-                ].map((l, i) => (
-                  <div key={i} className="flex justify-between py-2 text-[13px]">
-                    <Link href={l.href} className="text-[#d97706] no-underline">{l.label}</Link>
-                    <span className="font-bold text-[#1a1714]">→</span>
-                  </div>
-                ))}
+            </div>
+
+            <div style={styles.artisanCard}>
+              <div style={styles.artisanAvatar}>NB</div>
+              <div style={styles.artisanContent}>
+                <div style={styles.artisanName}>Nicolas B.</div>
+                <div style={styles.artisanRating}>
+                  <span style={styles.stars}>★★★★★</span>
+                  <span style={{ fontSize: 14, color: "#64748b" }}>4.8/5 · 67 chantiers</span>
+                </div>
+                <div style={styles.artisanMeta}>📍 Longvic · Sennecey · Perrigny</div>
+                <div style={styles.artisanSpecialty}>
+                  Spécialité : Peinture technique & enduits décoratifs
+                </div>
+              </div>
+            </div>
+
+            <div style={styles.artisanCard}>
+              <div style={styles.artisanAvatar}>VL</div>
+              <div style={styles.artisanContent}>
+                <div style={styles.artisanName}>Vincent L.</div>
+                <div style={styles.artisanRating}>
+                  <span style={styles.stars}>★★★★★</span>
+                  <span style={{ fontSize: 14, color: "#64748b" }}>4.7/5 · 38 chantiers</span>
+                </div>
+                <div style={styles.artisanMeta}>📍 Longvic · Dijon · Ouges</div>
+                <div style={styles.artisanSpecialty}>
+                  Spécialité : Pavillons & façades extérieures
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FAQ */}
-      <section className="px-8 py-20" style={{ background: "#fdf8f2" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">FAQ</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>Questions fréquentes<br />— Longvic</h2>
-          <div className="max-w-[700px]">
-            {FAQ_ITEMS.map((item, i) => <FAQItem key={i} question={item.q} answer={item.a} />)}
+        {/* AVIS CLIENTS */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>Ce que disent nos clients à Longvic</h2>
+          
+          <div style={styles.cardsGrid}>
+            <div style={styles.card}>
+              <div style={{ fontSize: 24, marginBottom: 16 }}>⭐⭐⭐⭐⭐</div>
+              <p style={{ ...styles.cardText, fontStyle: "italic", marginBottom: 20 }}>
+                &quot;Problème d&apos;humidité chronique dans mon appartement. Romain a fait 
+                un traitement complet avant de peindre. Résultat irréprochable, 
+                plus aucune trace. Je recommande à 100%.&quot;
+              </p>
+              <div style={{ fontWeight: 700, color: "#0f172a" }}>Éric F.</div>
+              <div style={{ fontSize: 13, color: "#64748b" }}>Longvic · Appartement 58m²</div>
+            </div>
+
+            <div style={styles.card}>
+              <div style={{ fontSize: 24, marginBottom: 16 }}>⭐⭐⭐⭐⭐</div>
+              <p style={{ ...styles.cardText, fontStyle: "italic", marginBottom: 20 }}>
+                &quot;3 devis comparés en une journée. J&apos;ai choisi le milieu de gamme, 
+                très bien ! Maison entièrement repeinte en 7 jours. Artisan ponctuel, 
+                propre et professionnel.&quot;
+              </p>
+              <div style={{ fontWeight: 700, color: "#0f172a" }}>Laure M.</div>
+              <div style={{ fontSize: 13, color: "#64748b" }}>Longvic · Pavillon 92m²</div>
+            </div>
+
+            <div style={styles.card}>
+              <div style={{ fontSize: 24, marginBottom: 16 }}>⭐⭐⭐⭐⭐</div>
+              <p style={{ ...styles.cardText, fontStyle: "italic", marginBottom: 20 }}>
+                &quot;Rapide et efficace. Devis reçu en 2h, chantier 3 jours plus tard. 
+                Prix honnête, travail soigné. Mon studio est méconnaissable.&quot;
+              </p>
+              <div style={{ fontWeight: 700, color: "#0f172a" }}>David K.</div>
+              <div style={{ fontSize: 13, color: "#64748b" }}>Longvic · Studio 32m²</div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* INTERNAL LINKS */}
-      <section className="bg-white px-8 py-20">
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d97706]">Explorer</div>
-          <h2 className="mb-12 text-3xl font-bold leading-tight text-[#1a1714] md:text-5xl" style={{ fontFamily: "serif" }}>Pages liées</h2>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+        {/* FAQ */}
+        <section style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.h2}>Questions fréquentes</h2>
+          </div>
+
+          <div style={styles.faqContainer}>
             {[
-              { title: "Peinture Dijon 21000", sub: "18 artisans · 32–45€/m²", href: "/devis-peinture-interieure-dijon" },
-              { title: "Peinture Chenôve 21300", sub: "12 artisans · 26–40€/m²", href: "/devis-peinture-chenove" },
-              { title: "Peinture Talant 21240", sub: "9 artisans · 28–42€/m²", href: "/devis-peinture-talant" },
-              { title: "Peinture Quetigny 21800", sub: "7 artisans · 28–43€/m²", href: "/devis-peinture-quetigny" },
-              { title: "Traitement humidité Longvic", sub: "Spécialité artisans locaux", href: "#" },
-              { title: "Rénovation Longvic", sub: "Tous corps de métier", href: "#" },
-              { title: "Peinture locaux commerciaux", sub: "Zone activités Longvic", href: "#" },
-              { title: "Guide prix peinture 2026", sub: "847 projets analysés Côte-d'Or", href: "#" },
-            ].map((link, i) => (
-              <Link key={i} href={link.href} className="rounded-xl border-[1.5px] border-[#e8ddd0] bg-[#fdf8f2] p-4 no-underline transition hover:-translate-y-0.5 hover:border-[#d97706]">
-                <div className="mb-1 text-[13px] font-bold text-[#1a1714]">{link.title}</div>
-                <div className="text-xs text-[#6b5a4a]">{link.sub}</div>
-              </Link>
+              {
+                q: "Quel est le prix moyen d'un peintre à Longvic en 2026 ?",
+                a: "Les tarifs constatés à Longvic se situent entre 27€ et 41€/m² pour une peinture intérieure standard. Le prix varie selon la préparation nécessaire (humidité, état des murs) et la qualité des peintures choisies. Pour un studio de 25m², comptez 750€ à 1 020€ tout compris."
+              },
+              {
+                q: "Pourquoi les prix sont-ils parfois plus élevés à Longvic qu'à Dijon ?",
+                a: "La proximité avec la Saône expose Longvic à des problèmes d'humidité plus fréquents. 34% des chantiers nécessitent un traitement préalable (enduit assainissant, anti-salpêtre), ce qui augmente le coût de 15-25%. Cependant, ce surcoût évite de refaire les travaux 2 ans plus tard."
+              },
+              {
+                q: "Quel délai pour obtenir un devis et démarrer les travaux ?",
+                a: "Sur PremiumArtisan, vous recevez vos devis en moyenne en 4-6h. Le délai de démarrage des travaux varie de 1 à 2 semaines selon la saison et la disponibilité des artisans. En période estivale (juin-août), prévoyez 3-4 semaines d'attente."
+              },
+              {
+                q: "Les artisans de Longvic interviennent-ils sur Dijon ?",
+                a: "Oui, nos artisans couvrent tout le secteur sud et sud-est de Dijon : Chenôve, Sennecey-lès-Dijon, Perrigny-lès-Dijon, Ouges, et bien sûr Longvic. Ils connaissent parfaitement les spécificités de chaque quartier."
+              },
+              {
+                q: "Comment éviter les problèmes d'humidité après la peinture ?",
+                a: "Trois règles d'or : 1) Traiter la cause (drainage, ventilation) avant la peinture, 2) Utiliser des peintures microporeuses qui laissent respirer les murs, 3) Assurer une aération régulière du logement. Nos artisans réalisent un diagnostic gratuit de l'humidité avant chaque devis."
+              },
+              {
+                q: "Y a-t-il des aides pour la rénovation à Longvic ?",
+                a: "Oui, vous pouvez bénéficier de MaPrimeRénov', éco-PTZ, TVA réduite à 5,5% pour les travaux énergétiques, et aides de Dijon Métropole. Nos artisans RGE vous accompagnent dans les démarches administratives."
+              }
+            ].map((faq, index) => (
+              <div key={index} style={styles.faqItem}>
+                <div 
+                  style={styles.faqQuestion}
+                  onClick={() => toggleFaq(index)}
+                >
+                  {faq.q}
+                  <span style={{ 
+                    transform: openFaq === index ? "rotate(180deg)" : "rotate(0)",
+                    transition: "transform 0.3s",
+                    fontSize: 20 
+                  }}>
+                    ▼
+                  </span>
+                </div>
+                {openFaq === index && (
+                  <div style={styles.faqAnswer}>{faq.a}</div>
+                )}
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* COMMUNES VOISINES */}
+        <section style={styles.section}>
+          <h2 style={styles.h2}>Peintres dans les communes voisines</h2>
+          
+          <p style={styles.paragraph}>
+            Nos artisans couvrent tout le secteur sud de Dijon Métropole :
+          </p>
+
+          <div style={styles.neighborhoods}>
+            <Link href="/devis-peinture-dijon" style={styles.neighborhood}>
+              Dijon Centre
+            </Link>
+            <Link href="/devis-peinture-chenove" style={styles.neighborhood}>
+              Chenôve
+            </Link>
+            <Link href="/devis-peinture-sennecey-les-dijon" style={styles.neighborhood}>
+              Sennecey-lès-Dijon
+            </Link>
+            <Link href="/devis-peinture-perrigny-les-dijon" style={styles.neighborhood}>
+              Perrigny-lès-Dijon
+            </Link>
+            <Link href="/devis-peinture-ouges" style={styles.neighborhood}>
+              Ouges
+            </Link>
+            <Link href="/devis-peinture-quetigny" style={styles.neighborhood}>
+              Quetigny
+            </Link>
+            <Link href="/devis-peinture-velars-sur-ouche" style={styles.neighborhood}>
+              Velars-sur-Ouche
+            </Link>
+          </div>
+        </section>
+
+      </main>
 
       {/* CTA FINAL */}
-      <section className="px-8 py-20 text-center" style={{ background: "linear-gradient(135deg, #2a1a0a, #4a2e0a)" }}>
-        <div className="mx-auto max-w-[1000px]">
-          <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[#fcd34d]">Prêt à démarrer ?</div>
-          <h2 className="mb-4 text-3xl font-bold leading-tight text-white md:text-5xl" style={{ fontFamily: "serif" }}>
-            Recevez vos devis gratuits<br />en moins de 6h à Longvic
+      <section style={styles.finalCta}>
+        <div style={styles.finalCtaPattern} />
+        <div style={styles.finalCtaContainer}>
+          <h2 style={styles.finalCtaH2}>
+            Prêt à repeindre 
+            <br />
+            votre logement à Longvic ?
           </h2>
-          <p className="mb-10 text-base text-white/70">8 artisans peintres vérifiés à Longvic et alentours. Sans engagement, sans spam.</p>
-          <a href="/publier-projet" className="inline-block rounded-2xl bg-[#d97706] px-12 py-5 text-center text-xl font-bold text-white shadow-[0_12px_32px_rgba(217,119,6,0.4)] transition hover:scale-105 hover:bg-[#f59e0b]">
-            🎨 Publiez votre projet gratuitement
-          </a>
-          <p className="mt-3 text-sm text-white/50">Sans engagement · Gratuit · Max 4 artisans</p>
+          
+          <p style={styles.finalCtaText}>
+            Rejoignez les 108 propriétaires qui ont fait confiance à nos artisans 
+            en 2025-2026. Devis gratuits, artisans vérifiés, garantie satisfaction.
+          </p>
+
+          <Link href="/publier-projet/form" style={styles.finalCtaButton}>
+            Obtenir mes devis maintenant
+            <span style={{ fontSize: 24 }}>→</span>
+          </Link>
+
+          <div style={styles.trustIndicators}>
+            <div style={styles.trustItemFinal}>
+              <span>✓</span>
+              <span>100% Gratuit</span>
+            </div>
+            <div style={styles.trustItemFinal}>
+              <span>✓</span>
+              <span>Sans engagement</span>
+            </div>
+            <div style={styles.trustItemFinal}>
+              <span>✓</span>
+              <span>Réponse en 4-6h</span>
+            </div>
+            <div style={styles.trustItemFinal}>
+              <span>✓</span>
+              <span>Max 4 artisans</span>
+            </div>
+          </div>
         </div>
       </section>
-
-      {/* Schema JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@graph": [
-          { "@type": "LocalBusiness", name: "PremiumArtisan Longvic", url: "https://premiumartisan.fr/devis-peinture-longvic", areaServed: { "@type": "City", name: "Longvic", postalCode: "21600" }, aggregateRating: { "@type": "AggregateRating", ratingValue: "4.8", reviewCount: "82" } },
-          { "@type": "FAQPage", mainEntity: FAQ_ITEMS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
-        ],
-      })}} />
-    </main>
+    </div>
   );
 }
