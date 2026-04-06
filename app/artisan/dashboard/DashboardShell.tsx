@@ -21,6 +21,7 @@ function pickProjectImageById(id: string): string {
   return PROJECT_FALLBACK_IMAGES[hash % PROJECT_FALLBACK_IMAGES.length];
 }
 import { formatPhone, phoneToWhatsApp } from "@/lib/formatPhone";
+import PALogo from "@/components/PALogo";
 import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
 import type { User } from "@supabase/supabase-js";
 
@@ -781,11 +782,7 @@ export function DashboardShell({
       <header className="sticky top-0 z-30 bg-[#eaecef] border-b border-[#d5d8dc] shadow-sm">
         <div className="mx-auto flex h-[52px] max-w-7xl items-center gap-2 px-4 sm:px-6 overflow-x-auto">
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-2 no-underline mr-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black text-white"
-              style={{ background: "linear-gradient(145deg,#2a0a14,#3d0f1e)" }}>PA</div>
-            <span className="hidden sm:block" style={{ fontFamily: "Georgia,'Times New Roman',serif", fontSize: 15, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.3px", whiteSpace: "nowrap" }}>
-              Premium<span style={{ color: "#0f172a" }}>Artisan</span>
-            </span>
+            <PALogo />
             {notifCount > 0 && <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{notifCount}</span>}
           </a>
           <span className="hidden sm:block h-4 w-px bg-slate-200 shrink-0" />

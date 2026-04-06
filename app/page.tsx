@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import HomeClient from "@/components/HomeClient";
+import PALogo from "@/components/PALogo";
 
 export const metadata: Metadata = {
   title: "PremiumArtisan — Trouvez un artisan fiable à Dijon & Côte-d'Or",
@@ -126,7 +127,7 @@ export default function Page() {
         <div style={styles.container}>
           {/* Nav — sans "Espace artisan" */}
           <div style={styles.topNav}>
-            <span style={styles.logoText}>Premium<span style={{ color: "#fda4af" }}>Artisan</span></span>
+            <PALogo />
             <div style={styles.topNavLinks}>
               <Link href="/comment-ca-marche" style={styles.topNavLink}>Comment ça marche</Link>
               <Link href="/about" style={styles.topNavLink}>À propos</Link>
@@ -329,7 +330,7 @@ export default function Page() {
       <footer style={styles.footer}>
         <div className="max-w-[1150px] mx-auto px-5 grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-10">
           <div style={{ maxWidth: 260 }}>
-            <div style={styles.footerLogo}>Premium<span style={{ color: "#be123c" }}>Artisan</span></div>
+            <div style={styles.footerLogo}><PALogo /></div>
             <p style={styles.footerTagline}>La plateforme qui connecte particuliers et artisans peintres à Dijon & Côte-d'Or.</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
