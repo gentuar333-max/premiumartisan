@@ -42,9 +42,10 @@ const reviews = [
   { initials: "ML", name: "Martine L.", location: "Chenôve · PMR · MaPrimeAdapt'", text: "Sofiane a transformé ma salle de bain en douche PMR à 72 ans. Il a géré le dossier MaPrimeAdapt' avec moi. Sur 7 800€ de travaux, j'ai obtenu 5 460€ d'aides.", stars: 5 },
 ];
 
-const seoLinks = [
+const seoLinks: { label: string; desc?: string; links: { label: string; href: string }[] }[] = [
   {
-    label: "🎨 Peinture",
+    label: "Devis peinture par commune",
+    desc: "Besoin d'un peintre en bâtiment ? Comparez les tarifs et disponibilités des professionnels près de chez vous.",
     links: [
       { label: "Peinture Dijon", href: "/devis-peinture-dijon" },
       { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
@@ -56,7 +57,8 @@ const seoLinks = [
     ],
   },
   {
-    label: "🔨 Rénovation",
+    label: "Devis rénovation par commune",
+    desc: "Rénovation complète ou partielle : obtenez plusieurs devis pour vos travaux en intérieur ou extérieur.",
     links: [
       { label: "Rénovation Dijon", href: "/devis-renovation-dijon" },
       { label: "Rénovation Chenôve", href: "/devis-renovation-chenove" },
@@ -67,7 +69,8 @@ const seoLinks = [
     ],
   },
   {
-    label: "🍳 Cuisine",
+    label: "Installation cuisine par commune",
+    desc: "Pose de cuisine équipée, raccordement électrique et plomberie. Artisans vérifiés disponibles rapidement.",
     links: [
       { label: "Cuisine Dijon", href: "/devis-cuisine-dijon" },
       { label: "Cuisine Chenôve", href: "/devis-cuisine-chenove" },
@@ -78,7 +81,8 @@ const seoLinks = [
     ],
   },
   {
-    label: "🚿 Salle de bain",
+    label: "Rénovation salle de bain par commune",
+    desc: "Douche à l'italienne, remplacement baignoire, carrelage et robinetterie. Devis détaillés sous 24 heures.",
     links: [
       { label: "Salle de bain Dijon", href: "/devis-salle-de-bain-dijon" },
       { label: "Salle de bain Chenôve", href: "/devis-salle-de-bain-chenove" },
@@ -89,7 +93,8 @@ const seoLinks = [
     ],
   },
   {
-    label: "🖼️ Papier peint",
+    label: "Pose papier peint par commune",
+    desc: "Pose professionnelle de papier peint et toile de verre. Finition soignée pour murs neufs ou rénovés.",
     links: [
       { label: "Papier peint Dijon", href: "/devis-pose-papier-peint-dijon" },
       { label: "Papier peint Chenôve", href: "/devis-pose-papier-peint-chenove" },
@@ -100,7 +105,8 @@ const seoLinks = [
     ],
   },
   {
-    label: "👷 Pour les artisans",
+    label: "Outils pour artisans peintres",
+    desc: "Vous êtes artisan ? Accédez à des outils de gestion simples et recevez des demandes de clients qualifiés dans votre secteur.",
     links: [
       { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
       { label: "Logiciel devis peintre Côte-d'Or", href: "/logiciel-devis-peintre-cote-dor" },
@@ -258,24 +264,32 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ── SEO INTERNAL LINKS — ngjyra gri/të bardha ── */}
+      {/* ── SEO INTERNAL LINKS ── */}
       <section style={{ background: "#f8f9fa", padding: "52px 20px" }}>
         <div style={{ maxWidth: 1150, margin: "0 auto" }}>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "#0f172a", marginBottom: 6 }}>
-            Artisans & devis gratuits par ville — Côte-d'Or
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "#0f172a", marginBottom: 12 }}>
+            Trouver un artisan qualifié en Côte-d&apos;Or
           </h2>
-          <p style={{ color: "#64748b", fontSize: 15, marginBottom: 36, maxWidth: 600 }}>
-            PremiumArtisan couvre Dijon, Chenôve, Longvic, Talant, Quetigny, Fontaine-lès-Dijon et toute la Côte-d'Or.
+          <p style={{ color: "#64748b", fontSize: 15, marginBottom: 36, maxWidth: 720, lineHeight: 1.6 }}>
+            PremiumArtisan met en relation particuliers et artisans du bâtiment sur Dijon et toute la Côte-d'Or.
+            Vous publiez votre projet gratuitement, nous le transmettons aux artisans disponibles dans votre secteur.
+            Chaque artisan paie uniquement s&apos;il souhaite répondre à votre demande.
+            Vous recevez jusqu'à 3 devis comparables, sans engagement.
           </p>
-          {seoLinks.map(({ label, links }) => (
-            <div key={label} style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 12, fontWeight: 700, color: "#64748b", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          {seoLinks.map(({ label, desc, links }) => (
+            <div key={label} style={{ marginBottom: 32 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>
                 {label}
               </h3>
+              {desc && (
+                <p style={{ color: "#64748b", fontSize: 14, marginBottom: 12, maxWidth: 680, lineHeight: 1.5 }}>
+                  {desc}
+                </p>
+              )}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {links.map(({ label: lbl, href }) => (
                   <Link key={href} href={href} style={{
-                    display: "inline-block", padding: "6px 14px", borderRadius: 999,
+                    display: "inline-block", padding: "8px 16px", borderRadius: 8,
                     border: "1px solid #e2e8f0", background: "#ffffff",
                     color: "#374151", fontSize: 13, fontWeight: 500, textDecoration: "none"
                   }}>
