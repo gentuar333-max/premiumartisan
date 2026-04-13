@@ -1,4 +1,3 @@
-// components/PALogo.tsx
 export default function PALogo() {
   return (
     <>
