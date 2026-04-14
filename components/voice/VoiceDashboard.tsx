@@ -2,375 +2,374 @@
 
 import { useState } from "react"
 
-type CallStatus = "nouveau" | "vu" | "rappelé" | "devis" | "terminé"
+type CallStatus = "nouveau" | "vu" | "rappelé" | "devis" | "terminé" | "urgent"
 
 interface Call {
   id: string
   dt: string
   name: string
   phone: string
-  postal: string
+  address: string
   type: string
   problem: string
   urgent: boolean
-  avail: string
   status: CallStatus
   dur: number
-  slot: "heures" | "hors_heures" | "weekend" | "ferie"
   isnew: boolean
-}
-
-const ST: Record<CallStatus, { l: string; cls: string }> = {
-  nouveau:   { l: "Nouveau",  cls: "new" },
-  vu:        { l: "Vu",       cls: "vu"  },
-  "rappelé": { l: "Rappelé",  cls: "rap" },
-  devis:     { l: "Devis",    cls: "dev" },
-  "terminé": { l: "Terminé",  cls: "ter" },
-}
-
-const SLOT: Record<string, string> = {
-  heures:      "Heures ouvrées",
-  hors_heures: "Hors horaires",
-  weekend:     "Week-end",
-  ferie:       "Jour férié",
+  transcript: { role: "ai" | "client"; text: string; time: string }[]
 }
 
 const MOCK: Call[] = [
   {
-    id: "1", dt: "2026-04-13T08:42:00",
-    name: "Marie Dupont", phone: "06 12 34 56 78", postal: "21000 Dijon",
+    id: "1",
+    dt: "2026-04-13T12:32:00",
+    name: "Marie Dupont",
+    phone: "06 98 76 54 32",
+    address: "15 rue de la Paix, Dijon 21000",
     type: "Plomberie",
-    problem: "Fuite sous l'évier de la cuisine, eau qui coule depuis ce matin. Appartement au 3ème étage, locataire. Propriétaire prévenu mais injoignable.",
-    urgent: true, avail: "Ce matin si possible",
-    status: "nouveau", dur: 142, slot: "heures", isnew: true,
+    problem: "Fuite d'eau - Cuisine",
+    urgent: true,
+    status: "nouveau",
+    dur: 142,
+    isnew: true,
+    transcript: [
+      { role: "ai", text: "Bonjour, vous êtes chez Jean-Marc Plomberie. Je suis Marie, l'assistante virtuelle. Comment puis-je vous aider ?", time: "14:32" },
+      { role: "client", text: "Bonjour, j'ai une fuite d'eau dans ma cuisine sous l'évier. C'est assez urgent.", time: "14:32" },
+      { role: "ai", text: "Je comprends, c'est une urgence. Pourriez-vous me donner votre adresse s'il vous plaît ?", time: "14:33" },
+      { role: "client", text: "15 rue de la Paix à Dijon. Je suis disponible demain matin.", time: "14:34" },
+      { role: "ai", text: "Parfait ! J'ai noté : fuite d'eau cuisine, 15 rue de la Paix Dijon, disponible demain matin. Monsieur Jean-Marc vous rappellera sous 30 minutes.", time: "14:35" },
+    ],
   },
   {
-    id: "2", dt: "2026-04-13T07:18:00",
-    name: "Thomas Bernard", phone: "07 98 76 54 32", postal: "21300 Chenôve",
-    type: "Peinture",
-    problem: "Peinture salon et chambre principale, environ 45 m², intérieur. Délai souhaité 3 semaines. Logement vide pendant travaux.",
-    urgent: false, avail: "Samedi matin pour visite",
-    status: "nouveau", dur: 98, slot: "heures", isnew: true,
+    id: "2",
+    dt: "2026-04-13T09:18:00",
+    name: "Thomas Bernard",
+    phone: "06 12 45 78 90",
+    address: "8 avenue de la République, Chenôve 21300",
+    type: "Chauffage",
+    problem: "Chauffage défectueux",
+    urgent: false,
+    status: "nouveau",
+    dur: 98,
+    isnew: true,
+    transcript: [
+      { role: "ai", text: "Bonjour, vous êtes chez Jean-Marc Plomberie & Chauffage. Comment puis-je vous aider ?", time: "09:18" },
+      { role: "client", text: "Bonjour, mon chauffage ne fonctionne plus depuis ce matin.", time: "09:19" },
+      { role: "ai", text: "Je comprends. Votre adresse s'il vous plaît ?", time: "09:19" },
+      { role: "client", text: "8 avenue de la République à Chenôve. Disponible samedi matin.", time: "09:20" },
+      { role: "ai", text: "Noté. Jean-Marc vous recontactera rapidement pour convenir d'un rendez-vous.", time: "09:21" },
+    ],
   },
   {
-    id: "3", dt: "2026-04-12T23:05:00",
-    name: "Inconnu", phone: "06 55 44 33 22", postal: "21000 Dijon",
+    id: "3",
+    dt: "2026-04-11T14:30:00",
+    name: "Sophie Martin",
+    phone: "06 78 90 12 34",
+    address: "5 boulevard de la Liberté, Quetigny 21800",
     type: "Plomberie",
-    problem: "Chauffe-eau en panne, plus d'eau chaude depuis hier soir. Appel hors horaires — message enregistré, rappel souhaité en urgence.",
-    urgent: true, avail: "Dès que possible",
-    status: "rappelé", dur: 87, slot: "hors_heures", isnew: true,
+    problem: "Devis rénovation salle de bain",
+    urgent: false,
+    status: "vu",
+    dur: 203,
+    isnew: false,
+    transcript: [
+      { role: "ai", text: "Bonjour, Jean-Marc Plomberie. Que puis-je faire pour vous ?", time: "14:30" },
+      { role: "client", text: "Je cherche un devis pour rénover ma salle de bain.", time: "14:31" },
+      { role: "ai", text: "Parfait. Quelle surface approximativement et votre adresse ?", time: "14:31" },
+      { role: "client", text: "5 boulevard de la Liberté à Quetigny, environ 8m².", time: "14:32" },
+      { role: "ai", text: "Très bien, Jean-Marc vous contactera pour fixer une visite.", time: "14:33" },
+    ],
   },
   {
-    id: "4", dt: "2026-04-11T14:30:00",
-    name: "Sophie Martin", phone: "06 11 22 33 44", postal: "21000 Dijon",
-    type: "Peinture",
-    problem: "Ravalement façade maison individuelle, surface estimée 120 m². Souhaite devis détaillé avec planning.",
-    urgent: false, avail: "Semaine prochaine",
-    status: "devis", dur: 203, slot: "heures", isnew: false,
-  },
-  {
-    id: "5", dt: "2026-04-10T16:45:00",
-    name: "Pierre Leroy", phone: "07 66 55 44 33", postal: "21600 Longvic",
+    id: "4",
+    dt: "2026-04-10T16:45:00",
+    name: "Pierre Leroy",
+    phone: "06 45 67 89 01",
+    address: "22 rue des Lilas, Longvic 21600",
     type: "Plomberie",
-    problem: "Robinet qui fuit salle de bain depuis quelques jours. Pas urgent, disponible en semaine.",
-    urgent: false, avail: "Pas pressé",
-    status: "terminé", dur: 75, slot: "heures", isnew: false,
+    problem: "Robinet qui fuit - Salle de bain",
+    urgent: false,
+    status: "terminé",
+    dur: 75,
+    isnew: false,
+    transcript: [
+      { role: "ai", text: "Bonjour, Jean-Marc Plomberie. Comment puis-je vous aider ?", time: "16:45" },
+      { role: "client", text: "J'ai un robinet qui fuit dans la salle de bain.", time: "16:46" },
+      { role: "ai", text: "D'accord. Votre adresse ?", time: "16:46" },
+      { role: "client", text: "22 rue des Lilas à Longvic.", time: "16:47" },
+      { role: "ai", text: "Noté. Jean-Marc vous rappellera pour convenir d'un passage.", time: "16:47" },
+    ],
   },
 ]
 
-function fmtDt(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", {
-    weekday: "short", day: "2-digit", month: "short",
-    hour: "2-digit", minute: "2-digit",
-  })
+function fmtTimeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const h = Math.floor(diff / 3600000)
+  const d = Math.floor(diff / 86400000)
+  if (h < 1) return "à l'instant"
+  if (h < 24) return `il y a ${h}h`
+  return `il y a ${d}j`
 }
+
 function fmtDur(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
 }
-function fmtDurLong(s: number) {
-  return `${Math.floor(s / 60)} min ${s % 60} sec`
-}
 
-const BS: Record<string, React.CSSProperties> = {
-  new: { color: "#16a34a", background: "#f0fdf4", border: "1px solid #bbf7d0" },
-  vu:  { color: "#5b50d6", background: "#f5f3ff", border: "1px solid #ddd6fe" },
-  rap: { color: "#b45309", background: "#fffbeb", border: "1px solid #fde68a" },
-  dev: { color: "#1d4ed8", background: "#eff6ff", border: "1px solid #bfdbfe" },
-  ter: { color: "#6b7280", background: "#f9fafb", border: "1px solid #e5e7eb" },
-  urg: { color: "#c00",    background: "#fff0f0", border: "1px solid #ffd0d0" },
-}
-
-function Badge({ type, label }: { type: string; label: string }) {
-  return (
-    <span style={{
-      ...BS[type], display: "inline-block", fontSize: 8, fontWeight: 700,
-      borderRadius: 2, padding: "2px 5px",
-      textTransform: "uppercase", letterSpacing: ".03em", whiteSpace: "nowrap",
-    }}>
-      {label}
-    </span>
-  )
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      fontSize: 8, fontWeight: 700, textTransform: "uppercase",
-      letterSpacing: ".1em", color: "#bbb",
-      display: "flex", alignItems: "center", gap: 6, marginBottom: 7,
-    }}>
-      {children}
-      <div style={{ flex: 1, height: 1, background: "#eee" }} />
-    </div>
-  )
-}
-
-function CallRow({ call, selected, onClick }: {
-  call: Call; selected: boolean; onClick: () => void
-}) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        padding: selected ? "9px 10px 9px 9px" : "9px 10px 9px 12px",
-        borderBottom: "1px solid #f0ede6",
-        borderLeft: selected ? "3px solid #111" : "3px solid transparent",
-        background: selected ? "#fffef5" : "transparent",
-        cursor: "pointer", position: "relative", transition: "background .1s",
-      }}
-    >
-      <div style={{
-        position: "absolute", left: 0, top: 0, bottom: 0, width: 3,
-        background: call.urgent ? "#c00" : call.isnew ? "#16a34a" : "transparent",
-      }} />
-      <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 3 }}>
-        <Badge type={ST[call.status].cls} label={ST[call.status].l} />
-        {call.urgent && <Badge type="urg" label="Urgent" />}
-      </div>
-      <div style={{ fontSize: 12, fontWeight: 700, color: "#111", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {call.name}
-      </div>
-      <div style={{ fontSize: 10, color: "#bbb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {call.type} · {call.postal}
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4, gap: 4 }}>
-        <span style={{ fontSize: 9, color: "#ccc", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {fmtDt(call.dt)}
-        </span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#111", flexShrink: 0 }}>
-          {fmtDur(call.dur)}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function CallDetail({ call, onStatusChange }: {
-  call: Call; onStatusChange: (id: string, s: CallStatus) => void
-}) {
-  const [dropOpen, setDropOpen] = useState(false)
-  const cost = (call.dur / 60 * 0.18).toFixed(2)
-
-  return (
-    <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
-      <div style={{ borderBottom: "2px solid #111", paddingBottom: 11 }}>
-        <div style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 800,
-          letterSpacing: "-.02em", color: "#111",
-          display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap", marginBottom: 3,
-        }}>
-          {call.name}
-          {call.urgent && <Badge type="urg" label="⚠ Urgent" />}
-          <Badge type={ST[call.status].cls} label={ST[call.status].l} />
-        </div>
-        <div style={{ fontSize: 10, color: "#999", lineHeight: 1.8 }}>
-          <strong>{fmtDt(call.dt)}</strong>{" · "}
-          <strong>{SLOT[call.slot]}</strong>{" · "}
-          {call.isnew
-            ? <span style={{ color: "#16a34a", fontWeight: 700 }}>● Nouveau</span>
-            : <span style={{ color: "#ccc" }}>Déjà vu</span>}
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", border: "1px solid #e8e4d8" }}>
-        {[
-          { label: "Durée appel IA", val: fmtDur(call.dur), sub: fmtDurLong(call.dur) },
-          { label: "Coût IA estimé", val: `€${cost}`, sub: "@ €0.18/min" },
-        ].map((b, i) => (
-          <div key={i} style={{ padding: "9px 10px", borderRight: i === 0 ? "1px solid #e8e4d8" : "none", textAlign: "center" }}>
-            <div style={{ fontSize: 8, color: "#bbb", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>{b.label}</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: "#111", lineHeight: 1 }}>{b.val}</div>
-            <div style={{ fontSize: 9, color: "#bbb", marginTop: 2 }}>{b.sub}</div>
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <SectionTitle>Informations client</SectionTitle>
-        <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #e8e4d8", fontSize: 11 }}>
-          <tbody>
-            {[
-              { k: "Téléphone", v: <a href={`tel:${call.phone.replace(/\s/g, "")}`} style={{ color: "#111", fontWeight: 600, textDecoration: "none" }}>{call.phone}</a> },
-              { k: "Localisation",  v: call.postal },
-              { k: "Travaux",       v: call.type },
-              { k: "Disponibilité", v: call.avail },
-              { k: "Durée", v: <><strong>{fmtDur(call.dur)}</strong> — {fmtDurLong(call.dur)}</> },
-            ].map((row) => (
-              <tr key={row.k} style={{ borderBottom: "1px solid #ede9e0" }}>
-                <td style={{ padding: "6px 10px", fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "#bbb", width: "36%", background: "#faf9f4", borderRight: "1px solid #ede9e0" }}>{row.k}</td>
-                <td style={{ padding: "6px 10px" }}>{row.v}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div>
-        <SectionTitle>Transcription IA</SectionTitle>
-        <div style={{ background: "#fff", border: "1px solid #e8e4d8", padding: "11px 13px", fontSize: 12, color: "#444", lineHeight: 1.75 }}>
-          {call.problem}
-        </div>
-      </div>
-
-      <div>
-        <SectionTitle>Statut</SectionTitle>
-        <div style={{ position: "relative" }}>
-          <button onClick={() => setDropOpen(!dropOpen)} style={{ width: "100%", padding: "7px 12px", background: "#fff", border: "1px solid #ddd", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: "#888", cursor: "pointer", textAlign: "left", fontFamily: "inherit", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>{ST[call.status].l}</span><span>▾</span>
-          </button>
-          {dropOpen && (
-            <div style={{ position: "absolute", bottom: "100%", left: 0, right: 0, background: "#fff", border: "1px solid #ddd", zIndex: 99 }}>
-              {(Object.keys(ST) as CallStatus[]).map((s) => (
-                <div key={s} onClick={() => { onStatusChange(call.id, s); setDropOpen(false) }}
-                  style={{ padding: "7px 12px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", cursor: "pointer", color: call.status === s ? "#111" : "#888", background: call.status === s ? "#faf9f4" : "#fff", display: "flex", justifyContent: "space-between" }}>
-                  <span>{ST[s].l}</span>
-                  {call.status === s && <span>✓</span>}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <SectionTitle>Actions</SectionTitle>
-        <div style={{ display: "flex", gap: 6 }}>
-          <a href={`tel:${call.phone.replace(/\s/g, "")}`} style={{ flex: 1, padding: "9px 4px", textAlign: "center", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", textDecoration: "none", background: "#111", color: "#fff" }}>
-            📞 Rappeler
-          </a>
-          <a href={`https://wa.me/33${call.phone.replace(/\s/g, "").replace(/^0/, "")}`} target="_blank" rel="noreferrer" style={{ flex: 1, padding: "9px 4px", textAlign: "center", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", textDecoration: "none", background: "#25d366", color: "#fff" }}>
-            WhatsApp
-          </a>
-          <button style={{ flex: 1, padding: "9px 4px", textAlign: "center", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", background: "#fff", color: "#111", border: "2px solid #111", cursor: "pointer", fontFamily: "inherit" }}>
-            Devis
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-type FilterKey = "all" | "new" | "urg"
+type FilterKey = "all" | "new" | "urgent" | "done"
 
 export default function VoiceDashboard() {
   const [calls, setCalls] = useState<Call[]>(MOCK)
-  const [selId, setSelId] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterKey>("all")
+  const [selected, setSelected] = useState<Call | null>(null)
 
-  const selected  = calls.find((c) => c.id === selId) ?? null
-  const newCount  = calls.filter((c) => c.isnew).length
-  const urgCount  = calls.filter((c) => c.urgent).length
-  const list      = filter === "new" ? calls.filter((c) => c.isnew) : filter === "urg" ? calls.filter((c) => c.urgent) : calls
-  const newOnes   = list.filter((c) => c.isnew)
-  const oldOnes   = list.filter((c) => !c.isnew)
-  const showDivider = filter === "all" && newOnes.length > 0 && oldOnes.length > 0
+  const newCount    = calls.filter(c => c.isnew).length
+  const urgentCount = calls.filter(c => c.urgent).length
+  const doneCount   = calls.filter(c => c.status === "terminé").length
 
-  function handleStatusChange(id: string, s: CallStatus) {
-    setCalls((prev) => prev.map((c) => (c.id === id ? { ...c, status: s } : c)))
+  const filtered =
+    filter === "new"    ? calls.filter(c => c.isnew) :
+    filter === "urgent" ? calls.filter(c => c.urgent) :
+    filter === "done"   ? calls.filter(c => c.status === "terminé") :
+    calls
+
+  const oldCalls = filtered.filter(c => !c.isnew)
+  const newCalls = filtered.filter(c => c.isnew)
+
+  function markDone(id: string) {
+    setCalls(prev => prev.map(c => c.id === id ? { ...c, status: "terminé" as CallStatus, isnew: false } : c))
+    setSelected(prev => prev?.id === id ? { ...prev, status: "terminé" as CallStatus, isnew: false } : prev)
   }
 
-  const stats: { key: FilterKey; label: string; value: number; color?: string }[] = [
-    { key: "all", label: "Tous les appels", value: calls.length },
-    { key: "new", label: "Nouveaux",        value: newCount, color: "#16a34a" },
-    { key: "urg", label: "Urgents",         value: urgCount, color: "#c00" },
-  ]
+  const BADGE: Record<string, { bg: string; color: string; label: string }> = {
+    nouveau:  { bg: "#DCFCE7", color: "#166534", label: "Nouveau" },
+    vu:       { bg: "#F3F4F6", color: "#6B7280", label: "Vu" },
+    "rappelé":{ bg: "#FEF3C7", color: "#92400E", label: "Rappelé" },
+    devis:    { bg: "#DBEAFE", color: "#1E40AF", label: "Devis" },
+    "terminé":{ bg: "#F3F4F6", color: "#6B7280", label: "Terminé" },
+    urgent:   { bg: "#FEE2E2", color: "#DC2626", label: "Urgent" },
+  }
+
+  function getBadge(call: Call) {
+    if (call.urgent) return BADGE.urgent
+    return BADGE[call.status] ?? BADGE.nouveau
+  }
+
+  function getBorderColor(call: Call) {
+    if (call.urgent) return "#EF4444"
+    if (call.isnew)  return "#22C55E"
+    if (call.status === "terminé") return "#D1D5DB"
+    return "#9CA3AF"
+  }
+
+  const CallCard = ({ call }: { call: Call }) => {
+    const badge = getBadge(call)
+    return (
+      <div
+        onClick={() => setSelected(call)}
+        style={{
+          background: "#fff",
+          borderRadius: 16,
+          padding: 16,
+          marginBottom: 12,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          cursor: "pointer",
+          borderLeft: `4px solid ${getBorderColor(call)}`,
+          opacity: call.status === "terminé" ? 0.7 : 1,
+          transition: "box-shadow .2s",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 20, textTransform: "uppercase", background: badge.bg, color: badge.color }}>
+            {badge.label}
+          </span>
+          <span style={{ fontSize: 12, color: "#999" }}>{fmtTimeAgo(call.dt)}</span>
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>{call.name}</div>
+        <div style={{ fontSize: 14, color: "#666", marginBottom: 12 }}>
+          📍 {call.address.split(",")[1]?.trim() ?? call.address} &nbsp;&nbsp; ⏱ {fmtDur(call.dur)}
+        </div>
+        <button
+          onClick={e => { e.stopPropagation(); window.location.href = `tel:${call.phone.replace(/\s/g, "")}` }}
+          style={{ width: "100%", padding: "13px", borderRadius: 12, border: "none", background: "#1A1A1A", color: "#fff", fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}
+        >
+          📞 {call.urgent ? "Appeler maintenant" : "Rappeler"}
+        </button>
+      </div>
+    )
+  }
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
-        * { box-sizing: border-box; }
-        .vd-stat:hover { background: #f5f3ec !important; }
-        .vd-row:hover  { background: #faf9f4 !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #F8F9FA; }
+        .tab-btn { padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 500; white-space: nowrap; border: none; cursor: pointer; transition: all .15s; font-family: inherit; }
+        .tab-btn.active { background: #1A1A1A; color: #fff; }
+        .tab-btn.inactive { background: #fff; color: #666; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
       `}</style>
 
-      <div style={{ fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "#fff", color: "#111" }}>
+      <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#F8F9FA", minHeight: "100vh", padding: "16px 16px 100px" }}>
 
-        <div style={{ borderBottom: "2.5px solid #111", padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, background: "#fff" }}>
-          <div style={{ display: "flex", alignItems: "baseline" }}>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 800, letterSpacing: "-.02em" }}>Réceptionniste IA</span>
-            <span style={{ fontSize: 9, color: "#999", textTransform: "uppercase", letterSpacing: ".12em", fontWeight: 600, marginLeft: 8 }}>PremiumArtisan</span>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 700 }}>Réceptionniste IA</h1>
+            <p style={{ fontSize: 13, color: "#666", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+              <span style={{ width: 8, height: 8, background: "#22C55E", borderRadius: "50%", display: "inline-block", animation: "pulse 2s infinite" }} />
+              En ligne 24/7
+            </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, color: "#888" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-            <span>Actif 24/7</span>
-            <span style={{ color: "#e0e0e0", margin: "0 5px" }}>|</span>
-            <span>Jean-Marc · Plomberie</span>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontWeight: 600 }}>Jean-Marc</div>
+            <div style={{ fontSize: 13, color: "#666" }}>Plomberie</div>
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", borderBottom: "1px solid #e8e4d8", background: "#fffef9", flexShrink: 0 }}>
-          {stats.map((s, i) => (
-            <div key={s.key} className="vd-stat" onClick={() => setFilter(s.key)}
-              style={{ padding: "10px 6px", textAlign: "center", cursor: "pointer", borderRight: i < 2 ? "1px solid #e8e4d8" : "none", background: filter === s.key ? "#111" : undefined, transition: "background .12s", userSelect: "none" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, lineHeight: 1, color: filter === s.key ? "#fff" : (s.color ?? "#111") }}>{s.value}</div>
-              <div style={{ fontSize: 9, color: filter === s.key ? "#aaa" : "#bbb", textTransform: "uppercase", letterSpacing: ".07em", marginTop: 3 }}>{s.label}</div>
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
+          {[
+            { val: calls.length, label: "Appels" },
+            { val: newCount,     label: "Nouveaux" },
+            { val: urgentCount,  label: "Urgents" },
+          ].map(s => (
+            <div key={s.label} style={{ background: "#fff", borderRadius: 16, padding: 16, textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{s.val}</div>
+              <div style={{ fontSize: 12, color: "#666" }}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(140px,280px) 1fr", flex: 1, overflow: "hidden" }}>
-
-          <div style={{ borderRight: "1px solid #e8e4d8", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{ padding: "8px 12px", borderBottom: "2px solid #111", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexShrink: 0 }}>
-              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, fontWeight: 700 }}>
-                {{ all: "Tous", new: "Nouveaux", urg: "Urgents" }[filter]}
-              </span>
-              <span style={{ fontSize: 9, color: "#ccc" }}>{list.length}</span>
-            </div>
-            <div style={{ overflowY: "auto", flex: 1 }}>
-              {list.length === 0 && <div style={{ padding: 24, textAlign: "center", color: "#ddd", fontSize: 11, fontStyle: "italic" }}>Aucun appel</div>}
-              {showDivider ? (
-                <>
-                  {newOnes.map((c) => <CallRow key={c.id} call={c} selected={selId === c.id} onClick={() => setSelId(c.id)} />)}
-                  <div style={{ display: "flex", alignItems: "center", padding: "0 12px", height: 20, position: "relative" }}>
-                    <div style={{ position: "absolute", left: 12, right: 12, top: "50%", height: 1.5, background: "#111" }} />
-                    <span style={{ position: "relative", background: "#fff", padding: "0 6px", fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".09em", color: "#bbb", marginLeft: "auto" }}>
-                      Appels précédents
-                    </span>
-                  </div>
-                  {oldOnes.map((c) => <CallRow key={c.id} call={c} selected={selId === c.id} onClick={() => setSelId(c.id)} />)}
-                </>
-              ) : (
-                list.map((c) => <CallRow key={c.id} call={c} selected={selId === c.id} onClick={() => setSelId(c.id)} />)
-              )}
-            </div>
-          </div>
-
-          <div style={{ background: "#fffef9", overflowY: "auto", display: "flex", flexDirection: "column" }}>
-            {selected ? (
-              <CallDetail call={selected} onStatusChange={handleStatusChange} />
-            ) : (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#ddd", gap: 8 }}>
-                <div style={{ fontSize: 28, opacity: .2 }}>📋</div>
-                <div style={{ fontSize: 12, fontWeight: 700, fontFamily: "'Playfair Display', serif", color: "#ccc" }}>Sélectionnez un appel</div>
-                <div style={{ fontSize: 10, color: "#ddd" }}>{newCount} nouveaux depuis votre dernière visite</div>
-              </div>
-            )}
-          </div>
-
+        {/* Tabs */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+          {([
+            { key: "all",    label: `Tous (${calls.length})` },
+            { key: "new",    label: `Nouveaux (${newCount})` },
+            { key: "urgent", label: `Urgents (${urgentCount})` },
+            { key: "done",   label: `Traités (${doneCount})` },
+          ] as { key: FilterKey; label: string }[]).map(t => (
+            <button
+              key={t.key}
+              className={`tab-btn ${filter === t.key ? "active" : "inactive"}`}
+              onClick={() => setFilter(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
+
+        {/* Appels précédents */}
+        {filter === "all" && oldCalls.length > 0 && (
+          <>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, margin: "20px 0 12px" }}>
+              Appels antérieurs
+            </div>
+            {oldCalls.map(c => <CallCard key={c.id} call={c} />)}
+          </>
+        )}
+
+        {/* Nouveaux appels */}
+        {filter === "all" && newCalls.length > 0 && (
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: 0.5, margin: "20px 0 12px" }}>
+            Nouveaux appels
+          </div>
+        )}
+        {filter === "all"
+          ? newCalls.map(c => <CallCard key={c.id} call={c} />)
+          : filtered.map(c => <CallCard key={c.id} call={c} />)
+        }
+
+        {filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: 40, color: "#999", fontSize: 14 }}>Aucun appel</div>
+        )}
       </div>
+
+      {/* Modal */}
+      {selected && (
+        <div
+          onClick={() => setSelected(null)}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "80vh", overflowY: "auto", padding: 24, animation: "slideUp .3s ease" }}
+          >
+            {/* Modal header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700 }}>Détails de l'appel</h2>
+              <button
+                onClick={() => setSelected(null)}
+                style={{ width: 40, height: 40, borderRadius: "50%", border: "none", background: "#F3F4F6", fontSize: 20, cursor: "pointer" }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Info grid */}
+            <div style={{ display: "grid", gap: 12, marginBottom: 16 }}>
+              {[
+                { icon: "👤", label: "Client",    val: selected.name },
+                { icon: "📱", label: "Téléphone", val: selected.phone },
+                { icon: "📍", label: "Adresse",   val: selected.address },
+                { icon: "🔧", label: "Problème",  val: selected.problem },
+                { icon: "⏱",  label: "Durée",     val: fmtDur(selected.dur) },
+              ].map(item => (
+                <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, background: "#F8F9FA", borderRadius: 12 }}>
+                  <div style={{ width: 40, height: 40, background: "#fff", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#6B7280" }}>{item.label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 500 }}>{item.val}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Transcript */}
+            <div style={{ background: "#F8F9FA", borderRadius: 16, padding: 16, marginBottom: 20 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase", marginBottom: 12 }}>
+                🎙 Conversation avec l'IA
+              </div>
+              {selected.transcript.map((msg, i) => (
+                <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+                    background: msg.role === "ai" ? "linear-gradient(135deg,#6366F1,#8B5CF6)" : "#E5E7EB",
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
+                  }}>
+                    {msg.role === "ai" ? "🤖" : "👤"}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+                      {msg.role === "ai" ? "Marie (IA)" : selected.name}
+                    </div>
+                    <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.5 }}>{msg.text}</div>
+                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4 }}>{msg.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 12 }}>
+              <a
+                href={`tel:${selected.phone.replace(/\s/g, "")}`}
+                style={{ flex: 1, padding: 16, borderRadius: 12, border: "none", background: "#1A1A1A", color: "#fff", fontSize: 16, fontWeight: 600, cursor: "pointer", textAlign: "center", textDecoration: "none", display: "block" }}
+              >
+                📞 Appeler
+              </a>
+              <button
+                onClick={() => markDone(selected.id)}
+                style={{ flex: 1, padding: 16, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontSize: 16, fontWeight: 600, cursor: "pointer" }}
+              >
+                ✅ Marquer traité
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
