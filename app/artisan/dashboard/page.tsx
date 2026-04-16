@@ -4,6 +4,11 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServiceClient } from "@/lib/supabaseServer";
 import { DashboardShell } from "./DashboardShell";
 
+export const metadata = {
+  title: "Dashboard Artisan | PremiumArtisan",
+  description: "Gérez vos projets, devis et factures depuis votre espace artisan PremiumArtisan.",
+};
+
 export const revalidate = 60; // cache 60 sekonda — refresh automatik
 
 const DEV_BYPASS_UNLOCK =
@@ -75,8 +80,6 @@ async function fetchProjects(
     .select(selectCols, { count: "exact" })
     .ilike("postal_prefix", `${cp}`);
 
-  // Shfaq vetëm projektet e konfirmuara nga klienti me email
-  // Vendos SKIP_EMAIL_CONFIRMATION=true në .env.local për dev/test
   if (process.env.SKIP_EMAIL_CONFIRMATION !== "true") {
     query = query.eq("confirmed", true);
   }
@@ -87,11 +90,10 @@ async function fetchProjects(
   } else if (sort === "budget_asc") {
     query = query.order("budget", { ascending: true, nullsFirst: false });
   } else {
-    // "recent" (default)
     query = query.order("created_at", { ascending: false });
   }
 
-  // ── Filtra kategori — OR mbi sluget e zgjedhura ────────────
+  // ── Filtra kategori ────────────────────────────────────────
   if (cats.length > 0) {
     const dbValues: string[] = [];
     cats.forEach(slug => {
@@ -99,7 +101,6 @@ async function fetchProjects(
       if (vals) dbValues.push(...vals);
     });
     if (dbValues.length > 0) {
-      // Supabase OR filter: category_details.ilike.val OR category.ilike.val
       const orParts = dbValues.map(v =>
         `category_details.ilike.%${v}%,category.ilike.%${v}%`
       ).join(",");
@@ -108,8 +109,6 @@ async function fetchProjects(
   }
 
   // ── Budget range ───────────────────────────────────────────
-  // Budget storehet si string (ex: "5000_10000", "40000_plus") ose number
-  // Bëjmë filter mbi rreshtat numeric të budget
   if (budgetMin !== null) {
     query = query.gte("budget", budgetMin);
   }
@@ -124,10 +123,6 @@ async function fetchProjects(
   }
 
   let projects = ((data ?? []) as unknown) as ProjectRow[];
-
-  // ── Filter statut "complet" / "open" — post-fetch (kërkon unlock_counts) ──
-  // Statut-i filtrohet në dashboard-data API, këtu e lëmë të gjitha
-  // (filtri real do bëhet client-side bazuar në projectUnlockCounts)
 
   return {
     cp,
@@ -165,8 +160,6 @@ export default async function ArtisanDashboardPage({
     project_id?: string;
   };
 
-  // ── Fix Stripe redirect: ?cp=&unlock=success&project_id=UUID ──────────────
-  // Quand Stripe redirige, cp peut être vide. On résout via project_id.
   const cpRaw = (sp.cp ?? "").toString().trim();
   const unlockProjectId = (sp.project_id ?? "").toString().trim();
 
@@ -181,7 +174,6 @@ export default async function ArtisanDashboardPage({
 
       if (proj?.postal_prefix) {
         const resolvedCp = String(proj.postal_prefix).trim();
-        // Rebuild URL with correct cp, keep unlock=success for toast
         const { redirect } = await import("next/navigation");
         const params = new URLSearchParams();
         params.set("cp", resolvedCp);
@@ -190,7 +182,7 @@ export default async function ArtisanDashboardPage({
         redirect(`/artisan/dashboard?${params.toString()}`);
       }
     } catch {
-      // Si redirect échoue (redirect throws), laisse continuer
+      // Si redirect échoue, laisse continuer
     }
   }
 
@@ -202,7 +194,6 @@ export default async function ArtisanDashboardPage({
         ? createSupabaseServiceClient()
         : createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
 
-      // sp.cp peut encore être vide si redirect n'a pas eu lieu
       const spResolved = { ...sp, cp: cpRaw || sp.cp || "21" };
       const result = await fetchProjects(supabase, spResolved, { includePhone: true });
       cp       = result.cp;
@@ -218,7 +209,6 @@ export default async function ArtisanDashboardPage({
 
   const catLabel = categoryLabelFromRow(projects[0], sp.cat ?? DEFAULT_CATEGORY);
 
-  // ── Sort URLs — ruajnë GJITHË parametrat aktualë, ndryshojnë vetëm sort ──
   const baseParams: Record<string, string | undefined> = {
     cp,
     cat:       sp.cat,

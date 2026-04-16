@@ -48,12 +48,12 @@ const seoLinks: { label: string; desc?: string; links: { label: string; href: st
     label: "Devis peinture par commune",
     desc: "Besoin d'un peintre en bâtiment ? Comparez les tarifs et disponibilités des professionnels près de chez vous.",
     links: [
-      { label: "Peinture Dijon", href: "/devis-peinture-dijon" },
-      { label: "Peinture Chenôve", href: "/devis-peinture-chenove" },
-      { label: "Peinture Longvic", href: "/devis-peinture-longvic" },
-      { label: "Peinture Talant", href: "/devis-peinture-talant" },
-      { label: "Peinture Quetigny", href: "/devis-peinture-quetigny" },
-      { label: "Peinture Fontaine-lès-Dijon", href: "/devis-peinture-fontaine-les-dijon" },
+      { label: "Peinture Dijon", href: "/devis-peintre/dijon" },
+      { label: "Peinture Chenôve", href: "/devis-peintre/chenove" },
+      { label: "Peinture Longvic", href: "/devis-peintre/longvic" },
+      { label: "Peinture Talant", href: "/devis-peintre/talant" },
+      { label: "Peinture Quetigny", href: "/devis-peintre/quetigny" },
+      { label: "Peinture Fontaine-lès-Dijon", href: "/devis-peintre/fontaine-les-dijon" },
       { label: "Peinture intérieure Dijon", href: "/devis-peinture-interieure-dijon" },
     ],
   },
@@ -73,12 +73,12 @@ const seoLinks: { label: string; desc?: string; links: { label: string; href: st
     label: "Installation cuisine par commune",
     desc: "Pose de cuisine équipée, raccordement électrique et plomberie. Artisans vérifiés disponibles rapidement.",
     links: [
-      { label: "Cuisine Dijon", href: "/devis-cuisine-dijon" },
-      { label: "Cuisine Chenôve", href: "/devis-cuisine-chenove" },
-      { label: "Cuisine Longvic", href: "/devis-cuisine-longvic" },
-      { label: "Cuisine Talant", href: "/devis-cuisine-talant" },
-      { label: "Cuisine Quetigny", href: "/devis-cuisine-quetigny" },
-      { label: "Cuisine Fontaine-lès-Dijon", href: "/devis-cuisine-fontaine-les-dijon" },
+      { label: "Cuisine Dijon", href: "/devis-cuisine/dijon" },
+      { label: "Cuisine Chenôve", href: "/devis-cuisine/chenove" },
+      { label: "Cuisine Longvic", href: "/devis-cuisine/longvic" },
+      { label: "Cuisine Talant", href: "/devis-cuisine/talant" },
+      { label: "Cuisine Quetigny", href: "/devis-cuisine/quetigny" },
+      { label: "Cuisine Fontaine-lès-Dijon", href: "/devis-cuisine/fontaine-les-dijon" },
     ],
   },
   {
@@ -110,10 +110,8 @@ const seoLinks: { label: string; desc?: string; links: { label: string; href: st
     desc: "Vous êtes artisan ? Accédez à des outils de gestion simples et recevez des demandes de clients qualifiés dans votre secteur.",
     links: [
       { label: "Trouver clients peintre Dijon", href: "/trouver-clients-peintre-dijon" },
-      { label: "Logiciel devis peintre Côte-d'Or", href: "/logiciel-devis-peintre-cote-dor" },
-      { label: "Créer devis peintre gratuit", href: "/creer-devis-peintre" },
-      { label: "Créer facture artisan", href: "/creer-facture-artisan" },
-      { label: "Devis facture peintre Bourgogne", href: "/devis-facture-gratuit-peintre-bourgogne" },
+      { label: "Logiciel devis artisan Dijon", href: "/logiciel-devis-artisan/dijon" },
+      { label: "Devis gratuit peintre Dijon", href: "/devis-gratuit-peintre-dijon" },
     ],
   },
 ];
@@ -125,7 +123,7 @@ export default function Page() {
       {/* ── HERO ── */}
       <section style={styles.heroSection}>
         <div style={styles.container}>
-          {/* Nav — sans "Espace artisan" */}
+          {/* Nav */}
           <div style={styles.topNav}>
             <PALogo />
             <div style={styles.topNavLinks}>
@@ -156,8 +154,8 @@ export default function Page() {
 
           <div style={styles.quickLinks}>
             <span style={styles.quickLinksLabel}>Devis locaux :</span>
-            <Link style={styles.quickLink} href="/devis-peinture-dijon">Peinture Dijon</Link>
-            <Link style={styles.quickLink} href="/devis-peinture-chenove">Peinture Chenôve</Link>
+            <Link style={styles.quickLink} href="/devis-peintre/dijon">Peinture Dijon</Link>
+            <Link style={styles.quickLink} href="/devis-peintre/chenove">Peinture Chenôve</Link>
             <Link style={styles.quickLink} href="/devis-renovation-dijon">Rénovation Dijon</Link>
           </div>
         </div>

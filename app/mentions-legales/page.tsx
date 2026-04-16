@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Mentions légales — PremiumArtisan",
+  description: "Mentions légales de PremiumArtisan — plateforme de mise en relation artisans et particuliers à Dijon et en Côte-d'Or.",
 };
 
 export default function MentionsLegalesPage() {

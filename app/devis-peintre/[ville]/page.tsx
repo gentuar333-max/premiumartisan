@@ -2,10 +2,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-// ── VILLES DATA (autonome — nuk importon nga file tjetër) ──────────────────
+// ── VILLES DATA ────────────────────────────────────────────────────────────
 const VILLES_DATA: Record<string, {
   nom: string; dept: string; region: string; slug: string; voisines: string[];
-  population?: string; context?: string; marche?: string; prix?: { label: string; fourchette: string }[];
+  population?: string; context?: string; marche?: string;
+  prix?: { label: string; fourchette: string }[];
   faq?: { q: string; a: string }[];
 }> = {
   'dijon':               { nom: 'Dijon',               dept: "Côte-d'Or",          region: 'Bourgogne',              slug: 'dijon',               voisines: ['beaune','chenove','longvic','talant'], population: '160 000 hab.', context: "Dijon, capitale de la Bourgogne, concentre une forte demande en rénovation de logements anciens — haussmanniens, immeubles de centre-ville et pavillons des années 1970. Le marché artisanal y est dense avec une concurrence élevée entre peintres.", marche: "Un artisan peintre à Dijon reçoit en moyenne 3 à 5 demandes de devis par semaine. Les particuliers dijonnais attendent un devis par email dans les 24 à 48h. PremiumArtisan sélectionne les artisans les plus réactifs pour chaque projet.", prix: [{label:"Peinture intérieure T3",fourchette:"2 200–4 500€"},{label:"Rénovation complète 100m²",fourchette:"12 000–28 000€"},{label:"Ravalement façade",fourchette:"4 500–14 000€"},{label:"Papier peint salon",fourchette:"800–2 200€"}], faq: [{q:"Quel est le prix d'un peintre à Dijon ?",a:"À Dijon, un peintre facture en moyenne 25–40€/m² pour la peinture intérieure. Le tarif dépend de l'état du support, du nombre de couches et du type de peinture."},{q:"Comment obtenir un devis peinture gratuit à Dijon ?",a:"Publiez votre projet sur PremiumArtisan en 2 minutes. Vous recevez jusqu'à 3 devis de peintres dijonnais sous 24h, gratuitement et sans engagement."}] },
@@ -34,10 +35,10 @@ const VILLES_DATA: Record<string, {
   'boulogne-billancourt':{ nom: 'Boulogne-Billancourt', dept: 'Hauts-de-Seine',     region: 'Île-de-France',          slug: 'boulogne-billancourt', voisines: ['paris','versailles'], prix: [{label:"Peinture intérieure",fourchette:"3 200–6 500€"}], faq: [{q:"Peintre à Boulogne-Billancourt ?",a:"PremiumArtisan référence des peintres en Hauts-de-Seine. Devis gratuit."}] },
   'saint-denis':         { nom: 'Saint-Denis',          dept: 'Seine-Saint-Denis',  region: 'Île-de-France',          slug: 'saint-denis',         voisines: ['paris','aubervilliers'], prix: [{label:"Peinture intérieure",fourchette:"2 800–5 500€"}], faq: [{q:"Peintre à Saint-Denis ?",a:"Recevez des devis de peintres locaux via PremiumArtisan."}] },
   'versailles':          { nom: 'Versailles',           dept: 'Yvelines',           region: 'Île-de-France',          slug: 'versailles',          voisines: ['paris','boulogne-billancourt'], prix: [{label:"Peinture intérieure",fourchette:"3 000–6 000€"}], faq: [{q:"Peintre à Versailles ?",a:"PremiumArtisan met en relation les particuliers de Versailles avec des peintres qualifiés."}] },
-  'lyon':                { nom: 'Lyon',                 dept: 'Rhône',              region: 'Auvergne-Rhône-Alpes',  slug: 'lyon',                voisines: ['villeurbanne','saint-etienne','grenoble'], population: '520 000 hab.', context: "Lyon, deuxième métropole économique française, concentre une demande massive en rénovation de logements anciens — immeubles Haussmanniens, traboules du Vieux-Lyon et résidences des arrondissements périphériques.", marche: "À Lyon, les particuliers comparent plusieurs devis en 48h. La réactivité est clé.", prix: [{label:"Peinture intérieure T3 Lyon",fourchette:"2 800–5 500€"},{label:"Rénovation appartement 80m²",fourchette:"15 000–35 000€"},{label:"Ravalement Presqu'île",fourchette:"12 000–40 000€"}], faq: [{q:"Prix d'un peintre à Lyon ?",a:"À Lyon, un peintre facture en moyenne 28–45€/m² pour la peinture intérieure."},{q:"Devis peinture gratuit à Lyon ?",a:"PremiumArtisan publie votre projet et vous met en relation avec 3 peintres lyonnais sous 24h."}] },
+  'lyon':                { nom: 'Lyon',                 dept: 'Rhône',              region: 'Auvergne-Rhône-Alpes',  slug: 'lyon',                voisines: ['villeurbanne','saint-etienne','grenoble'], population: '520 000 hab.', context: "Lyon, deuxième métropole économique française, concentre une demande massive en rénovation de logements anciens.", marche: "À Lyon, les particuliers comparent plusieurs devis en 48h. La réactivité est clé.", prix: [{label:"Peinture intérieure T3 Lyon",fourchette:"2 800–5 500€"},{label:"Rénovation appartement 80m²",fourchette:"15 000–35 000€"},{label:"Ravalement Presqu'île",fourchette:"12 000–40 000€"}], faq: [{q:"Prix d'un peintre à Lyon ?",a:"À Lyon, un peintre facture en moyenne 28–45€/m² pour la peinture intérieure."},{q:"Devis peinture gratuit à Lyon ?",a:"PremiumArtisan publie votre projet et vous met en relation avec 3 peintres lyonnais sous 24h."}] },
   'villeurbanne':        { nom: 'Villeurbanne',         dept: 'Rhône',              region: 'Auvergne-Rhône-Alpes',  slug: 'villeurbanne',        voisines: ['lyon','bron'], prix: [{label:"Peinture intérieure",fourchette:"2 600–5 200€"}], faq: [{q:"Peintre à Villeurbanne ?",a:"PremiumArtisan référence des peintres à Villeurbanne et dans le Rhône."}] },
   'grenoble':            { nom: 'Grenoble',             dept: 'Isère',              region: 'Auvergne-Rhône-Alpes',  slug: 'grenoble',            voisines: ['lyon','chambery'], prix: [{label:"Peinture intérieure",fourchette:"2 400–4 800€"}], faq: [{q:"Devis peintre à Grenoble ?",a:"Recevez des devis de peintres grenoblois via PremiumArtisan."}] },
-  'saint-etienne':       { nom: 'Saint-Étienne',        dept: 'Loire',              region: 'Auvergne-Rhône-Alpes',  slug: 'saint-etienne',       voisines: ['lyon','clermont-ferrand','roanne'], population: '172 000 hab.', context: "Saint-Étienne, ancienne capitale industrielle de la Loire, connaît depuis 10 ans une transformation profonde. Les quartiers Manufacture et Centre-Ville font l'objet de nombreux programmes de rénovation. Le parc immobilier ancien génère une demande constante en peinture intérieure et ravalement.", marche: "Le marché stéphanois est caractérisé par des budgets plus serrés qu'à Lyon mais un volume de chantiers élevé. Les artisans travaillent souvent pour des bailleurs sociaux et des propriétaires locatifs.", prix: [{label:"Peinture intérieure T3 Saint-Étienne",fourchette:"1 800–3 800€"},{label:"Ravalement façade années 50",fourchette:"6 000–18 000€"},{label:"Rénovation logement social",fourchette:"8 000–20 000€"}], faq: [{q:"Prix d'un peintre à Saint-Étienne ?",a:"À Saint-Étienne, un peintre facture en moyenne 22–38€/m² pour la peinture intérieure, soit environ 15% moins cher qu'à Lyon."},{q:"Comment trouver un peintre à Saint-Étienne ?",a:"PremiumArtisan référence des artisans peintres stéphanois. Publiez votre projet pour recevoir 3 devis sous 24h."},{q:"Quel budget pour rénover un appartement à Saint-Étienne ?",a:"La rénovation complète d'un appartement de 70m² à Saint-Étienne coûte en moyenne entre 12 000€ et 25 000€ selon l'état du logement."}] },
+  'saint-etienne':       { nom: 'Saint-Étienne',        dept: 'Loire',              region: 'Auvergne-Rhône-Alpes',  slug: 'saint-etienne',       voisines: ['lyon','clermont-ferrand','roanne'], population: '172 000 hab.', context: "Saint-Étienne connaît depuis 10 ans une transformation profonde. Les quartiers Manufacture et Centre-Ville font l'objet de nombreux programmes de rénovation.", marche: "Le marché stéphanois est caractérisé par des budgets plus serrés qu'à Lyon mais un volume de chantiers élevé.", prix: [{label:"Peinture intérieure T3",fourchette:"1 800–3 800€"},{label:"Ravalement façade années 50",fourchette:"6 000–18 000€"},{label:"Rénovation logement social",fourchette:"8 000–20 000€"}], faq: [{q:"Prix d'un peintre à Saint-Étienne ?",a:"À Saint-Étienne, un peintre facture en moyenne 22–38€/m² pour la peinture intérieure."},{q:"Comment trouver un peintre à Saint-Étienne ?",a:"PremiumArtisan référence des artisans peintres stéphanois. Publiez votre projet pour recevoir 3 devis sous 24h."},{q:"Quel budget pour rénover un appartement à Saint-Étienne ?",a:"La rénovation complète d'un appartement de 70m² coûte en moyenne entre 12 000€ et 25 000€."}] },
   'marseille':           { nom: 'Marseille',            dept: 'Bouches-du-Rhône',   region: 'PACA',                  slug: 'marseille',           voisines: ['aix-en-provence','toulon','nice'], population: '870 000 hab.', context: "Marseille connaît un renouveau urbain important avec de nombreux projets de réhabilitation dans les quartiers Nord et le centre-ville.", marche: "Le marché marseillais est dynamique, porté par les programmes Anah et les copropriétés anciennes.", prix: [{label:"Peinture intérieure T4",fourchette:"2 200–4 800€"},{label:"Ravalement façade",fourchette:"8 000–25 000€"},{label:"Rénovation logement ancien",fourchette:"10 000–30 000€"}], faq: [{q:"Prix d'un peintre à Marseille ?",a:"À Marseille, un peintre facture en moyenne 26–42€/m² pour la peinture intérieure."},{q:"Devis peinture gratuit à Marseille ?",a:"Publiez votre projet sur PremiumArtisan et recevez 3 devis de peintres marseillais sous 24h."}] },
   'nice':                { nom: 'Nice',                 dept: 'Alpes-Maritimes',    region: 'PACA',                  slug: 'nice',                voisines: ['antibes','cannes','toulon'], prix: [{label:"Peinture intérieure",fourchette:"2 800–5 500€"}], faq: [{q:"Peintre à Nice ?",a:"PremiumArtisan référence des peintres à Nice et dans les Alpes-Maritimes."}] },
   'toulon':              { nom: 'Toulon',               dept: 'Var',                region: 'PACA',                  slug: 'toulon',              voisines: ['marseille','nice'], prix: [{label:"Peinture intérieure",fourchette:"2 400–4 800€"}], faq: [{q:"Devis peintre à Toulon ?",a:"Recevez des devis de peintres toulonnais via PremiumArtisan."}] },
@@ -49,24 +50,26 @@ const VILLES_DATA: Record<string, {
   'nancy':               { nom: 'Nancy',                dept: 'Meurthe-et-Moselle', region: 'Grand Est',             slug: 'nancy',               voisines: ['metz','strasbourg'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 300€"}], faq: [{q:"Peintre à Nancy ?",a:"Recevez des devis de peintres nancéiens via PremiumArtisan."}] },
   'metz':                { nom: 'Metz',                 dept: 'Moselle',            region: 'Grand Est',             slug: 'metz',                voisines: ['nancy','thionville'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 200€"}], faq: [{q:"Peintre à Metz ?",a:"PremiumArtisan référence des peintres à Metz et en Moselle."}] },
   'reims':               { nom: 'Reims',                dept: 'Marne',              region: 'Grand Est',             slug: 'reims',               voisines: ['troyes','chalons-en-champagne'], prix: [{label:"Peinture intérieure",fourchette:"2 200–4 500€"}], faq: [{q:"Devis peinture à Reims ?",a:"Publiez votre projet sur PremiumArtisan pour recevoir des devis de peintres rémois."}] },
-  'lille':               { nom: 'Lille',                dept: 'Nord',               region: 'Hauts-de-France',       slug: 'lille',               voisines: ['roubaix','tourcoing','valenciennes'], population: '235 000 hab.', context: "Lille, métropole du Nord, présente un parc immobilier varié : maisons de ville du 19e siècle, immeubles modernes et résidences périphériques. La demande en rénovation y est soutenue.", marche: "Les artisans lillois couvrent l'ensemble de la métropole : Roubaix, Tourcoing, Villeneuve-d'Ascq.", prix: [{label:"Peinture intérieure T3",fourchette:"2 300–4 700€"},{label:"Ravalement façade maison",fourchette:"6 000–16 000€"}], faq: [{q:"Prix d'un peintre à Lille ?",a:"À Lille, un peintre facture en moyenne 26–42€/m² pour la peinture intérieure."},{q:"Devis peinture à Lille ?",a:"PremiumArtisan publie votre projet et vous met en relation avec 3 peintres lillois sous 24h."}] },
+  'lille':               { nom: 'Lille',                dept: 'Nord',               region: 'Hauts-de-France',       slug: 'lille',               voisines: ['roubaix','tourcoing','valenciennes'], population: '235 000 hab.', context: "Lille présente un parc immobilier varié : maisons de ville du 19e siècle, immeubles modernes et résidences périphériques. La demande en rénovation y est soutenue.", marche: "Les artisans lillois couvrent l'ensemble de la métropole : Roubaix, Tourcoing, Villeneuve-d'Ascq.", prix: [{label:"Peinture intérieure T3",fourchette:"2 300–4 700€"},{label:"Ravalement façade maison",fourchette:"6 000–16 000€"}], faq: [{q:"Prix d'un peintre à Lille ?",a:"À Lille, un peintre facture en moyenne 26–42€/m² pour la peinture intérieure."},{q:"Devis peinture à Lille ?",a:"PremiumArtisan publie votre projet et vous met en relation avec 3 peintres lillois sous 24h."}] },
   'amiens':              { nom: 'Amiens',               dept: 'Somme',              region: 'Hauts-de-France',       slug: 'amiens',              voisines: ['lille','rouen'], prix: [{label:"Peinture intérieure",fourchette:"2 000–4 100€"}], faq: [{q:"Peintre à Amiens ?",a:"PremiumArtisan référence des peintres à Amiens et en Somme."}] },
   'rouen':               { nom: 'Rouen',                dept: 'Seine-Maritime',     region: 'Normandie',             slug: 'rouen',               voisines: ['caen','amiens'], prix: [{label:"Peinture intérieure",fourchette:"2 200–4 400€"}], faq: [{q:"Devis peintre à Rouen ?",a:"Recevez des devis de peintres rouennais via PremiumArtisan."}] },
   'caen':                { nom: 'Caen',                 dept: 'Calvados',           region: 'Normandie',             slug: 'caen',                voisines: ['rouen','rennes'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 200€"}], faq: [{q:"Peintre à Caen ?",a:"PremiumArtisan met en relation les particuliers de Caen avec des peintres du Calvados."}] },
   'rennes':              { nom: 'Rennes',               dept: 'Ille-et-Vilaine',    region: 'Bretagne',              slug: 'rennes',              voisines: ['nantes','caen','brest'], prix: [{label:"Peinture intérieure T3",fourchette:"2 200–4 500€"}], faq: [{q:"Prix d'un peintre à Rennes ?",a:"À Rennes, un peintre facture en moyenne 25–40€/m² pour la peinture intérieure."},{q:"Devis peinture à Rennes ?",a:"PremiumArtisan publie votre projet et vous met en relation avec des peintres rennais."}] },
   'brest':               { nom: 'Brest',                dept: 'Finistère',          region: 'Bretagne',              slug: 'brest',               voisines: ['quimper','rennes'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 200€"}], faq: [{q:"Peintre à Brest ?",a:"PremiumArtisan référence des peintres à Brest et dans le Finistère."}] },
-  'nantes':              { nom: 'Nantes',               dept: 'Loire-Atlantique',   region: 'Pays de la Loire',      slug: 'nantes',              voisines: ['rennes','angers','saint-nazaire'], population: '320 000 hab.', context: "Nantes, métropole dynamique de l'Ouest, connaît une forte croissance immobilière. La demande en peinture et rénovation y est soutenue par de nombreux projets de construction et réhabilitation.", prix: [{label:"Peinture intérieure T3",fourchette:"2 300–4 700€"},{label:"Rénovation appartement",fourchette:"12 000–28 000€"}], faq: [{q:"Prix d'un peintre à Nantes ?",a:"À Nantes, un peintre facture en moyenne 26–42€/m² pour la peinture intérieure."},{q:"Devis peinture à Nantes ?",a:"PremiumArtisan publie votre projet et vous met en relation avec 3 peintres nantais."}] },
+  'nantes':              { nom: 'Nantes',               dept: 'Loire-Atlantique',   region: 'Pays de la Loire',      slug: 'nantes',              voisines: ['rennes','angers','saint-nazaire'], population: '320 000 hab.', context: "Nantes, métropole dynamique de l'Ouest, connaît une forte croissance immobilière. La demande en peinture et rénovation y est soutenue.", prix: [{label:"Peinture intérieure T3",fourchette:"2 300–4 700€"},{label:"Rénovation appartement",fourchette:"12 000–28 000€"}], faq: [{q:"Prix d'un peintre à Nantes ?",a:"À Nantes, un peintre facture en moyenne 26–42€/m² pour la peinture intérieure."},{q:"Devis peinture à Nantes ?",a:"PremiumArtisan publie votre projet et vous met en relation avec 3 peintres nantais."}] },
   'angers':              { nom: 'Angers',               dept: 'Maine-et-Loire',     region: 'Pays de la Loire',      slug: 'angers',              voisines: ['nantes','tours'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 300€"}], faq: [{q:"Peintre à Angers ?",a:"PremiumArtisan met en relation les particuliers d'Angers avec des peintres qualifiés."}] },
   'tours':               { nom: 'Tours',                dept: 'Indre-et-Loire',     region: 'Centre-Val de Loire',   slug: 'tours',               voisines: ['angers','orleans'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 200€"}], faq: [{q:"Peintre à Tours ?",a:"PremiumArtisan référence des peintres à Tours et en Indre-et-Loire."}] },
-  'orleans':             { nom: 'Orléans',              dept: 'Loiret',             region: 'Centre-Val de Loire',   slug: 'orleans',             voisines: ['tours','paris','bourges'], population: '114 000 hab.', context: "Orléans, préfecture du Loiret et capitale de la région Centre-Val de Loire, dispose d'un parc immobilier diversifié : hôtels particuliers du centre historique, pavillons de la périphérie et résidences des années 1960–1980. La ville connaît une dynamique de rénovation soutenue, notamment dans le quartier Bannier et les faubourgs.", marche: "Le marché orléanais est caractérisé par une demande régulière en peinture intérieure et ravalement. Les artisans couvrent également les communes de l'agglomération : Saint-Jean-de-Braye, Saint-Jean-de-la-Ruelle, Saran et Fleury-les-Aubrais.", prix: [{label:"Peinture intérieure T3 Orléans",fourchette:"2 000–4 200€"},{label:"Rénovation maison 100m²",fourchette:"11 000–26 000€"},{label:"Ravalement façade pavillon",fourchette:"5 000–14 000€"},{label:"Papier peint + peinture salon",fourchette:"700–2 000€"}], faq: [{q:"Quel est le prix d'un peintre à Orléans ?",a:"À Orléans, un peintre facture en moyenne 24–38€/m² pour la peinture intérieure sur logement existant. Le tarif varie selon l'état des murs, le nombre de couches et le type de peinture choisi."},{q:"Comment obtenir des devis peinture gratuits à Orléans ?",a:"Publiez votre projet sur PremiumArtisan en 2 minutes. Vous recevez jusqu'à 3 devis de peintres orléanais sous 24h, sans engagement."},{q:"Quelle TVA pour les travaux de peinture à Orléans ?",a:"Pour les logements de plus de 2 ans à Orléans, la TVA est de 10% sur la main d'œuvre et les fournitures. Pour les constructions neuves, le taux est de 20%."}] },
+  'orleans':             { nom: 'Orléans',              dept: 'Loiret',             region: 'Centre-Val de Loire',   slug: 'orleans',             voisines: ['tours','paris','bourges'], population: '114 000 hab.', context: "Orléans dispose d'un parc immobilier diversifié : hôtels particuliers du centre historique, pavillons de la périphérie et résidences des années 1960–1980.", marche: "Le marché orléanais est caractérisé par une demande régulière en peinture intérieure et ravalement.", prix: [{label:"Peinture intérieure T3",fourchette:"2 000–4 200€"},{label:"Rénovation maison 100m²",fourchette:"11 000–26 000€"},{label:"Ravalement façade pavillon",fourchette:"5 000–14 000€"},{label:"Papier peint + peinture salon",fourchette:"700–2 000€"}], faq: [{q:"Quel est le prix d'un peintre à Orléans ?",a:"À Orléans, un peintre facture en moyenne 24–38€/m² pour la peinture intérieure."},{q:"Comment obtenir des devis peinture gratuits à Orléans ?",a:"Publiez votre projet sur PremiumArtisan en 2 minutes. Vous recevez jusqu'à 3 devis sous 24h, sans engagement."},{q:"Quelle TVA pour les travaux de peinture à Orléans ?",a:"Pour les logements de plus de 2 ans, la TVA est de 10% sur la main d'œuvre et les fournitures."}] },
   'clermont-ferrand':    { nom: 'Clermont-Ferrand',     dept: 'Puy-de-Dôme',       region: 'Auvergne-Rhône-Alpes',  slug: 'clermont-ferrand',    voisines: ['lyon','saint-etienne','limoges'], prix: [{label:"Peinture intérieure T3",fourchette:"2 000–4 100€"}], faq: [{q:"Peintre à Clermont-Ferrand ?",a:"PremiumArtisan référence des peintres à Clermont-Ferrand et dans le Puy-de-Dôme."},{q:"Devis peinture à Clermont-Ferrand ?",a:"Publiez votre projet et recevez des devis de peintres clermontois sous 24h."}] },
   'besancon':            { nom: 'Besançon',             dept: 'Doubs',              region: 'Bourgogne-Franche-Comté', slug: 'besancon',           voisines: ['dijon','belfort'], prix: [{label:"Peinture intérieure",fourchette:"2 100–4 300€"}], faq: [{q:"Peintre à Besançon ?",a:"PremiumArtisan met en relation les particuliers de Besançon avec des peintres du Doubs."}] },
 };
 
+// ── STATIC PARAMS ──────────────────────────────────────────────────────────
 export async function generateStaticParams() {
   return Object.keys(VILLES_DATA).map((ville) => ({ ville }));
 }
 
+// ── METADATA ───────────────────────────────────────────────────────────────
 export async function generateMetadata(
   { params }: { params: Promise<{ ville: string }> }
 ): Promise<Metadata> {
@@ -77,17 +80,18 @@ export async function generateMetadata(
   return {
     title: `Devis Peintre ${nom} – Comparez 3 Artisans Qualifiés | PremiumArtisan`,
     description: `Obtenez jusqu'à 3 devis de peintres qualifiés à ${nom}. Artisans ${dept} vérifiés, réponse sous 24h, sans engagement. Peinture intérieure, rénovation.`,
-    alternates: { canonical: `https://premiumartisan.fr/devis-peintre/${ville}` },
+    alternates: { canonical: `https://www.premiumartisan.fr/devis-peintre/${ville}` },
     keywords: `devis peintre ${nom.toLowerCase()}, peintre ${nom.toLowerCase()}, devis peinture ${nom.toLowerCase()}, artisan peintre ${dept.toLowerCase()}`,
     openGraph: {
       title: `Devis Peintre ${nom} – 3 Artisans Qualifiés`,
       description: `Comparez jusqu'à 3 devis de peintres à ${nom}. Réponse sous 24h.`,
-      url: `https://premiumartisan.fr/devis-peintre/${ville}`,
+      url: `https://www.premiumartisan.fr/devis-peintre/${ville}`,
       type: 'website', locale: 'fr_FR', siteName: 'PremiumArtisan',
     },
   };
 }
 
+// ── PAGE ───────────────────────────────────────────────────────────────────
 export default async function DevisPeintreVille(
   { params }: { params: Promise<{ ville: string }> }
 ) {
@@ -107,14 +111,35 @@ export default async function DevisPeintreVille(
 
   const { nom, dept, region, voisines } = data;
 
+  // ── SCHEMA JSON-LD (LocalBusiness + Service + FAQPage) ─────────────────
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "LocalBusiness",
+        "name": `PremiumArtisan — Peintre à ${nom}`,
+        "image": "https://www.premiumartisan.fr/og-image.jpg",
+        "url": `https://www.premiumartisan.fr/devis-peintre/${ville}`,
+        "telephone": "+33XXXXXXXXX",
+        "priceRange": "€€",
+        "description": `Mise en relation avec des artisans peintres qualifiés à ${nom}, ${dept}. Devis gratuit sous 24h.`,
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": nom,
+          "addressRegion": dept,
+          "addressCountry": "FR",
+        },
+        "areaServed": {
+          "@type": "City",
+          "name": nom,
+        },
+        "sameAs": ["https://www.premiumartisan.fr"],
+      },
+      {
         "@type": "Service",
         "name": `Devis peintre à ${nom}`,
         "description": `Mise en relation avec des artisans peintres qualifiés à ${nom}, ${dept}.`,
-        "provider": { "@type": "Organization", "name": "PremiumArtisan", "url": "https://premiumartisan.fr" },
+        "provider": { "@type": "Organization", "name": "PremiumArtisan", "url": "https://www.premiumartisan.fr" },
         "areaServed": { "@type": "City", "name": nom },
         "serviceType": "Mise en relation artisan peintre",
       },
@@ -205,7 +230,7 @@ export default async function DevisPeintreVille(
           </section>
         )}
 
-        {/* COMMENT ÇA MARCHE */}
+        {/* COMMENT CA MARCHE */}
         <section className="py-14 px-4 bg-white border-t border-gray-100">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Trouver un peintre à {nom} : comment ça marche ?</h2>
@@ -221,7 +246,7 @@ export default async function DevisPeintreVille(
             </p>
             <h3 className="text-xl font-bold text-gray-900 mb-3 mt-6">Ravalement de façade à {nom}</h3>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Le ravalement de façade est obligatoire tous les 10 ans dans les communes de plus de 5 000 habitants. À {nom}, les artisans spécialisés en ravalement proposent des devis selon la surface, le type d'enduit et l'accessibilité du bâtiment. Un ravalement bien réalisé améliore l'isolation thermique et la valeur du bien.
+              Le ravalement de façade est obligatoire tous les 10 ans dans les communes de plus de 5 000 habitants. À {nom}, les artisans spécialisés en ravalement proposent des devis selon la surface, le type d'enduit et l'accessibilité du bâtiment.
             </p>
           </div>
         </section>
@@ -305,6 +330,7 @@ export default async function DevisPeintreVille(
                 { label: "Devis rénovation Dijon", href: "/devis-renovation-dijon" },
                 { label: "Trouver clients peintre", href: "/trouver-clients-peintre-dijon" },
                 { label: "Créer devis gratuit", href: "/creer-devis-peintre" },
+                { label: "Rénovation cuisine Dijon", href: "/devis-cuisine/dijon" },
               ].map(({ label, href }) => (
                 <Link key={href} href={href}
                   className="inline-block px-4 py-2 rounded-full border border-gray-200 bg-gray-50 text-sm text-gray-700 font-medium hover:border-[#be123c] hover:text-[#be123c] transition">

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Conditions d'utilisation — PremiumArtisan",
+  description: "Conditions générales d'utilisation de la plateforme PremiumArtisan — mise en relation artisans et particuliers à Dijon et en Côte-d'Or.",
 };
 
 export default function TermsPage() {

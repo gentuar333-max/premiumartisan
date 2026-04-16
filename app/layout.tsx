@@ -1,3 +1,4 @@
+// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PremiumArtisan — Trouvez un artisan fiable à Dijon & Côte-d'Or",
+  title: "PremiumArtisan — Artisans Vérifiés Dijon & Côte-d'Or",
   description: "Publiez votre projet gratuitement et recevez jusqu'à 3 devis d'artisans qualifiés à Dijon et en Côte-d'Or. Peinture, rénovation, plomberie. Gratuit, sans engagement.",
   metadataBase: new URL("https://premiumartisan.fr"),
   verification: {
