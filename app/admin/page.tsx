@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+
+export const dynamic = "force-dynamic";
 
 export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
@@ -66,7 +68,7 @@ export default function AdminPage() {
     if (error) {
       console.error("Supabase error:", error);
       setError(
-        `${error.message}\n\nSi tu vois “permission denied” → RLS est activé, il faut une policy ou un accès admin.`
+        `${error.message}\n\nSi tu vois â€œpermission deniedâ€ â†’ RLS est activÃ©, il faut une policy ou un accÃ¨s admin.`
       );
       setProjects([]);
     } else {
@@ -84,9 +86,9 @@ export default function AdminPage() {
     <div style={styles.wrap}>
       <div style={styles.header}>
         <div>
-          <h1 style={styles.h1}>Admin – Demandes (publier_projets)</h1>
+          <h1 style={styles.h1}>Admin â€“ Demandes (publier_projets)</h1>
           <div style={styles.sub}>
-            Total: <b>{projects.length}</b> • Affichés: <b>{filtered.length}</b>
+            Total: <b>{projects.length}</b> â€¢ AffichÃ©s: <b>{filtered.length}</b>
           </div>
         </div>
 
@@ -99,7 +101,7 @@ export default function AdminPage() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Rechercher (nom, téléphone, CP, ville, catégorie...)"
+          placeholder="Rechercher (nom, tÃ©lÃ©phone, CP, ville, catÃ©gorie...)"
           style={styles.search}
         />
 
@@ -109,7 +111,7 @@ export default function AdminPage() {
             checked={onlyWithPhone}
             onChange={(e) => setOnlyWithPhone(e.target.checked)}
           />
-          <span style={{ marginLeft: 8 }}>Seulement avec téléphone</span>
+          <span style={{ marginLeft: 8 }}>Seulement avec tÃ©lÃ©phone</span>
         </label>
       </div>
 
@@ -131,7 +133,7 @@ export default function AdminPage() {
             <div key={p.id} style={styles.card}>
               <div style={styles.cardTop}>
                 <div style={styles.badge}>
-                  {p.category ?? "Sans catégorie"}
+                  {p.category ?? "Sans catÃ©gorie"}
                 </div>
                 <div style={styles.date}>
                   {p.created_at
@@ -146,7 +148,7 @@ export default function AdminPage() {
               </div>
 
               <div style={styles.row}>
-                <span style={styles.label}>Téléphone</span>
+                <span style={styles.label}>TÃ©lÃ©phone</span>
                 <span style={styles.value}>{p.phone ? formatPhone(p.phone) : "-"}</span>
               </div>
 
@@ -163,7 +165,7 @@ export default function AdminPage() {
               <div style={styles.row}>
                 <span style={styles.label}>Surface</span>
                 <span style={styles.value}>
-                  {p.surface ? `${p.surface} m²` : "-"}
+                  {p.surface ? `${p.surface} mÂ²` : "-"}
                 </span>
               </div>
 
