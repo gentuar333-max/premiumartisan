@@ -1,5 +1,6 @@
 "use client";
 
+export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../publier-projet/supabaseClient";
 import { formatPhone } from "@/lib/formatPhone";
