@@ -2,58 +2,55 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY!);
+}
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Log complet pour debug
     console.log("VAPI WEBHOOK TYPE:", body.message?.type);
     console.log("VAPI BODY:", JSON.stringify(body, null, 2));
 
-    // Accepte les deux types possibles
     const msgType = body.message?.type;
     if (msgType !== "end-of-call-report" && msgType !== "call-ended") {
       return NextResponse.json({ ok: true });
     }
 
+    const supabase = getSupabase();
+    const resend = getResend();
+
     const call = body.message;
 
-    // Vapi peut envoyer structuredData a differents endroits
     const analysis =
       call.analysis?.structuredData ??
       call.structuredData ??
-      call.analysis?.summary ??
       null;
 
     console.log("ANALYSIS:", JSON.stringify(analysis, null, 2));
 
-    // Transcript - plusieurs formats possibles
     const transcript =
       typeof call.transcript === "string"
         ? call.transcript
         : Array.isArray(call.transcript)
-        ? call.transcript.map((t: { role: string; content?: string; message?: string }) =>
-            `${t.role}: ${t.content ?? t.message ?? ""}`
-          ).join("\n")
+        ? call.transcript
+            .map((t: { role: string; content?: string; message?: string }) =>
+              `${t.role}: ${t.content ?? t.message ?? ""}`
+            )
+            .join("\n")
         : "";
 
-    const duration = Math.round(
-      call.durationSeconds ?? call.duration ?? 0
-    );
+    const duration = Math.round(call.durationSeconds ?? call.duration ?? 0);
+    const callerPhone = call.customer?.number ?? call.phoneNumber ?? null;
 
-    const callerPhone =
-      call.customer?.number ??
-      call.phoneNumber ??
-      null;
-
-    // 1. Ruan ne Supabase
     const insertData = {
       caller_phone: callerPhone,
       nom_client: analysis?.nom_client ?? null,
@@ -73,7 +70,6 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase.from("calls").insert(insertData);
     if (error) console.error("Supabase error:", error);
 
-    // 2. Email te artizani via Resend
     const urgentTag = analysis?.urgent ? "URGENT - " : "";
     const durMin = Math.floor(duration / 60);
     const durSec = String(duration % 60).padStart(2, "0");
