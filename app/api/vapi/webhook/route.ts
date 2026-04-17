@@ -13,18 +13,48 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    if (body.message?.type !== "end-of-call-report") {
+    // Log complet pour debug
+    console.log("VAPI WEBHOOK TYPE:", body.message?.type);
+    console.log("VAPI BODY:", JSON.stringify(body, null, 2));
+
+    // Accepte les deux types possibles
+    const msgType = body.message?.type;
+    if (msgType !== "end-of-call-report" && msgType !== "call-ended") {
       return NextResponse.json({ ok: true });
     }
 
     const call = body.message;
-    const analysis = call.analysis?.structuredData;
-    const transcript = call.transcript ?? "";
-    const duration = Math.round(call.durationSeconds ?? 0);
-    const callerPhone = call.customer?.number ?? null;
+
+    // Vapi peut envoyer structuredData a differents endroits
+    const analysis =
+      call.analysis?.structuredData ??
+      call.structuredData ??
+      call.analysis?.summary ??
+      null;
+
+    console.log("ANALYSIS:", JSON.stringify(analysis, null, 2));
+
+    // Transcript - plusieurs formats possibles
+    const transcript =
+      typeof call.transcript === "string"
+        ? call.transcript
+        : Array.isArray(call.transcript)
+        ? call.transcript.map((t: { role: string; content?: string; message?: string }) =>
+            `${t.role}: ${t.content ?? t.message ?? ""}`
+          ).join("\n")
+        : "";
+
+    const duration = Math.round(
+      call.durationSeconds ?? call.duration ?? 0
+    );
+
+    const callerPhone =
+      call.customer?.number ??
+      call.phoneNumber ??
+      null;
 
     // 1. Ruan ne Supabase
-    const { error } = await supabase.from("calls").insert({
+    const insertData = {
       caller_phone: callerPhone,
       nom_client: analysis?.nom_client ?? null,
       adresse: analysis?.adresse ?? null,
@@ -36,8 +66,11 @@ export async function POST(req: NextRequest) {
       duration: duration,
       status: "nouveau",
       isnew: true,
-    });
+    };
 
+    console.log("INSERT DATA:", JSON.stringify(insertData, null, 2));
+
+    const { error } = await supabase.from("calls").insert(insertData);
     if (error) console.error("Supabase error:", error);
 
     // 2. Email te artizani via Resend
@@ -86,7 +119,11 @@ export async function POST(req: NextRequest) {
               <td style="padding:10px">${durMin}:${durSec}</td>
             </tr>
           </table>
-          <div style="margin-top:20px;padding:16px;background:#f8fafc;border-radius:8px">
+          <div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:8px;font-size:12px;color:#64748b">
+            <b>Transcript:</b><br/>
+            <pre style="white-space:pre-wrap;font-size:11px">${transcript.slice(0, 500)}${transcript.length > 500 ? "..." : ""}</pre>
+          </div>
+          <div style="margin-top:16px">
             <a href="https://premiumartisan.fr/artisan/receptionist"
                style="display:inline-block;padding:12px 24px;background:#1e293b;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
               Voir le dashboard
