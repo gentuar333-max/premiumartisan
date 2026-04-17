@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 
-type CallStatus = "nouveau" | "vu" | "rappelé" | "devis" | "terminé"
+type CallStatus = "nouveau" | "vu" | "rappele" | "devis" | "termine"
 
 interface Call {
   id: string
@@ -36,6 +36,10 @@ function parseTranscript(raw: string | null): { role: "ai" | "client"; text: str
 }
 
 function mapDbCall(row: Record<string, unknown>): Call {
+  const rawStatus = (row.status as string) ?? "nouveau"
+  const status = rawStatus
+    .replace("terminé", "termine")
+    .replace("rappelé", "rappele") as CallStatus
   return {
     id: row.id as string,
     dt: row.created_at as string,
@@ -45,7 +49,7 @@ function mapDbCall(row: Record<string, unknown>): Call {
     type: (row.type_travaux as string) ?? "Divers",
     problem: (row.probleme as string) ?? "",
     urgent: (row.urgent as boolean) ?? false,
-    status: (row.status as CallStatus) ?? "nouveau",
+    status,
     dur: (row.duration as number) ?? 0,
     isnew: (row.isnew as boolean) ?? true,
     transcript: parseTranscript(row.transcript as string | null),
@@ -68,12 +72,12 @@ function fmtDur(s: number) {
 type FilterKey = "all" | "new" | "urgent" | "done"
 
 const BADGE: Record<string, { bg: string; color: string; label: string }> = {
-  nouveau:   { bg: "#DCFCE7", color: "#166534", label: "Nouveau" },
-  vu:        { bg: "#F3F4F6", color: "#6B7280", label: "Vu" },
-  "rappele": { bg: "#FEF3C7", color: "#92400E", label: "Rappele" },
-  devis:     { bg: "#DBEAFE", color: "#1E40AF", label: "Devis" },
-  "termine": { bg: "#F3F4F6", color: "#6B7280", label: "Termine" },
-  urgent:    { bg: "#FEE2E2", color: "#DC2626", label: "Urgent" },
+  nouveau:  { bg: "#DCFCE7", color: "#166534", label: "Nouveau" },
+  vu:       { bg: "#F3F4F6", color: "#6B7280", label: "Vu" },
+  rappele:  { bg: "#FEF3C7", color: "#92400E", label: "Rappele" },
+  devis:    { bg: "#DBEAFE", color: "#1E40AF", label: "Devis" },
+  termine:  { bg: "#F3F4F6", color: "#6B7280", label: "Termine" },
+  urgent:   { bg: "#FEE2E2", color: "#DC2626", label: "Urgent" },
 }
 
 export default function VoiceDashboard() {
@@ -167,7 +171,7 @@ export default function VoiceDashboard() {
         </div>
         <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>{call.name}</div>
         <div style={{ fontSize: 14, color: "#666", marginBottom: 12 }}>
-          {call.address ? `${call.address.split(",")[1]?.trim() ?? call.address}` : "Adresse non renseignee"}
+          {call.address ? (call.address.split(",")[1]?.trim() ?? call.address) : "Adresse non renseignee"}
           {call.dur > 0 && ` · ${fmtDur(call.dur)}`}
         </div>
         <button
@@ -181,7 +185,7 @@ export default function VoiceDashboard() {
   }
 
   if (loading) return (
-    <div style={{ fontFamily: "sans-serif", padding: 32, textAlign: "center", color: "#666" }}>
+    <div style={{ fontFamily: "sans-serif", padding: 32, textAlign: "center" as const, color: "#666" }}>
       Chargement...
     </div>
   )
@@ -199,7 +203,6 @@ export default function VoiceDashboard() {
 
       <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#F8F9FA", minHeight: "100vh", padding: "16px 16px 100px" }}>
 
-        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700 }}>Receptionniste IA</h1>
@@ -219,7 +222,6 @@ export default function VoiceDashboard() {
           </div>
         )}
 
-        {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
           {[
             { val: calls.length, label: "Appels" },
@@ -233,7 +235,6 @@ export default function VoiceDashboard() {
           ))}
         </div>
 
-        {/* Tabs */}
         <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto" as const, paddingBottom: 4 }}>
           {([
             { key: "all",    label: `Tous (${calls.length})` },
@@ -247,7 +248,6 @@ export default function VoiceDashboard() {
           ))}
         </div>
 
-        {/* Appels anterieurs */}
         {filter === "all" && oldCalls.length > 0 && (
           <>
             <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: 0.5, margin: "20px 0 12px" }}>
@@ -275,7 +275,6 @@ export default function VoiceDashboard() {
         )}
       </div>
 
-      {/* Modal */}
       {selected && (
         <div onClick={() => setSelected(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "82vh", overflowY: "auto", padding: 24, animation: "slideUp .3s ease" }}>
