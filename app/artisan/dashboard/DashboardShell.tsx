@@ -802,7 +802,7 @@ export function DashboardShell({
           </button>
 
           {/* IA RÃ©ceptionniste â€” pa emoji, tekst i thjeshtÃ« */}
-          <Link href="/artisan/receptionist/setup" target="_blank" rel="noopener noreferrer"
+          <Link href="/artisan/receptionist/setup"
             className="shrink-0 px-2.5 py-1.5 text-sm text-slate-600 transition hover:text-slate-900 hover:bg-slate-200 rounded-lg whitespace-nowrap">
             <span className="hidden sm:inline">IA RÃ©ceptionniste</span>
             <span className="sm:hidden">IA</span>
@@ -889,7 +889,7 @@ export function DashboardShell({
               </Link>
 
               {/* IA RÃ©ceptionniste â€” pa emoji */}
-              <Link href="/artisan/receptionist/setup" target="_blank" rel="noopener noreferrer"
+              <Link href="/artisan/receptionist/setup"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
                 IA RÃ©ceptionniste
@@ -981,4 +981,5 @@ export function DashboardShell({
     </div>
   );
 }
+
 
