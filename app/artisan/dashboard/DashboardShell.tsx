@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -26,14 +26,14 @@ function pickProjectImageById(id: string): string {
 }
 
 const PIECE_LABELS: Record<string, string> = {
-  salon: "Salon / Séjour",
+  salon: "Salon / SÃ©jour",
   cuisine: "Cuisine",
   salle_bain: "Salle de bain",
   chambre: "Chambre",
-  couloir: "Couloir / Entrée",
+  couloir: "Couloir / EntrÃ©e",
   bureau: "Bureau",
-  exterieur: "Extérieur / Façade",
-  autre: "Autre / Plusieurs pièces",
+  exterieur: "ExtÃ©rieur / FaÃ§ade",
+  autre: "Autre / Plusieurs piÃ¨ces",
 };
 
 function formatPieceType(raw: string | null): string[] {
@@ -51,10 +51,10 @@ const BRAND_BLUE = "#2563EB";
 
 const REGION_TO_PREFIX: Record<string, string> = {
   lyon: "69",
-  "côte-d'or": "21",
+  "cÃ´te-d'or": "21",
   "cote d'or": "21",
   paris: "75",
-  rhône: "69",
+  rhÃ´ne: "69",
   rhone: "69",
   dijon: "21",
   beaune: "21",
@@ -62,8 +62,8 @@ const REGION_TO_PREFIX: Record<string, string> = {
 };
 
 const PREFIX_TO_REGION: Record<string, string> = {
-  "21": "Côte-d'Or (ex: 21000)",
-  "69": "Rhône (ex: 69000)",
+  "21": "CÃ´te-d'Or (ex: 21000)",
+  "69": "RhÃ´ne (ex: 69000)",
   "75": "Paris (ex: 75000)",
 };
 
@@ -75,9 +75,9 @@ function parseSearchToPrefix(input: string): string | null {
   const m2 = s.match(/^\d{2}$/);
   if (m2) return m2[0];
   const normalized = s
-    .replace(/[éèê]/g, "e")
-    .replace(/[àâ]/g, "a")
-    .replace(/ô/g, "o");
+    .replace(/[Ã©Ã¨Ãª]/g, "e")
+    .replace(/[Ã Ã¢]/g, "a")
+    .replace(/Ã´/g, "o");
   for (const [key, prefix] of Object.entries(REGION_TO_PREFIX)) {
     if (normalized.includes(key) || key.includes(normalized)) return prefix;
   }
@@ -104,17 +104,17 @@ type ProjectRow = {
 type DashboardInsertPayload = { new: { id?: string } };
 
 function formatBudget(b: ProjectRow["budget"]) {
-  if (b === null || b === undefined || b === "") return "—";
-  if (typeof b === "number") return `${b.toLocaleString("fr-FR")}€`;
+  if (b === null || b === undefined || b === "") return "â€”";
+  if (typeof b === "number") return `${b.toLocaleString("fr-FR")}â‚¬`;
   const raw = String(b).trim();
-  if (!raw) return "—";
-  if (raw.endsWith("_plus")) return `${raw.replace("_plus", "")}€+`;
+  if (!raw) return "â€”";
+  if (raw.endsWith("_plus")) return `${raw.replace("_plus", "")}â‚¬+`;
   if (raw.includes("_") || raw.includes("-")) {
     const sep = raw.includes("_") ? "_" : "-";
     const [min, max] = raw.split(sep);
-    if (min && max) return `${min}€ – ${max}€`;
+    if (min && max) return `${min}â‚¬ â€“ ${max}â‚¬`;
   }
-  if (/^\d+$/.test(raw)) return `${raw}€`;
+  if (/^\d+$/.test(raw)) return `${raw}â‚¬`;
   return raw;
 }
 
@@ -163,12 +163,12 @@ function getUnlockPrice(budget: ProjectRow["budget"]): {
 
 function truncate(text: string, max: number) {
   const t = text.trim();
-  return t.length <= max ? t : t.slice(0, max - 1) + "…";
+  return t.length <= max ? t : t.slice(0, max - 1) + "â€¦";
 }
 
 function formatCategory(category?: string | null) {
   if (!category) return null;
-  return category.replace(":", " ·").replace(" : ", " · ");
+  return category.replace(":", " Â·").replace(" : ", " Â· ");
 }
 
 function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
@@ -179,7 +179,7 @@ function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        <span className="text-[11px] font-bold text-slate-300">Réservé</span>
+        <span className="text-[11px] font-bold text-slate-300">RÃ©servÃ©</span>
       </div>
     );
   }
@@ -189,7 +189,7 @@ function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
   ));
   return (
     <div className="flex items-center gap-1.5 rounded-full bg-slate-900/80 px-2.5 py-1 backdrop-blur-sm">
-      <span className="text-[13px] leading-none">🔥</span>
+      <span className="text-[13px] leading-none">ðŸ”¥</span>
       <span className="text-[11px] font-bold text-white">{count} / 3</span>
       <div className="flex items-center gap-0.5">{dots}</div>
     </div>
@@ -227,8 +227,8 @@ const ProjectCard = memo(function ProjectCard({
   const rawName = p.first_name?.trim() || "Client";
   const nameParts = rawName.split(" ").filter(Boolean);
   const name = nameParts.length >= 2 ? `${nameParts[0]} ${nameParts[1][0]}.` : rawName;
-  const zoneLabel = p.location?.trim() || `Département ${p.postal_prefix ?? ""}`;
-  const locLine = zoneLabel ? truncate(zoneLabel, 56) : "—";
+  const zoneLabel = p.location?.trim() || `DÃ©partement ${p.postal_prefix ?? ""}`;
+  const locLine = zoneLabel ? truncate(zoneLabel, 56) : "â€”";
   const descriptionLine = p.description?.trim() || "";
   const isUnlocked = unlockState?.status === "paid";
   const unlockedPhone = isUnlocked ? (contact?.phone ?? p.client_phone ?? p.phone ?? null) : null;
@@ -257,7 +257,7 @@ const ProjectCard = memo(function ProjectCard({
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <span className="text-[12px] font-semibold text-slate-200">Projet réservé — déjà attribué à un artisan</span>
+            <span className="text-[12px] font-semibold text-slate-200">Projet rÃ©servÃ© â€” dÃ©jÃ  attribuÃ© Ã  un artisan</span>
           </div>
         )}
         {showFallbackBadge && !isLockedForMe && (
@@ -287,7 +287,7 @@ const ProjectCard = memo(function ProjectCard({
               <span key={label} className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs text-slate-600">{label}</span>
             ))}
             {p.surface_m2 && (
-              <span className="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">{p.surface_m2} m²</span>
+              <span className="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">{p.surface_m2} mÂ²</span>
             )}
           </div>
         )}
@@ -298,17 +298,17 @@ const ProjectCard = memo(function ProjectCard({
 
         {isUnlocked && !isLockedForMe && (
           <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-            <span className="font-semibold">Téléphone:</span>{" "}{unlockedPhone ? formatPhone(unlockedPhone) : "—"}
+            <span className="font-semibold">TÃ©lÃ©phone:</span>{" "}{unlockedPhone ? formatPhone(unlockedPhone) : "â€”"}
           </div>
         )}
 
         {isFirstSlot && !isUnlocked && !isLockedForMe && (
           <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
             <div className="flex items-start gap-2">
-              <span className="text-base leading-none">⚡</span>
+              <span className="text-base leading-none">âš¡</span>
               <div className="min-w-0">
                 <p className="text-[12px] font-bold text-amber-800">Offre exclusive disponible</p>
-                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul à recevoir ce projet — bloquez les autres artisans</p>
+                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul Ã  recevoir ce projet â€” bloquez les autres artisans</p>
               </div>
             </div>
           </div>
@@ -340,9 +340,9 @@ const ProjectCard = memo(function ProjectCard({
                   disabled={!p.id || p.id === "undefined" || unlocking}
                   className="inline-flex shrink-0 flex-col items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(16,185,129,0.28)] transition hover:from-emerald-400 hover:to-emerald-600 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70">
                   {unlocking ? (
-                    <><span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />Déblocage...</>
+                    <><span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />DÃ©blocage...</>
                   ) : (
-                    <><span>Voir le numéro</span><span className="text-[11px] font-normal opacity-90">{price.normal}€</span></>
+                    <><span>Voir le numÃ©ro</span><span className="text-[11px] font-normal opacity-90">{price.normal}â‚¬</span></>
                   )}
                 </button>
               </div>
@@ -361,7 +361,7 @@ const ProjectCard = memo(function ProjectCard({
                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  Débloqué
+                  DÃ©bloquÃ©
                 </span>
               </div>
             )}
@@ -372,7 +372,7 @@ const ProjectCard = memo(function ProjectCard({
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                3 / 3 artisans — complet
+                3 / 3 artisans â€” complet
               </div>
             )}
           </div>
@@ -381,11 +381,11 @@ const ProjectCard = memo(function ProjectCard({
             <button type="button" onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
               disabled={!p.id || p.id === "undefined" || unlocking}
               className="flex w-full items-center gap-2 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:from-amber-100 hover:to-orange-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
-              <span className="text-base leading-none">⚡</span>
-              <span>Réserver en exclusivité</span>
+              <span className="text-base leading-none">âš¡</span>
+              <span>RÃ©server en exclusivitÃ©</span>
               <span className="ml-auto flex flex-col items-end">
-                <span className="text-[13px] font-black text-amber-900">{price.exclusive}€</span>
-                <span className="text-[10px] font-normal text-amber-700">accès unique</span>
+                <span className="text-[13px] font-black text-amber-900">{price.exclusive}â‚¬</span>
+                <span className="text-[10px] font-normal text-amber-700">accÃ¨s unique</span>
               </span>
             </button>
           )}
@@ -396,7 +396,7 @@ const ProjectCard = memo(function ProjectCard({
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Projet réservé — non disponible
+              Projet rÃ©servÃ© â€” non disponible
             </button>
           )}
         </div>
@@ -445,13 +445,13 @@ function FilterPanel({
   }, [isOpen]);
 
   const CATEGORIES = [
-    { key: "peinture-interieure", label: "Peinture intérieure" },
-    { key: "peinture-exterieure", label: "Peinture extérieure" },
-    { key: "renovation", label: "Rénovation" },
+    { key: "peinture-interieure", label: "Peinture intÃ©rieure" },
+    { key: "peinture-exterieure", label: "Peinture extÃ©rieure" },
+    { key: "renovation", label: "RÃ©novation" },
     { key: "papier-peint", label: "Pose papier peint" },
     { key: "salle-de-bain", label: "Salle de bain" },
     { key: "cuisine", label: "Cuisine" },
-    { key: "electricite", label: "Électricité" },
+    { key: "electricite", label: "Ã‰lectricitÃ©" },
     { key: "plomberie", label: "Plomberie" },
   ];
   const STATUTS = [
@@ -459,16 +459,16 @@ function FilterPanel({
     { key: "complet", label: "Projet complet (3/3)" },
   ];
   const SORTS = [
-    { key: "recent", label: "Plus récents" },
-    { key: "budget_desc", label: "Budget le plus élevé" },
+    { key: "recent", label: "Plus rÃ©cents" },
+    { key: "budget_desc", label: "Budget le plus Ã©levÃ©" },
     { key: "budget_asc", label: "Budget le plus bas" },
   ];
   const BUDGET_OPTIONS = [
-    { value: "", label: "€ No Min" }, { value: "500", label: "€ 500" },
-    { value: "1000", label: "€ 1 000" }, { value: "3000", label: "€ 3 000" },
-    { value: "5000", label: "€ 5 000" }, { value: "10000", label: "€ 10 000" },
-    { value: "20000", label: "€ 20 000" }, { value: "50000", label: "€ 50 000" },
-    { value: "100000", label: "€ 100 000" },
+    { value: "", label: "â‚¬ No Min" }, { value: "500", label: "â‚¬ 500" },
+    { value: "1000", label: "â‚¬ 1 000" }, { value: "3000", label: "â‚¬ 3 000" },
+    { value: "5000", label: "â‚¬ 5 000" }, { value: "10000", label: "â‚¬ 10 000" },
+    { value: "20000", label: "â‚¬ 20 000" }, { value: "50000", label: "â‚¬ 50 000" },
+    { value: "100000", label: "â‚¬ 100 000" },
   ];
 
   function handleApply() {
@@ -503,9 +503,9 @@ function FilterPanel({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="flex flex-col divide-y divide-slate-100">
             <div className="pb-5">
-              <p className="mb-2 text-[12px] font-bold uppercase tracking-widest text-slate-500">Zone / Département</p>
+              <p className="mb-2 text-[12px] font-bold uppercase tracking-widest text-slate-500">Zone / DÃ©partement</p>
               <div className="relative">
-                <input type="text" value={zone} onChange={(e) => setZone(e.target.value)} placeholder="21, Lyon, Dijon…"
+                <input type="text" value={zone} onChange={(e) => setZone(e.target.value)} placeholder="21, Lyon, Dijonâ€¦"
                   className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-600" />
                 {zone && (
                   <button type="button" onClick={() => setZone("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -515,7 +515,7 @@ function FilterPanel({
               </div>
             </div>
             <div className="py-4">
-              <p className="mb-1 text-[12px] font-bold uppercase tracking-widest text-slate-500">Catégorie</p>
+              <p className="mb-1 text-[12px] font-bold uppercase tracking-widest text-slate-500">CatÃ©gorie</p>
               {CATEGORIES.map(({ key, label }) => (
                 <CheckItem key={key} label={label} checked={selectedCats.includes(key)}
                   onChange={() => setSelectedCats((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key])} />
@@ -532,7 +532,7 @@ function FilterPanel({
               <div className="flex gap-3">
                 {[
                   { value: budgetMin, onChange: setBudgetMin, options: BUDGET_OPTIONS },
-                  { value: budgetMax, onChange: setBudgetMax, options: BUDGET_OPTIONS.map((o, i) => i === 0 ? { ...o, label: "€ No Max" } : o) },
+                  { value: budgetMax, onChange: setBudgetMax, options: BUDGET_OPTIONS.map((o, i) => i === 0 ? { ...o, label: "â‚¬ No Max" } : o) },
                 ].map(({ value, onChange, options }, idx) => (
                   <div key={idx} className="relative flex-1">
                     <select value={value} onChange={(e) => onChange(e.target.value)}
@@ -664,7 +664,7 @@ export function DashboardShell({
 
   void newHit;
 
-  const regionLabel = PREFIX_TO_REGION[cp] ?? `Département ${cp}`;
+  const regionLabel = PREFIX_TO_REGION[cp] ?? `DÃ©partement ${cp}`;
   const prefetchProject = useCallback((id: string) => { router.prefetch(`/artisan/project/${id}`); }, [router]);
 
   useEffect(() => {
@@ -687,12 +687,12 @@ export function DashboardShell({
       });
       const json = await res.json().catch(() => null);
       if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
-      if (res.status === 401 || json?.error?.includes("authentifié")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
-      if (!res.ok || !json?.ok) { setToast({ msg: json?.error || "Impossible de récupérer le numéro.", type: "error" }); return; }
+      if (res.status === 401 || json?.error?.includes("authentifiÃ©")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
+      if (!res.ok || !json?.ok) { setToast({ msg: json?.error || "Impossible de rÃ©cupÃ©rer le numÃ©ro.", type: "error" }); return; }
       setUnlockStatuses((prev) => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts((prev) => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
       setProjectUnlockCounts((prev) => ({ ...prev, [projectId]: (prev[projectId] ?? 0) + 1 }));
-      setToast({ msg: "Numéro affiché.", type: "success" });
+      setToast({ msg: "NumÃ©ro affichÃ©.", type: "success" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
   }, [currentUser, cp, router]);
@@ -706,25 +706,25 @@ export function DashboardShell({
         body: JSON.stringify({ projectIds: [projectId], exclusive: true, cp }),
       });
       const json = await res.json().catch(() => null);
-      if (res.status === 401 || json?.error?.includes("authentifié")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
+      if (res.status === 401 || json?.error?.includes("authentifiÃ©")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
       if (!res.ok || !json?.ok) {
         if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
-        setToast({ msg: json?.error || "Erreur lors de la réservation exclusive.", type: "error" });
+        setToast({ msg: json?.error || "Erreur lors de la rÃ©servation exclusive.", type: "error" });
         return;
       }
       setUnlockStatuses((prev) => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts((prev) => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
       setProjectUnlockCounts((prev) => ({ ...prev, [projectId]: 3 }));
       setProjectIsLocked((prev) => ({ ...prev, [projectId]: false }));
-      setToast({ msg: "⚡ Projet réservé en exclusivité !", type: "info" });
+      setToast({ msg: "âš¡ Projet rÃ©servÃ© en exclusivitÃ© !", type: "info" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
   }, [currentUser, cp, router]);
 
   useEffect(() => {
-    if (unlockToast === "cancel") setToast({ msg: "Paiement annulé.", type: "error" });
+    if (unlockToast === "cancel") setToast({ msg: "Paiement annulÃ©.", type: "error" });
     if (unlockToast === "success") {
-      setToast({ msg: "Paiement confirmé ! Numéro débloqué.", type: "success" });
+      setToast({ msg: "Paiement confirmÃ© ! NumÃ©ro dÃ©bloquÃ©.", type: "success" });
       const successProjectId = searchParams.get("project_id");
       if (successProjectId && projects.length > 0) {
         const refetch = async () => {
@@ -768,14 +768,14 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-[#f0f2f5]">
 
-      {/* ── HEADER ── */}
+      {/* â”€â”€ HEADER â”€â”€ */}
       <header className="sticky top-0 z-30 bg-[#eaecef] border-b border-[#d5d8dc] shadow-sm">
         <div className="mx-auto flex h-[52px] max-w-7xl items-center gap-2 px-4 sm:px-6">
 
           {/* Logo */}
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-1.5 no-underline mr-1">
             <div style={{ background: "#ff6b35", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0 }}>
-              <span style={{ transform: "rotate(-45deg)", display: "block" }}>⚒</span>
+              <span style={{ transform: "rotate(-45deg)", display: "block" }}>âš’</span>
             </div>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#1e293b", letterSpacing: 1, lineHeight: 1 }}>
               PremiumArtisan
@@ -802,14 +802,14 @@ export function DashboardShell({
             )}
           </button>
 
-          {/* IA Réceptionniste — pa emoji, tekst i thjeshtë */}
-          <Link href="/artisan/receptionist" target="_blank" rel="noopener noreferrer"
+          {/* IA RÃ©ceptionniste â€” pa emoji, tekst i thjeshtÃ« */}
+          <Link href="/artisan/receptionist/setup" target="_blank" rel="noopener noreferrer"
             className="shrink-0 px-2.5 py-1.5 text-sm text-slate-600 transition hover:text-slate-900 hover:bg-slate-200 rounded-lg whitespace-nowrap">
-            <span className="hidden sm:inline">IA Réceptionniste</span>
+            <span className="hidden sm:inline">IA RÃ©ceptionniste</span>
             <span className="sm:hidden">IA</span>
           </Link>
 
-          {/* Search — vetëm desktop */}
+          {/* Search â€” vetÃ«m desktop */}
           <div className="relative hidden sm:flex flex-1 min-w-[80px] max-w-sm mx-2">
             <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -826,7 +826,7 @@ export function DashboardShell({
                   }
                 }
               }}
-              placeholder="Ville, code postal…"
+              placeholder="Ville, code postalâ€¦"
               className="h-8 w-full rounded-full border border-slate-200 bg-slate-50 pl-8 pr-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-300 focus:bg-white" />
           </div>
 
@@ -848,7 +848,7 @@ export function DashboardShell({
         initialStatut={currentStatut} initialBudgetMin={currentBudgetMin}
         initialBudgetMax={currentBudgetMax} onApply={handleFilterApply} count={count} />
 
-      {/* ── MENU LATERAL ── */}
+      {/* â”€â”€ MENU LATERAL â”€â”€ */}
       {menuOpen && (
         <>
           <div role="button" tabIndex={0} onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 bg-black/40" />
@@ -867,33 +867,33 @@ export function DashboardShell({
               <div className="flex gap-2">
                 <Link href={sortRecentUrl} onClick={() => setMenuOpen(false)}
                   className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort !== "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                  Plus récents
+                  Plus rÃ©cents
                 </Link>
                 <Link href={sortBudgetUrl} onClick={() => setMenuOpen(false)}
                   className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort === "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                  Budget élevé
+                  Budget Ã©levÃ©
                 </Link>
               </div>
 
-              {/* + Créer un devis */}
+              {/* + CrÃ©er un devis */}
               <Link href="/artisan/devis/new"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
-                + Créer un devis
+                + CrÃ©er un devis
               </Link>
 
-              {/* + Créer une facture */}
+              {/* + CrÃ©er une facture */}
               <Link href="/artisan/factures/new"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
-                + Créer une facture
+                + CrÃ©er une facture
               </Link>
 
-              {/* IA Réceptionniste — pa emoji */}
-              <Link href="/artisan/receptionist" target="_blank" rel="noopener noreferrer"
+              {/* IA RÃ©ceptionniste â€” pa emoji */}
+              <Link href="/artisan/receptionist/setup" target="_blank" rel="noopener noreferrer"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
-                IA Réceptionniste
+                IA RÃ©ceptionniste
               </Link>
 
               {/* Effacer filtres */}
@@ -910,11 +910,11 @@ export function DashboardShell({
                   className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400">
                   Aide / Support
                 </button>
-                <span className="mt-1.5 block text-xs text-slate-400">Bientôt disponible</span>
+                <span className="mt-1.5 block text-xs text-slate-400">BientÃ´t disponible</span>
               </div>
             </div>
 
-            {/* Se déconnecter */}
+            {/* Se dÃ©connecter */}
             <div className="border-t border-slate-100 p-5">
               <button type="button"
                 onClick={async () => {
@@ -925,25 +925,25 @@ export function DashboardShell({
                   setMenuOpen(false);
                 }}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
-                {currentUser ? "Se déconnecter" : "Se connecter"}
+                {currentUser ? "Se dÃ©connecter" : "Se connecter"}
               </button>
             </div>
           </aside>
         </>
       )}
 
-      {/* ── CONTENT ── */}
+      {/* â”€â”€ CONTENT â”€â”€ */}
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         {newHit && (
           <div className="mb-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4 text-[13px] text-blue-900">
-            <div><b>Nouveau projet dans votre zone !</b> La liste a été mise à jour.</div>
+            <div><b>Nouveau projet dans votre zone !</b> La liste a Ã©tÃ© mise Ã  jour.</div>
             <button onClick={() => setNewHit(null)} className="ml-4 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-100">OK</button>
           </div>
         )}
         {toast && <div className={`mb-4 rounded-xl border p-3 text-[13px] ${toastColors[toast.type]}`}>{toast.msg}</div>}
         {error && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-800">
-            <span className="font-semibold">Erreur</span> — {error}
+            <span className="font-semibold">Erreur</span> â€” {error}
           </div>
         )}
         <p className="mb-5 text-sm text-slate-600">
@@ -970,7 +970,7 @@ export function DashboardShell({
               </svg>
             </div>
             <p className="mb-1 text-base font-medium text-slate-900">Aucun projet dans votre zone pour le moment</p>
-            <p className="mb-6 text-sm text-slate-500">Les nouveaux projets apparaîtront automatiquement</p>
+            <p className="mb-6 text-sm text-slate-500">Les nouveaux projets apparaÃ®tront automatiquement</p>
             <button type="button" onClick={handleFilterReset}
               className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
               style={{ backgroundColor: BRAND_BLUE }}>
