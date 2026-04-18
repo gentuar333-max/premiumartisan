@@ -18,6 +18,8 @@ export default function ReceptionistSetupPage() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [metierOpen, setMetierOpen] = useState(false)
+  const [tempMetier, setTempMetier] = useState("")
+  const [tempAutre, setTempAutre] = useState("")
 
   useEffect(() => {
     fetch("/api/artisan/vapi/setup")
@@ -39,6 +41,18 @@ export default function ReceptionistSetupPage() {
       })
       .catch(() => {})
   }, [])
+
+  function openMetier() {
+    setTempMetier(metier)
+    setTempAutre(autreMetier)
+    setMetierOpen(true)
+  }
+
+  function confirmMetier() {
+    setMetier(tempMetier)
+    setAutreMetier(tempAutre)
+    setMetierOpen(false)
+  }
 
   async function handleSubmit() {
     setLoading(true)
@@ -79,7 +93,11 @@ export default function ReceptionistSetupPage() {
   return (
     <>
       <style>{`
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes slideUp {
+          from { transform: translateY(100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .metier-row:hover { background: #fdf6ee !important; }
       `}</style>
 
       <div style={{
@@ -97,23 +115,20 @@ export default function ReceptionistSetupPage() {
               Configurer votre assistant
             </div>
 
-            {/* Nom complet */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Nom complet</label>
               <input value={nom} onChange={e => setNom(e.target.value)} style={inp} />
             </div>
 
-            {/* Nom entreprise */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Nom de l'entreprise</label>
               <input value={entreprise} onChange={e => setEntreprise(e.target.value)} style={inp} />
             </div>
 
-            {/* Metier — trigger */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Metier</label>
               <div
-                onClick={() => setMetierOpen(true)}
+                onClick={openMetier}
                 style={{
                   ...inp,
                   display: "flex",
@@ -124,25 +139,15 @@ export default function ReceptionistSetupPage() {
                 }}
               >
                 <span>{displayMetier}</span>
-                <span style={{ color: "#9ca3af", fontSize: 12 }}>▼</span>
+                <span style={{ color: "#9ca3af", fontSize: 11 }}>&#9660;</span>
               </div>
-              {metier === "Autre" && (
-                <input
-                  value={autreMetier}
-                  onChange={e => setAutreMetier(e.target.value)}
-                  placeholder="Precisez votre metier..."
-                  style={{ ...inp, marginTop: 8, border: `1.5px solid ${orange}` }}
-                />
-              )}
             </div>
 
-            {/* Telephone */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Numero de telephone</label>
               <input value={tel} onChange={e => setTel(e.target.value)} style={inp} />
             </div>
 
-            {/* Email */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Email</label>
               <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inp} />
@@ -167,47 +172,118 @@ export default function ReceptionistSetupPage() {
       {metierOpen && (
         <div
           onClick={() => setMetierOpen(false)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.45)",
+            zIndex: 1000,
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+          }}
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ background: "#fff", borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 500, animation: "slideUp .25s ease", overflow: "hidden" }}
+            style={{
+              background: "#fff",
+              borderRadius: "22px 22px 0 0",
+              width: "100%",
+              maxWidth: 500,
+              animation: "slideUp .3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              overflow: "hidden",
+              boxShadow: "0 -4px 40px rgba(0,0,0,0.12)",
+            }}
           >
-            <div style={{ padding: "16px 16px 0", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 15, fontWeight: 600, color: "#1e293b" }}>Selectionnez votre metier</span>
-              <button onClick={() => setMetierOpen(false)} style={{ border: "none", background: "none", fontSize: 20, cursor: "pointer", color: "#999", padding: "0 0 12px" }}>x</button>
+            {/* Header modal */}
+            <div style={{
+              padding: "18px 20px 14px",
+              borderBottom: "1px solid #f0f0f0",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>
+                Votre metier
+              </span>
+              <button
+                onClick={() => setMetierOpen(false)}
+                style={{
+                  border: "none", background: "#f3f4f6",
+                  width: 30, height: 30, borderRadius: "50%",
+                  cursor: "pointer", fontSize: 16, color: "#6b7280",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >
+                ×
+              </button>
             </div>
-            <div style={{ overflowY: "auto", maxHeight: "60vh" }}>
+
+            {/* Liste metiers */}
+            <div style={{ overflowY: "auto", maxHeight: "50vh" }}>
               {METIERS.map((m, i) => (
                 <div key={m}>
                   <div
-                    onClick={() => { setMetier(m); if (m !== "Autre") setMetierOpen(false) }}
+                    className="metier-row"
+                    onClick={() => setTempMetier(m)}
                     style={{
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      padding: "16px 20px",
+                      padding: "15px 20px",
                       cursor: "pointer",
                       background: "#fff",
+                      transition: "background .1s",
                     }}
                   >
-                    <span style={{ fontSize: 16, color: "#1e293b" }}>{m}</span>
+                    <span style={{ fontSize: 15, color: "#1e293b", fontWeight: tempMetier === m ? 600 : 400 }}>
+                      {m}
+                    </span>
                     <div style={{
                       width: 22, height: 22, borderRadius: "50%",
-                      border: `2px solid ${metier === m ? "#0d9488" : "#d1d5db"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      border: `2px solid ${tempMetier === m ? orange : "#d1d5db"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0, transition: "border-color .15s",
                     }}>
-                      {metier === m && <div style={{ width: 11, height: 11, borderRadius: "50%", background: "#0d9488" }} />}
+                      {tempMetier === m && (
+                        <div style={{ width: 11, height: 11, borderRadius: "50%", background: orange }} />
+                      )}
                     </div>
                   </div>
-                  {i < METIERS.length - 1 && <div style={{ height: 1, background: "#f5f5f5", marginLeft: 20 }} />}
+                  {i < METIERS.length - 1 && (
+                    <div style={{ height: 1, background: "#f5f5f5", marginLeft: 20 }} />
+                  )}
                 </div>
               ))}
             </div>
-            <div style={{ padding: 16, borderTop: "1px solid #f0f0f0" }}>
+
+            {/* Autre — input si Autre est selectionne */}
+            {tempMetier === "Autre" && (
+              <div style={{ padding: "12px 20px 0" }}>
+                <input
+                  value={tempAutre}
+                  onChange={e => setTempAutre(e.target.value)}
+                  placeholder="Precisez votre metier..."
+                  autoFocus
+                  style={{
+                    width: "100%", padding: "12px 14px",
+                    borderRadius: 10, border: `1.5px solid ${orange}`,
+                    background: "#fff8f0", fontSize: 14, color: "#1e293b",
+                    outline: "none", fontFamily: "inherit",
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Bouton Confirmer */}
+            <div style={{ padding: 16 }}>
               <button
-                onClick={() => setMetierOpen(false)}
-                style={{ width: "100%", padding: 14, borderRadius: 10, border: "none", background: "#1e293b", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+                onClick={confirmMetier}
+                disabled={!tempMetier || (tempMetier === "Autre" && !tempAutre.trim())}
+                style={{
+                  width: "100%", padding: 15, borderRadius: 12,
+                  border: "none",
+                  background: (!tempMetier || (tempMetier === "Autre" && !tempAutre.trim())) ? "#fcd9b6" : orange,
+                  color: "#fff", fontSize: 14, fontWeight: 700,
+                  letterSpacing: ".05em", cursor: "pointer",
+                  transition: "background .2s",
+                }}
               >
                 Confirmer
               </button>
