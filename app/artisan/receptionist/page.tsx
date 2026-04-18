@@ -1,11 +1,5 @@
-import { Metadata } from "next"
-import VoiceDashboard from "@/components/voice/VoiceDashboard"
-
-export const metadata: Metadata = {
-  title: "Réceptionniste IA | PremiumArtisan",
-  description: "Gérez vos appels traités par votre réceptionniste IA 24/7",
-}
+﻿import { redirect } from "next/navigation"
 
 export default function ReceptionistPage() {
-  return <VoiceDashboard />
+  redirect("/artisan/receptionist/setup")
 }
