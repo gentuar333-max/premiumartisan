@@ -70,7 +70,7 @@ export default function ReceptionistSetupPage() {
         }),
       })
       if (res.ok) {
-        router.push("/artisan/receptionist/dashboard")
+        router.push("/artisan/receptionist")
       }
     } catch {
       // ignore
