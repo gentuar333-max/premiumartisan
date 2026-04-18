@@ -54,7 +54,6 @@ const REGION_TO_PREFIX: Record<string, string> = {
   "cÃ´te-d'or": "21",
   "cote d'or": "21",
   paris: "75",
-  rhÃ´ne: "69",
   rhone: "69",
   dijon: "21",
   beaune: "21",
