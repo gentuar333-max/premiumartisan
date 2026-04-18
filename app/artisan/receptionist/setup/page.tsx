@@ -29,7 +29,7 @@ export default function ReceptionistSetupPage() {
           setNom(json.settings.artisan_name ?? "")
           setEntreprise(json.settings.company_name ?? "")
           const m = json.settings.metier?.[0] ?? ""
-          if (METIERS.slice(0,-1).includes(m)) {
+          if (METIERS.slice(0, -1).includes(m)) {
             setMetier(m)
           } else if (m) {
             setMetier("Autre")
@@ -57,19 +57,26 @@ export default function ReceptionistSetupPage() {
   async function handleSubmit() {
     setLoading(true)
     const finalMetier = metier === "Autre" ? autreMetier : metier
-    const res = await fetch("/api/artisan/vapi/setup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        artisan_name: nom,
-        company_name: entreprise,
-        metier: finalMetier ? [finalMetier] : [],
-        phone: tel,
-        email,
-      }),
-    })
-    setLoading(false)
-    if (res.ok) router.push("/artisan/receptionist")
+    try {
+      const res = await fetch("/api/artisan/vapi/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          artisan_name: nom,
+          company_name: entreprise,
+          metier: finalMetier ? [finalMetier] : [],
+          phone: tel,
+          email,
+        }),
+      })
+      if (res.ok) {
+        router.push("/artisan/receptionist/dashboard")
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false)
+    }
   }
 
   const orange = "#e8650a"
@@ -125,6 +132,7 @@ export default function ReceptionistSetupPage() {
               <input value={entreprise} onChange={e => setEntreprise(e.target.value)} style={inp} />
             </div>
 
+            {/* Metier — trigger only, no outside input */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Metier</label>
               <div
@@ -191,7 +199,6 @@ export default function ReceptionistSetupPage() {
               boxShadow: "0 -4px 40px rgba(0,0,0,0.12)",
             }}
           >
-            {/* Header modal */}
             <div style={{
               padding: "18px 20px 14px",
               borderBottom: "1px solid #f0f0f0",
@@ -199,24 +206,21 @@ export default function ReceptionistSetupPage() {
               justifyContent: "space-between",
               alignItems: "center",
             }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>
-                Votre metier
-              </span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>Votre metier</span>
               <button
                 onClick={() => setMetierOpen(false)}
                 style={{
                   border: "none", background: "#f3f4f6",
                   width: 30, height: 30, borderRadius: "50%",
-                  cursor: "pointer", fontSize: 16, color: "#6b7280",
+                  cursor: "pointer", fontSize: 18, color: "#6b7280",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}
               >
-                ×
+                x
               </button>
             </div>
 
-            {/* Liste metiers */}
-            <div style={{ overflowY: "auto", maxHeight: "50vh" }}>
+            <div style={{ overflowY: "auto", maxHeight: "45vh" }}>
               {METIERS.map((m, i) => (
                 <div key={m}>
                   <div
@@ -229,7 +233,6 @@ export default function ReceptionistSetupPage() {
                       padding: "15px 20px",
                       cursor: "pointer",
                       background: "#fff",
-                      transition: "background .1s",
                     }}
                   >
                     <span style={{ fontSize: 15, color: "#1e293b", fontWeight: tempMetier === m ? 600 : 400 }}>
@@ -239,7 +242,7 @@ export default function ReceptionistSetupPage() {
                       width: 22, height: 22, borderRadius: "50%",
                       border: `2px solid ${tempMetier === m ? orange : "#d1d5db"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, transition: "border-color .15s",
+                      flexShrink: 0,
                     }}>
                       {tempMetier === m && (
                         <div style={{ width: 11, height: 11, borderRadius: "50%", background: orange }} />
@@ -253,9 +256,9 @@ export default function ReceptionistSetupPage() {
               ))}
             </div>
 
-            {/* Autre — input si Autre est selectionne */}
+            {/* Input Autre — hapet vetem kur zgjedhet Autre */}
             {tempMetier === "Autre" && (
-              <div style={{ padding: "12px 20px 0" }}>
+              <div style={{ padding: "12px 20px 4px" }}>
                 <input
                   value={tempAutre}
                   onChange={e => setTempAutre(e.target.value)}
@@ -271,7 +274,6 @@ export default function ReceptionistSetupPage() {
               </div>
             )}
 
-            {/* Bouton Confirmer */}
             <div style={{ padding: 16 }}>
               <button
                 onClick={confirmMetier}
@@ -282,7 +284,6 @@ export default function ReceptionistSetupPage() {
                   background: (!tempMetier || (tempMetier === "Autre" && !tempAutre.trim())) ? "#fcd9b6" : orange,
                   color: "#fff", fontSize: 14, fontWeight: 700,
                   letterSpacing: ".05em", cursor: "pointer",
-                  transition: "background .2s",
                 }}
               >
                 Confirmer
