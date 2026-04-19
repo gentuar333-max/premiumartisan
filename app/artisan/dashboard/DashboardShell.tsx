@@ -61,8 +61,8 @@ const REGION_TO_PREFIX: Record<string, string> = {
 };
 
 const PREFIX_TO_REGION: Record<string, string> = {
-  "21": "CÃ´te-d'Or (ex: 21000)",
-  "69": "RhÃ´ne (ex: 69000)",
+  "21": "Côte-d'Or (ex: 21000)",
+  "69": "rhone (ex: 69000)",
   "75": "Paris (ex: 75000)",
 };
 
@@ -801,10 +801,10 @@ export function DashboardShell({
             )}
           </button>
 
-          {/* IA RÃ©ceptionniste â€” pa emoji, tekst i thjeshtÃ« */}
+          {/* IA Réceptionniste â€” pa emoji, tekst i thjeshtÃ« */}
           <Link href="/artisan/receptionist/setup"
             className="shrink-0 px-2.5 py-1.5 text-sm text-slate-600 transition hover:text-slate-900 hover:bg-slate-200 rounded-lg whitespace-nowrap">
-            <span className="hidden sm:inline">IA RÃ©ceptionniste</span>
+            <span className="hidden sm:inline">IA Réceptionniste</span>
             <span className="sm:hidden">IA</span>
           </Link>
 
@@ -888,11 +888,11 @@ export function DashboardShell({
                 + CrÃ©er une facture
               </Link>
 
-              {/* IA RÃ©ceptionniste â€” pa emoji */}
+              {/* IA Réceptionniste â€” pa emoji */}
               <Link href="/artisan/receptionist/setup"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
-                IA RÃ©ceptionniste
+                IA Réceptionniste
               </Link>
 
               {/* Effacer filtres */}
