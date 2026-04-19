@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { Resend } from "resend";
 
 function getSupabase() {
   return createClient(
@@ -9,8 +8,27 @@ function getSupabase() {
   );
 }
 
-function getResend() {
-  return new Resend(process.env.RESEND_API_KEY!);
+async function sendSMS(to: string, message: string) {
+  const apiKey = process.env.BREVO_API_KEY;
+  const sender = process.env.BREVO_SMS_SENDER ?? "PremiumArt";
+  if (!apiKey || !to) return;
+
+  let phone = to.replace(/\s/g, "").replace(/^0/, "+33");
+  if (!phone.startsWith("+")) phone = `+33${phone}`;
+
+  await fetch("https://api.brevo.com/v3/transactionalSMS/sms", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify({
+      sender,
+      recipient: phone,
+      content: message,
+      type: "transactional",
+    }),
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -25,7 +43,6 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabase();
-    const resend = getResend();
 
     const call = body.message;
 
@@ -48,25 +65,23 @@ export async function POST(req: NextRequest) {
     const duration = Math.round(call.durationSeconds ?? call.duration ?? 0);
     const callerPhone = call.customer?.number ?? call.phoneNumber ?? null;
 
-    // Merr artisan_id nga artisan_settings
     let artisanId: string | null = null;
-    let artisanEmail = "artisan@premiumartisan.fr";
+    let artisanPhone: string | null = null;
     let artisanName: string | null = null;
 
     const { data: settings } = await supabase
       .from("artisan_settings")
-      .select("artisan_id, artisan_name, company_name, phone, email")
+      .select("artisan_id, artisan_name, phone")
       .order("updated_at", { ascending: false })
       .limit(1)
       .single();
 
     if (settings) {
       artisanId = settings.artisan_id ?? null;
-      artisanEmail = settings.email ?? artisanEmail;
+      artisanPhone = settings.phone ?? null;
       artisanName = settings.artisan_name ?? null;
     }
 
-    // Lookup caller ne contacts table
     let contactType = "inconnu";
     let contactName: string | null = null;
 
@@ -108,75 +123,28 @@ export async function POST(req: NextRequest) {
     const { error } = await supabase.from("calls").insert(insertData);
     if (error) console.error("Supabase error:", error);
 
-    // Email te artizani
-    const urgentTag = analysis?.urgent ? "URGENT - " : "";
-    const durMin = Math.floor(duration / 60);
-    const durSec = String(duration % 60).padStart(2, "0");
+    if (artisanPhone) {
+      const urgentTag = analysis?.urgent ? "URGENT - " : "";
+      const nomClient = contactName ?? analysis?.nom_client ?? "Client inconnu";
+      const probleme = analysis?.probleme ?? "-";
+      const durMin = Math.floor(duration / 60);
+      const durSec = String(duration % 60).padStart(2, "0");
 
-    const contactBadge = contactType !== "inconnu"
-      ? `<span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600">${contactType.toUpperCase()}${contactName ? ` — ${contactName}` : ""}</span>`
-      : "";
+      const smsMessage = [
+        `${urgentTag}Nouveau appel - Marie`,
+        ``,
+        `Client: ${nomClient}`,
+        `Tel: ${callerPhone ?? "-"}`,
+        `Probleme: ${probleme}`,
+        analysis?.disponibilite ? `Disponible: ${analysis.disponibilite}` : null,
+        `Duree: ${durMin}:${durSec}`,
+        ``,
+        `premiumartisan.fr/artisan/receptionist`,
+      ].filter(Boolean).join("\n");
 
-    await resend.emails.send({
-      from: "Marie IA <marie@premiumartisan.fr>",
-      to: [artisanEmail],
-      subject: `${urgentTag}Nouveau appel - ${contactName ?? analysis?.nom_client ?? "Client inconnu"}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
-          <h2 style="color:${analysis?.urgent ? "#dc2626" : "#1e293b"};margin-bottom:8px">
-            ${analysis?.urgent ? "Nouveau appel URGENT" : "Nouveau appel recu"}
-          </h2>
-          ${artisanName ? `<p style="color:#64748b;font-size:14px;margin-bottom:12px">pour ${artisanName}</p>` : ""}
-          ${contactBadge ? `<div style="margin-bottom:12px">${contactBadge}</div>` : ""}
-          <table style="width:100%;border-collapse:collapse">
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b;width:40%">Appelant</td>
-              <td style="padding:10px;font-weight:600">${contactName ?? analysis?.nom_client ?? "-"}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b">Type</td>
-              <td style="padding:10px;font-weight:600">${contactType}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b">Telephone</td>
-              <td style="padding:10px;font-weight:600">${callerPhone ?? "-"}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b">Adresse</td>
-              <td style="padding:10px">${analysis?.adresse ?? "-"}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b">Probleme</td>
-              <td style="padding:10px">${analysis?.probleme ?? "-"}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b">Disponibilite</td>
-              <td style="padding:10px">${analysis?.disponibilite ?? "-"}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b">Urgent</td>
-              <td style="padding:10px;color:${analysis?.urgent ? "#dc2626" : "#16a34a"};font-weight:600">
-                ${analysis?.urgent ? "OUI" : "NON"}
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:10px;color:#64748b">Duree</td>
-              <td style="padding:10px">${durMin}:${durSec}</td>
-            </tr>
-          </table>
-          <div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:8px;font-size:12px;color:#64748b">
-            <b>Transcript:</b><br/>
-            <pre style="white-space:pre-wrap;font-size:11px">${transcript.slice(0, 500)}${transcript.length > 500 ? "..." : ""}</pre>
-          </div>
-          <div style="margin-top:16px">
-            <a href="https://premiumartisan.fr/artisan/receptionist"
-               style="display:inline-block;padding:12px 24px;background:#1e293b;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
-              Voir le dashboard
-            </a>
-          </div>
-        </div>
-      `,
-    });
+      await sendSMS(artisanPhone, smsMessage);
+      console.log("SMS sent to:", artisanPhone);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
