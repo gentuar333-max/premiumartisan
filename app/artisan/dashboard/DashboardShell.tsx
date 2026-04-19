@@ -107,13 +107,13 @@ function formatBudget(b: ProjectRow["budget"]) {
   if (typeof b === "number") return `${b.toLocaleString("fr-FR")}€`;
   const raw = String(b).trim();
   if (!raw) return "—”";
-  if (raw.endsWith("_plus")) return `${raw.replace("_plus", "")}€+`;
+  if (raw.endsWith("_plus")) return `Budget: ${raw.replace("_plus", "")}€+`;
   if (raw.includes("_") || raw.includes("-")) {
     const sep = raw.includes("_") ? "_" : "-";
     const [min, max] = raw.split(sep);
-    if (min && max) return `${min}€ —“ ${max}€`;
+    if (min && max) return `Budget: ${min}€ – ${max}€`;
   }
-  if (/^\d+$/.test(raw)) return `${raw}€`;
+  if (/^\d+$/.test(raw)) return `Budget: ${raw}€`;
   return raw;
 }
 
