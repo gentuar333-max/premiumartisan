@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     // Merr artisan_id nga numri i telefonit ne artisan_settings
     let artisanId: string | null = null;
-    let artisanEmail: string | null = "artisan@premiumartisan.fr";
+    let artisanEmail = "artisan@premiumartisan.fr";
     let artisanName: string | null = null;
 
     // Hap 1: Merr artizanin e pare (per tani — me vone do shtojme logjiken per numrin)
