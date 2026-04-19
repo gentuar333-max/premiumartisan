@@ -1,5 +1,5 @@
-﻿import { redirect } from "next/navigation"
+﻿import VoiceDashboard from "@/components/voice/VoiceDashboard"
 
 export default function ReceptionistPage() {
-  redirect("/artisan/receptionist/setup")
+  return <VoiceDashboard />
 }
