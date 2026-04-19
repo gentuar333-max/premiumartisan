@@ -26,14 +26,14 @@ function pickProjectImageById(id: string): string {
 }
 
 const PIECE_LABELS: Record<string, string> = {
-  salon: "Salon / SÃ©jour",
+  salon: "Salon / Séjour",
   cuisine: "Cuisine",
   salle_bain: "Salle de bain",
   chambre: "Chambre",
-  couloir: "Couloir / EntrÃ©e",
+  couloir: "Couloir / Entrée",
   bureau: "Bureau",
-  exterieur: "ExtÃ©rieur / FaÃ§ade",
-  autre: "Autre / Plusieurs piÃ¨ces",
+  exterieur: "Extérieur / Façade",
+  autre: "Autre / Plusieurs pièces",
 };
 
 function formatPieceType(raw: string | null): string[] {
@@ -51,7 +51,7 @@ const BRAND_BLUE = "#2563EB";
 
 const REGION_TO_PREFIX: Record<string, string> = {
   lyon: "69",
-  "cÃ´te-d'or": "21",
+  "côte-d'or": "21",
   "cote d'or": "21",
   paris: "75",
   rhone: "69",
@@ -74,9 +74,9 @@ function parseSearchToPrefix(input: string): string | null {
   const m2 = s.match(/^\d{2}$/);
   if (m2) return m2[0];
   const normalized = s
-    .replace(/[Ã©Ã¨Ãª]/g, "e")
+    .replace(/[éèÃª]/g, "e")
     .replace(/[Ã Ã¢]/g, "a")
-    .replace(/Ã´/g, "o");
+    .replace(/ô/g, "o");
   for (const [key, prefix] of Object.entries(REGION_TO_PREFIX)) {
     if (normalized.includes(key) || key.includes(normalized)) return prefix;
   }
@@ -103,17 +103,17 @@ type ProjectRow = {
 type DashboardInsertPayload = { new: { id?: string } };
 
 function formatBudget(b: ProjectRow["budget"]) {
-  if (b === null || b === undefined || b === "") return "â€”";
-  if (typeof b === "number") return `${b.toLocaleString("fr-FR")}â‚¬`;
+  if (b === null || b === undefined || b === "") return "—”";
+  if (typeof b === "number") return `${b.toLocaleString("fr-FR")}€`;
   const raw = String(b).trim();
-  if (!raw) return "â€”";
-  if (raw.endsWith("_plus")) return `${raw.replace("_plus", "")}â‚¬+`;
+  if (!raw) return "—”";
+  if (raw.endsWith("_plus")) return `${raw.replace("_plus", "")}€+`;
   if (raw.includes("_") || raw.includes("-")) {
     const sep = raw.includes("_") ? "_" : "-";
     const [min, max] = raw.split(sep);
-    if (min && max) return `${min}â‚¬ â€“ ${max}â‚¬`;
+    if (min && max) return `${min}€ —“ ${max}€`;
   }
-  if (/^\d+$/.test(raw)) return `${raw}â‚¬`;
+  if (/^\d+$/.test(raw)) return `${raw}€`;
   return raw;
 }
 
@@ -162,12 +162,12 @@ function getUnlockPrice(budget: ProjectRow["budget"]): {
 
 function truncate(text: string, max: number) {
   const t = text.trim();
-  return t.length <= max ? t : t.slice(0, max - 1) + "â€¦";
+  return t.length <= max ? t : t.slice(0, max - 1) + "—¦";
 }
 
 function formatCategory(category?: string | null) {
   if (!category) return null;
-  return category.replace(":", " Â·").replace(" : ", " Â· ");
+  return category.replace(":", " ·").replace(" : ", " · ");
 }
 
 function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
@@ -178,7 +178,7 @@ function FireBadge({ count, isLocked }: { count: number; isLocked: boolean }) {
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        <span className="text-[11px] font-bold text-slate-300">RÃ©servÃ©</span>
+        <span className="text-[11px] font-bold text-slate-300">Réservé</span>
       </div>
     );
   }
@@ -226,8 +226,8 @@ const ProjectCard = memo(function ProjectCard({
   const rawName = p.first_name?.trim() || "Client";
   const nameParts = rawName.split(" ").filter(Boolean);
   const name = nameParts.length >= 2 ? `${nameParts[0]} ${nameParts[1][0]}.` : rawName;
-  const zoneLabel = p.location?.trim() || `DÃ©partement ${p.postal_prefix ?? ""}`;
-  const locLine = zoneLabel ? truncate(zoneLabel, 56) : "â€”";
+  const zoneLabel = p.location?.trim() || `Département ${p.postal_prefix ?? ""}`;
+  const locLine = zoneLabel ? truncate(zoneLabel, 56) : "—”";
   const descriptionLine = p.description?.trim() || "";
   const isUnlocked = unlockState?.status === "paid";
   const unlockedPhone = isUnlocked ? (contact?.phone ?? p.client_phone ?? p.phone ?? null) : null;
@@ -256,7 +256,7 @@ const ProjectCard = memo(function ProjectCard({
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <span className="text-[12px] font-semibold text-slate-200">Projet rÃ©servÃ© â€” dÃ©jÃ  attribuÃ© Ã  un artisan</span>
+            <span className="text-[12px] font-semibold text-slate-200">Projet réservé —” déjÃ  attribué Ã  un artisan</span>
           </div>
         )}
         {showFallbackBadge && !isLockedForMe && (
@@ -297,7 +297,7 @@ const ProjectCard = memo(function ProjectCard({
 
         {isUnlocked && !isLockedForMe && (
           <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-            <span className="font-semibold">TÃ©lÃ©phone:</span>{" "}{unlockedPhone ? formatPhone(unlockedPhone) : "â€”"}
+            <span className="font-semibold">Téléphone:</span>{" "}{unlockedPhone ? formatPhone(unlockedPhone) : "—”"}
           </div>
         )}
 
@@ -307,7 +307,7 @@ const ProjectCard = memo(function ProjectCard({
               <span className="text-base leading-none">âš¡</span>
               <div className="min-w-0">
                 <p className="text-[12px] font-bold text-amber-800">Offre exclusive disponible</p>
-                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul Ã  recevoir ce projet â€” bloquez les autres artisans</p>
+                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul Ã  recevoir ce projet —” bloquez les autres artisans</p>
               </div>
             </div>
           </div>
@@ -339,9 +339,9 @@ const ProjectCard = memo(function ProjectCard({
                   disabled={!p.id || p.id === "undefined" || unlocking}
                   className="inline-flex shrink-0 flex-col items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(16,185,129,0.28)] transition hover:from-emerald-400 hover:to-emerald-600 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70">
                   {unlocking ? (
-                    <><span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />DÃ©blocage...</>
+                    <><span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />Déblocage...</>
                   ) : (
-                    <><span>Voir le numÃ©ro</span><span className="text-[11px] font-normal opacity-90">{price.normal}â‚¬</span></>
+                    <><span>Voir le numéro</span><span className="text-[11px] font-normal opacity-90">{price.normal}€</span></>
                   )}
                 </button>
               </div>
@@ -360,7 +360,7 @@ const ProjectCard = memo(function ProjectCard({
                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  DÃ©bloquÃ©
+                  Débloqué
                 </span>
               </div>
             )}
@@ -371,7 +371,7 @@ const ProjectCard = memo(function ProjectCard({
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                3 / 3 artisans â€” complet
+                3 / 3 artisans —” complet
               </div>
             )}
           </div>
@@ -381,10 +381,10 @@ const ProjectCard = memo(function ProjectCard({
               disabled={!p.id || p.id === "undefined" || unlocking}
               className="flex w-full items-center gap-2 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:from-amber-100 hover:to-orange-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
               <span className="text-base leading-none">âš¡</span>
-              <span>RÃ©server en exclusivitÃ©</span>
+              <span>Réserver en exclusivité</span>
               <span className="ml-auto flex flex-col items-end">
-                <span className="text-[13px] font-black text-amber-900">{price.exclusive}â‚¬</span>
-                <span className="text-[10px] font-normal text-amber-700">accÃ¨s unique</span>
+                <span className="text-[13px] font-black text-amber-900">{price.exclusive}€</span>
+                <span className="text-[10px] font-normal text-amber-700">accès unique</span>
               </span>
             </button>
           )}
@@ -395,7 +395,7 @@ const ProjectCard = memo(function ProjectCard({
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Projet rÃ©servÃ© â€” non disponible
+              Projet réservé —” non disponible
             </button>
           )}
         </div>
@@ -444,13 +444,13 @@ function FilterPanel({
   }, [isOpen]);
 
   const CATEGORIES = [
-    { key: "peinture-interieure", label: "Peinture intÃ©rieure" },
-    { key: "peinture-exterieure", label: "Peinture extÃ©rieure" },
-    { key: "renovation", label: "RÃ©novation" },
+    { key: "peinture-interieure", label: "Peinture intérieure" },
+    { key: "peinture-exterieure", label: "Peinture extérieure" },
+    { key: "renovation", label: "Rénovation" },
     { key: "papier-peint", label: "Pose papier peint" },
     { key: "salle-de-bain", label: "Salle de bain" },
     { key: "cuisine", label: "Cuisine" },
-    { key: "electricite", label: "Ã‰lectricitÃ©" },
+    { key: "electricite", label: "Ã‰lectricité" },
     { key: "plomberie", label: "Plomberie" },
   ];
   const STATUTS = [
@@ -458,16 +458,16 @@ function FilterPanel({
     { key: "complet", label: "Projet complet (3/3)" },
   ];
   const SORTS = [
-    { key: "recent", label: "Plus rÃ©cents" },
-    { key: "budget_desc", label: "Budget le plus Ã©levÃ©" },
+    { key: "recent", label: "Plus récents" },
+    { key: "budget_desc", label: "Budget le plus élevé" },
     { key: "budget_asc", label: "Budget le plus bas" },
   ];
   const BUDGET_OPTIONS = [
-    { value: "", label: "â‚¬ No Min" }, { value: "500", label: "â‚¬ 500" },
-    { value: "1000", label: "â‚¬ 1 000" }, { value: "3000", label: "â‚¬ 3 000" },
-    { value: "5000", label: "â‚¬ 5 000" }, { value: "10000", label: "â‚¬ 10 000" },
-    { value: "20000", label: "â‚¬ 20 000" }, { value: "50000", label: "â‚¬ 50 000" },
-    { value: "100000", label: "â‚¬ 100 000" },
+    { value: "", label: "€ No Min" }, { value: "500", label: "€ 500" },
+    { value: "1000", label: "€ 1 000" }, { value: "3000", label: "€ 3 000" },
+    { value: "5000", label: "€ 5 000" }, { value: "10000", label: "€ 10 000" },
+    { value: "20000", label: "€ 20 000" }, { value: "50000", label: "€ 50 000" },
+    { value: "100000", label: "€ 100 000" },
   ];
 
   function handleApply() {
@@ -502,9 +502,9 @@ function FilterPanel({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="flex flex-col divide-y divide-slate-100">
             <div className="pb-5">
-              <p className="mb-2 text-[12px] font-bold uppercase tracking-widest text-slate-500">Zone / DÃ©partement</p>
+              <p className="mb-2 text-[12px] font-bold uppercase tracking-widest text-slate-500">Zone / Département</p>
               <div className="relative">
-                <input type="text" value={zone} onChange={(e) => setZone(e.target.value)} placeholder="21, Lyon, Dijonâ€¦"
+                <input type="text" value={zone} onChange={(e) => setZone(e.target.value)} placeholder="21, Lyon, Dijon—¦"
                   className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-600" />
                 {zone && (
                   <button type="button" onClick={() => setZone("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -514,7 +514,7 @@ function FilterPanel({
               </div>
             </div>
             <div className="py-4">
-              <p className="mb-1 text-[12px] font-bold uppercase tracking-widest text-slate-500">CatÃ©gorie</p>
+              <p className="mb-1 text-[12px] font-bold uppercase tracking-widest text-slate-500">Catégorie</p>
               {CATEGORIES.map(({ key, label }) => (
                 <CheckItem key={key} label={label} checked={selectedCats.includes(key)}
                   onChange={() => setSelectedCats((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key])} />
@@ -531,7 +531,7 @@ function FilterPanel({
               <div className="flex gap-3">
                 {[
                   { value: budgetMin, onChange: setBudgetMin, options: BUDGET_OPTIONS },
-                  { value: budgetMax, onChange: setBudgetMax, options: BUDGET_OPTIONS.map((o, i) => i === 0 ? { ...o, label: "â‚¬ No Max" } : o) },
+                  { value: budgetMax, onChange: setBudgetMax, options: BUDGET_OPTIONS.map((o, i) => i === 0 ? { ...o, label: "€ No Max" } : o) },
                 ].map(({ value, onChange, options }, idx) => (
                   <div key={idx} className="relative flex-1">
                     <select value={value} onChange={(e) => onChange(e.target.value)}
@@ -663,7 +663,7 @@ export function DashboardShell({
 
   void newHit;
 
-  const regionLabel = PREFIX_TO_REGION[cp] ?? `DÃ©partement ${cp}`;
+  const regionLabel = PREFIX_TO_REGION[cp] ?? `Département ${cp}`;
   const prefetchProject = useCallback((id: string) => { router.prefetch(`/artisan/project/${id}`); }, [router]);
 
   useEffect(() => {
@@ -686,12 +686,12 @@ export function DashboardShell({
       });
       const json = await res.json().catch(() => null);
       if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
-      if (res.status === 401 || json?.error?.includes("authentifiÃ©")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
-      if (!res.ok || !json?.ok) { setToast({ msg: json?.error || "Impossible de rÃ©cupÃ©rer le numÃ©ro.", type: "error" }); return; }
+      if (res.status === 401 || json?.error?.includes("authentifié")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
+      if (!res.ok || !json?.ok) { setToast({ msg: json?.error || "Impossible de récupérer le numéro.", type: "error" }); return; }
       setUnlockStatuses((prev) => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts((prev) => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
       setProjectUnlockCounts((prev) => ({ ...prev, [projectId]: (prev[projectId] ?? 0) + 1 }));
-      setToast({ msg: "NumÃ©ro affichÃ©.", type: "success" });
+      setToast({ msg: "Numéro affiché.", type: "success" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
   }, [currentUser, cp, router]);
@@ -705,25 +705,25 @@ export function DashboardShell({
         body: JSON.stringify({ projectIds: [projectId], exclusive: true, cp }),
       });
       const json = await res.json().catch(() => null);
-      if (res.status === 401 || json?.error?.includes("authentifiÃ©")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
+      if (res.status === 401 || json?.error?.includes("authentifié")) { router.push(`/artisan/login?redirect=/artisan/dashboard`); return; }
       if (!res.ok || !json?.ok) {
         if (json?.checkoutUrl) { window.location.href = json.checkoutUrl; return; }
-        setToast({ msg: json?.error || "Erreur lors de la rÃ©servation exclusive.", type: "error" });
+        setToast({ msg: json?.error || "Erreur lors de la réservation exclusive.", type: "error" });
         return;
       }
       setUnlockStatuses((prev) => ({ ...prev, [projectId]: { status: "paid", conversation_id: prev[projectId]?.conversation_id ?? null } }));
       setUnlockedContacts((prev) => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
       setProjectUnlockCounts((prev) => ({ ...prev, [projectId]: 3 }));
       setProjectIsLocked((prev) => ({ ...prev, [projectId]: false }));
-      setToast({ msg: "âš¡ Projet rÃ©servÃ© en exclusivitÃ© !", type: "info" });
+      setToast({ msg: "âš¡ Projet réservé en exclusivité !", type: "info" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
   }, [currentUser, cp, router]);
 
   useEffect(() => {
-    if (unlockToast === "cancel") setToast({ msg: "Paiement annulÃ©.", type: "error" });
+    if (unlockToast === "cancel") setToast({ msg: "Paiement annulé.", type: "error" });
     if (unlockToast === "success") {
-      setToast({ msg: "Paiement confirmÃ© ! NumÃ©ro dÃ©bloquÃ©.", type: "success" });
+      setToast({ msg: "Paiement confirmé ! Numéro débloqué.", type: "success" });
       const successProjectId = searchParams.get("project_id");
       if (successProjectId && projects.length > 0) {
         const refetch = async () => {
@@ -801,14 +801,14 @@ export function DashboardShell({
             )}
           </button>
 
-          {/* IA Réceptionniste â€” pa emoji, tekst i thjeshtÃ« */}
+          {/* IA Réceptionniste —” pa emoji, tekst i thjeshtÃ« */}
           <Link href="/artisan/receptionist/setup"
             className="shrink-0 px-2.5 py-1.5 text-sm text-slate-600 transition hover:text-slate-900 hover:bg-slate-200 rounded-lg whitespace-nowrap">
             <span className="hidden sm:inline">IA Réceptionniste</span>
             <span className="sm:hidden">IA</span>
           </Link>
 
-          {/* Search â€” vetÃ«m desktop */}
+          {/* Search —” vetÃ«m desktop */}
           <div className="relative hidden sm:flex flex-1 min-w-[80px] max-w-sm mx-2">
             <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -825,7 +825,7 @@ export function DashboardShell({
                   }
                 }
               }}
-              placeholder="Ville, code postalâ€¦"
+              placeholder="Ville, code postal—¦"
               className="h-8 w-full rounded-full border border-slate-200 bg-slate-50 pl-8 pr-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-300 focus:bg-white" />
           </div>
 
@@ -866,29 +866,29 @@ export function DashboardShell({
               <div className="flex gap-2">
                 <Link href={sortRecentUrl} onClick={() => setMenuOpen(false)}
                   className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort !== "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                  Plus rÃ©cents
+                  Plus récents
                 </Link>
                 <Link href={sortBudgetUrl} onClick={() => setMenuOpen(false)}
                   className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort === "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                  Budget Ã©levÃ©
+                  Budget élevé
                 </Link>
               </div>
 
-              {/* + CrÃ©er un devis */}
+              {/* + Créer un devis */}
               <Link href="/artisan/devis/new"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
-                + CrÃ©er un devis
+                + Créer un devis
               </Link>
 
-              {/* + CrÃ©er une facture */}
+              {/* + Créer une facture */}
               <Link href="/artisan/factures/new"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
-                + CrÃ©er une facture
+                + Créer une facture
               </Link>
 
-              {/* IA Réceptionniste â€” pa emoji */}
+              {/* IA Réceptionniste —” pa emoji */}
               <Link href="/artisan/receptionist/setup"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
@@ -909,11 +909,11 @@ export function DashboardShell({
                   className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400">
                   Aide / Support
                 </button>
-                <span className="mt-1.5 block text-xs text-slate-400">BientÃ´t disponible</span>
+                <span className="mt-1.5 block text-xs text-slate-400">Bientôt disponible</span>
               </div>
             </div>
 
-            {/* Se dÃ©connecter */}
+            {/* Se déconnecter */}
             <div className="border-t border-slate-100 p-5">
               <button type="button"
                 onClick={async () => {
@@ -924,7 +924,7 @@ export function DashboardShell({
                   setMenuOpen(false);
                 }}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
-                {currentUser ? "Se dÃ©connecter" : "Se connecter"}
+                {currentUser ? "Se déconnecter" : "Se connecter"}
               </button>
             </div>
           </aside>
@@ -935,14 +935,14 @@ export function DashboardShell({
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         {newHit && (
           <div className="mb-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4 text-[13px] text-blue-900">
-            <div><b>Nouveau projet dans votre zone !</b> La liste a Ã©tÃ© mise Ã  jour.</div>
+            <div><b>Nouveau projet dans votre zone !</b> La liste a été mise Ã  jour.</div>
             <button onClick={() => setNewHit(null)} className="ml-4 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-100">OK</button>
           </div>
         )}
         {toast && <div className={`mb-4 rounded-xl border p-3 text-[13px] ${toastColors[toast.type]}`}>{toast.msg}</div>}
         {error && (
           <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-[13px] text-red-800">
-            <span className="font-semibold">Erreur</span> â€” {error}
+            <span className="font-semibold">Erreur</span> —” {error}
           </div>
         )}
         <p className="mb-5 text-sm text-slate-600">
@@ -969,7 +969,7 @@ export function DashboardShell({
               </svg>
             </div>
             <p className="mb-1 text-base font-medium text-slate-900">Aucun projet dans votre zone pour le moment</p>
-            <p className="mb-6 text-sm text-slate-500">Les nouveaux projets apparaÃ®tront automatiquement</p>
+            <p className="mb-6 text-sm text-slate-500">Les nouveaux projets apparaîtront automatiquement</p>
             <button type="button" onClick={handleFilterReset}
               className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
               style={{ backgroundColor: BRAND_BLUE }}>
