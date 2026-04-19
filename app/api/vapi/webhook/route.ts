@@ -48,12 +48,11 @@ export async function POST(req: NextRequest) {
     const duration = Math.round(call.durationSeconds ?? call.duration ?? 0);
     const callerPhone = call.customer?.number ?? call.phoneNumber ?? null;
 
-    // Merr artisan_id nga numri i telefonit ne artisan_settings
+    // Merr artisan_id nga artisan_settings
     let artisanId: string | null = null;
     let artisanEmail = "artisan@premiumartisan.fr";
     let artisanName: string | null = null;
 
-    // Hap 1: Merr artizanin e pare (per tani — me vone do shtojme logjiken per numrin)
     const { data: settings } = await supabase
       .from("artisan_settings")
       .select("artisan_id, artisan_name, company_name, phone, email")
@@ -67,13 +66,32 @@ export async function POST(req: NextRequest) {
       artisanName = settings.artisan_name ?? null;
     }
 
+    // Lookup caller ne contacts table
+    let contactType = "inconnu";
+    let contactName: string | null = null;
+
+    if (artisanId && callerPhone) {
+      const { data: contact } = await supabase
+        .from("contacts")
+        .select("name, type")
+        .eq("artisan_id", artisanId)
+        .eq("phone", callerPhone)
+        .single();
+
+      if (contact) {
+        contactType = contact.type ?? "client";
+        contactName = contact.name ?? null;
+      }
+    }
+
     console.log("ARTISAN ID:", artisanId);
+    console.log("CONTACT TYPE:", contactType);
     console.log("ANALYSIS:", JSON.stringify(analysis, null, 2));
 
     const insertData = {
       artisan_id: artisanId,
       caller_phone: callerPhone,
-      nom_client: analysis?.nom_client ?? null,
+      nom_client: analysis?.nom_client ?? contactName ?? null,
       adresse: analysis?.adresse ?? null,
       probleme: analysis?.probleme ?? null,
       urgent: analysis?.urgent ?? false,
@@ -83,6 +101,8 @@ export async function POST(req: NextRequest) {
       duration: duration,
       status: "nouveau",
       isnew: true,
+      contact_type: contactType,
+      contact_name: contactName,
     };
 
     const { error } = await supabase.from("calls").insert(insertData);
@@ -93,20 +113,29 @@ export async function POST(req: NextRequest) {
     const durMin = Math.floor(duration / 60);
     const durSec = String(duration % 60).padStart(2, "0");
 
+    const contactBadge = contactType !== "inconnu"
+      ? `<span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:4px;font-size:12px;font-weight:600">${contactType.toUpperCase()}${contactName ? ` — ${contactName}` : ""}</span>`
+      : "";
+
     await resend.emails.send({
       from: "Marie IA <marie@premiumartisan.fr>",
       to: [artisanEmail],
-      subject: `${urgentTag}Nouveau appel - ${analysis?.nom_client ?? "Client inconnu"}`,
+      subject: `${urgentTag}Nouveau appel - ${contactName ?? analysis?.nom_client ?? "Client inconnu"}`,
       html: `
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
-          <h2 style="color:${analysis?.urgent ? "#dc2626" : "#1e293b"};margin-bottom:20px">
+          <h2 style="color:${analysis?.urgent ? "#dc2626" : "#1e293b"};margin-bottom:8px">
             ${analysis?.urgent ? "Nouveau appel URGENT" : "Nouveau appel recu"}
-            ${artisanName ? `<span style="font-size:14px;font-weight:400;color:#64748b;display:block;margin-top:4px">pour ${artisanName}</span>` : ""}
           </h2>
+          ${artisanName ? `<p style="color:#64748b;font-size:14px;margin-bottom:12px">pour ${artisanName}</p>` : ""}
+          ${contactBadge ? `<div style="margin-bottom:12px">${contactBadge}</div>` : ""}
           <table style="width:100%;border-collapse:collapse">
             <tr style="border-bottom:1px solid #e2e8f0">
-              <td style="padding:10px;color:#64748b;width:40%">Client</td>
-              <td style="padding:10px;font-weight:600">${analysis?.nom_client ?? "-"}</td>
+              <td style="padding:10px;color:#64748b;width:40%">Appelant</td>
+              <td style="padding:10px;font-weight:600">${contactName ?? analysis?.nom_client ?? "-"}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #e2e8f0">
+              <td style="padding:10px;color:#64748b">Type</td>
+              <td style="padding:10px;font-weight:600">${contactType}</td>
             </tr>
             <tr style="border-bottom:1px solid #e2e8f0">
               <td style="padding:10px;color:#64748b">Telephone</td>
