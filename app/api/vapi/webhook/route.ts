@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     console.log("VAPI WEBHOOK TYPE:", body.message?.type);
-    console.log("VAPI BODY:", JSON.stringify(body, null, 2));
 
     const msgType = body.message?.type;
     if (msgType !== "end-of-call-report" && msgType !== "call-ended") {
@@ -35,8 +34,6 @@ export async function POST(req: NextRequest) {
       call.structuredData ??
       null;
 
-    console.log("ANALYSIS:", JSON.stringify(analysis, null, 2));
-
     const transcript =
       typeof call.transcript === "string"
         ? call.transcript
@@ -51,7 +48,30 @@ export async function POST(req: NextRequest) {
     const duration = Math.round(call.durationSeconds ?? call.duration ?? 0);
     const callerPhone = call.customer?.number ?? call.phoneNumber ?? null;
 
+    // Merr artisan_id nga numri i telefonit ne artisan_settings
+    let artisanId: string | null = null;
+    let artisanEmail: string | null = "artisan@premiumartisan.fr";
+    let artisanName: string | null = null;
+
+    // Hap 1: Merr artizanin e pare (per tani — me vone do shtojme logjiken per numrin)
+    const { data: settings } = await supabase
+      .from("artisan_settings")
+      .select("artisan_id, artisan_name, company_name, phone, email")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (settings) {
+      artisanId = settings.artisan_id ?? null;
+      artisanEmail = settings.email ?? artisanEmail;
+      artisanName = settings.artisan_name ?? null;
+    }
+
+    console.log("ARTISAN ID:", artisanId);
+    console.log("ANALYSIS:", JSON.stringify(analysis, null, 2));
+
     const insertData = {
+      artisan_id: artisanId,
       caller_phone: callerPhone,
       nom_client: analysis?.nom_client ?? null,
       adresse: analysis?.adresse ?? null,
@@ -65,23 +85,23 @@ export async function POST(req: NextRequest) {
       isnew: true,
     };
 
-    console.log("INSERT DATA:", JSON.stringify(insertData, null, 2));
-
     const { error } = await supabase.from("calls").insert(insertData);
     if (error) console.error("Supabase error:", error);
 
+    // Email te artizani
     const urgentTag = analysis?.urgent ? "URGENT - " : "";
     const durMin = Math.floor(duration / 60);
     const durSec = String(duration % 60).padStart(2, "0");
 
     await resend.emails.send({
       from: "Marie IA <marie@premiumartisan.fr>",
-      to: ["artisan@premiumartisan.fr"],
+      to: [artisanEmail],
       subject: `${urgentTag}Nouveau appel - ${analysis?.nom_client ?? "Client inconnu"}`,
       html: `
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
           <h2 style="color:${analysis?.urgent ? "#dc2626" : "#1e293b"};margin-bottom:20px">
             ${analysis?.urgent ? "Nouveau appel URGENT" : "Nouveau appel recu"}
+            ${artisanName ? `<span style="font-size:14px;font-weight:400;color:#64748b;display:block;margin-top:4px">pour ${artisanName}</span>` : ""}
           </h2>
           <table style="width:100%;border-collapse:collapse">
             <tr style="border-bottom:1px solid #e2e8f0">
