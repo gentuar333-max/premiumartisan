@@ -74,8 +74,8 @@ function parseSearchToPrefix(input: string): string | null {
   const m2 = s.match(/^\d{2}$/);
   if (m2) return m2[0];
   const normalized = s
-    .replace(/[éèÃª]/g, "e")
-    .replace(/[Ã Ã¢]/g, "a")
+    .replace(/[éèàª]/g, "e")
+    .replace(/[à à¢]/g, "a")
     .replace(/ô/g, "o");
   for (const [key, prefix] of Object.entries(REGION_TO_PREFIX)) {
     if (normalized.includes(key) || key.includes(normalized)) return prefix;
@@ -256,7 +256,7 @@ const ProjectCard = memo(function ProjectCard({
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <span className="text-[12px] font-semibold text-slate-200">Projet réservé —” déjÃ  attribué Ã  un artisan</span>
+            <span className="text-[12px] font-semibold text-slate-200">Projet réservé —” déjà  attribué à  un artisan</span>
           </div>
         )}
         {showFallbackBadge && !isLockedForMe && (
@@ -286,7 +286,7 @@ const ProjectCard = memo(function ProjectCard({
               <span key={label} className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs text-slate-600">{label}</span>
             ))}
             {p.surface_m2 && (
-              <span className="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">{p.surface_m2} mÂ²</span>
+              <span className="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">{p.surface_m2} m²</span>
             )}
           </div>
         )}
@@ -304,10 +304,10 @@ const ProjectCard = memo(function ProjectCard({
         {isFirstSlot && !isUnlocked && !isLockedForMe && (
           <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
             <div className="flex items-start gap-2">
-              <span className="text-base leading-none">âš¡</span>
+              <span className="text-base leading-none"></span>
               <div className="min-w-0">
                 <p className="text-[12px] font-bold text-amber-800">Offre exclusive disponible</p>
-                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul Ã  recevoir ce projet —” bloquez les autres artisans</p>
+                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul à  recevoir ce projet —” bloquez les autres artisans</p>
               </div>
             </div>
           </div>
@@ -380,7 +380,7 @@ const ProjectCard = memo(function ProjectCard({
             <button type="button" onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
               disabled={!p.id || p.id === "undefined" || unlocking}
               className="flex w-full items-center gap-2 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:from-amber-100 hover:to-orange-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
-              <span className="text-base leading-none">âš¡</span>
+              <span className="text-base leading-none"></span>
               <span>Réserver en exclusivité</span>
               <span className="ml-auto flex flex-col items-end">
                 <span className="text-[13px] font-black text-amber-900">{price.exclusive}€</span>
@@ -450,7 +450,7 @@ function FilterPanel({
     { key: "papier-peint", label: "Pose papier peint" },
     { key: "salle-de-bain", label: "Salle de bain" },
     { key: "cuisine", label: "Cuisine" },
-    { key: "electricite", label: "Ã‰lectricité" },
+    { key: "electricite", label: "à‰lectricité" },
     { key: "plomberie", label: "Plomberie" },
   ];
   const STATUTS = [
@@ -715,7 +715,7 @@ export function DashboardShell({
       setUnlockedContacts((prev) => ({ ...prev, [projectId]: { phone: json?.contacts?.[projectId]?.phone ?? null } }));
       setProjectUnlockCounts((prev) => ({ ...prev, [projectId]: 3 }));
       setProjectIsLocked((prev) => ({ ...prev, [projectId]: false }));
-      setToast({ msg: "âš¡ Projet réservé en exclusivité !", type: "info" });
+      setToast({ msg: " Projet réservé en exclusivité !", type: "info" });
     } catch { setToast({ msg: "Erreur serveur.", type: "error" }); }
     finally { setUnlockingProjectId(null); }
   }, [currentUser, cp, router]);
@@ -801,14 +801,14 @@ export function DashboardShell({
             )}
           </button>
 
-          {/* IA Réceptionniste —” pa emoji, tekst i thjeshtÃ« */}
+          {/* IA Réceptionniste —” pa emoji, tekst i thjeshtà« */}
           <Link href="/artisan/receptionist/setup"
             className="shrink-0 px-2.5 py-1.5 text-sm text-slate-600 transition hover:text-slate-900 hover:bg-slate-200 rounded-lg whitespace-nowrap">
             <span className="hidden sm:inline">IA Réceptionniste</span>
             <span className="sm:hidden">IA</span>
           </Link>
 
-          {/* Search —” vetÃ«m desktop */}
+          {/* Search —” vetà«m desktop */}
           <div className="relative hidden sm:flex flex-1 min-w-[80px] max-w-sm mx-2">
             <svg className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -935,7 +935,7 @@ export function DashboardShell({
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         {newHit && (
           <div className="mb-4 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4 text-[13px] text-blue-900">
-            <div><b>Nouveau projet dans votre zone !</b> La liste a été mise Ã  jour.</div>
+            <div><b>Nouveau projet dans votre zone !</b> La liste a été mise à  jour.</div>
             <button onClick={() => setNewHit(null)} className="ml-4 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-100">OK</button>
           </div>
         )}
