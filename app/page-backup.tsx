@@ -1,4 +1,4 @@
-﻿// app/page.tsx — SERVER COMPONENT
+// app/page.tsx — SERVER COMPONENT
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,6 +123,7 @@ export default function Page() {
       {/* ── HERO ── */}
       <section style={styles.heroSection}>
         <div style={styles.container}>
+          {/* Nav */}
           <div style={styles.topNav}>
             <PALogo />
             <div style={styles.topNavLinks}>
@@ -140,7 +141,7 @@ export default function Page() {
           </h1>
 
           <p style={styles.sub}>
-            Gratuit, sans engagement. Nous transmettons votre demande à des artisans de votre zone. Vous recevez jusqu&apos;à <b>3 réponses maximum</b>.
+            Gratuit, sans engagement. Nous transmettons votre demande à des artisans de votre zone. Vous recevez jusqu'à <b>3 réponses maximum</b>.
           </p>
 
           <HomeClient />
@@ -213,7 +214,7 @@ export default function Page() {
             {[
               { title: "1) Vous publiez", text: "Décrivez votre projet en 1 minute." },
               { title: "2) On transmet", text: "Votre demande est envoyée à des artisans pertinents (zone + besoin)." },
-              { title: "3) Vous choisissez", text: "Vous comparez et décidez – jusqu'à 3 réponses maximum." },
+              { title: "3) Vous choisissez", text: "Vous comparez et décidez — jusqu'à 3 réponses maximum." },
             ].map(({ title, text }) => (
               <div key={title} style={styles.stepCard}>
                 <div style={styles.stepTitle}>{title}</div>
@@ -227,14 +228,14 @@ export default function Page() {
           <div className="grid md:grid-cols-12 gap-6 mt-10">
             <div className="md:col-span-7">
               <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden rounded-2xl">
-                <Image src="/landing-static/how-it-works-1.webp" alt="Artisan en intervention" fill sizes="(max-width: 768px) 100vw, 50vw" quality={90} className="object-cover" />
+                <Image src="/landing/how-it-works-1.webp" alt="Artisan en intervention" fill sizes="(max-width: 768px) 100vw, 50vw" quality={90} className="object-cover" />
                 <div className="absolute inset-0 bg-black/10" />
                 <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">Photo illustrative</span>
               </div>
             </div>
             <div className="md:col-span-5 flex md:items-center">
               <div className="relative w-full h-[300px] sm:h-[420px] overflow-hidden rounded-2xl">
-                <Image src="/landing-static/how-it-works-2.webp" alt="Finition intérieure soignée" fill sizes="(max-width: 768px) 100vw, 50vw" quality={95} className="object-contain rounded-2xl bg-gray-50" />
+                <Image src="/landing/how-it-works-2.webp" alt="Finition intérieure soignée" fill sizes="(max-width: 768px) 100vw, 50vw" quality={95} className="object-contain rounded-2xl bg-gray-50" />
                 <div className="absolute inset-0 bg-black/10" />
                 <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">Photo illustrative</span>
               </div>
@@ -269,10 +270,10 @@ export default function Page() {
             Trouver un artisan qualifié en Côte-d&apos;Or
           </h2>
           <p style={{ color: "#64748b", fontSize: 15, marginBottom: 36, maxWidth: 720, lineHeight: 1.6 }}>
-            PremiumArtisan met en relation particuliers et artisans du bâtiment sur Dijon et toute la Côte-d&apos;Or.
+            PremiumArtisan met en relation particuliers et artisans du bâtiment sur Dijon et toute la Côte-d'Or.
             Vous publiez votre projet gratuitement, nous le transmettons aux artisans disponibles dans votre secteur.
             Chaque artisan paie uniquement s&apos;il souhaite répondre à votre demande.
-            Vous recevez jusqu&apos;à 3 devis comparables, sans engagement.
+            Vous recevez jusqu'à 3 devis comparables, sans engagement.
           </p>
           {seoLinks.map(({ label, desc, links }) => (
             <div key={label} style={{ marginBottom: 32 }}>
@@ -309,7 +310,7 @@ export default function Page() {
             <span style={styles.ctaAccent}>votre projet ?</span>
           </h2>
           <p style={{ color: "rgba(234,240,255,0.7)", marginBottom: 32, fontSize: 16, lineHeight: 1.6 }}>
-            Publiez votre projet en 2 minutes et recevez jusqu&apos;à 3 devis d&apos;artisans qualifiés de votre secteur.
+            Publiez votre projet en 2 minutes et recevez jusqu'à 3 devis d'artisans qualifiés de votre secteur.
           </p>
           <Link href="/publier-projet/form" style={styles.ctaBtn}>
             Publier mon projet gratuitement →
@@ -328,7 +329,7 @@ export default function Page() {
         <div className="max-w-[1150px] mx-auto px-5 grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-10">
           <div style={{ maxWidth: 260 }}>
             <div style={styles.footerLogo}><PALogo /></div>
-            <p style={styles.footerTagline}>La plateforme qui connecte particuliers et artisans peintres à Dijon & Côte-d&apos;Or.</p>
+            <p style={styles.footerTagline}>La plateforme qui connecte particuliers et artisans peintres à Dijon & Côte-d'Or.</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             <div>
@@ -367,7 +368,7 @@ export default function Page() {
         <div style={styles.footerBottom}>
           <span>© 2026 PremiumArtisan</span>
           <span style={{ margin: "0 8px", opacity: 0.3 }}>·</span>
-          <span>Dijon, Côte-d&apos;Or (21)</span>
+          <span>Dijon, Côte-d'Or (21)</span>
         </div>
       </footer>
     </main>
