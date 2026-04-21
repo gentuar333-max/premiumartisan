@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import HomeClient from "@/components/HomeClient";
-import PALogo from "@/components/PALogo";
 
 // Count-up hook
 function useCountUp(target: number, duration: number, trigger: boolean) {
@@ -98,7 +97,6 @@ export default function Page() {
       {/* ── NAV ── */}
       <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(11,17,32,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(51,65,85,0.3)" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-          {/* Logo petit */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <div style={{ width: 28, height: 28, background: "#F59E0B", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, transform: "rotate(45deg)", flexShrink: 0 }}>
               <span style={{ transform: "rotate(-45deg)", display: "block", fontSize: 14 }}>⚒</span>
@@ -109,12 +107,10 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Desktop nav */}
-          <div style={{ display: "flex", alignItems: "center", gap: 24, flex: 1, justifyContent: "center" }} className="hidden-mobile">
+          <div style={{ display: "flex", alignItems: "center", gap: 24, flex: 1, justifyContent: "center" }}>
             {[
               { label: "Comment ça marche", href: "/comment-ca-marche" },
               { label: "Pourquoi nous ?", href: "#why" },
-              { label: "Témoignages", href: "#testimonials" },
               { label: "IA Réceptionniste", href: "/artisan/receptionist" },
               { label: "FAQ", href: "/faq" },
             ].map(({ label, href }) => (
@@ -125,10 +121,9 @@ export default function Page() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-            <Link href="/publier-projet/form" style={{ background: "linear-gradient(90deg,#3B82F6,#22D3EE)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", borderRadius: 999, textDecoration: "none", whiteSpace: "nowrap" }} className="hidden-mobile">
+            <Link href="/publier-projet/form" style={{ background: "linear-gradient(90deg,#3B82F6,#22D3EE)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 20px", borderRadius: 999, textDecoration: "none", whiteSpace: "nowrap" }}>
               Publier mon projet
             </Link>
-            {/* Burger 3 lignes */}
             <button onClick={() => setMenuOpen(o => !o)} style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, padding: 8 }} aria-label="Menu">
               <span style={{ display: "block", width: 22, height: 2, background: "#fff", borderRadius: 2 }} />
               <span style={{ display: "block", width: 16, height: 2, background: "#fff", borderRadius: 2 }} />
@@ -137,13 +132,11 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Mobile menu */}
         {menuOpen && (
           <div style={{ background: "#0F172A", borderTop: "1px solid #334155", padding: "16px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
             {[
               { label: "Comment ça marche", href: "/comment-ca-marche" },
               { label: "Pourquoi nous ?", href: "#why" },
-              { label: "Témoignages", href: "#testimonials" },
               { label: "IA Réceptionniste", href: "/artisan/receptionist" },
               { label: "FAQ", href: "/faq" },
             ].map(({ label, href }) => (
@@ -200,7 +193,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Right geometric */}
           <div style={{ flex: "0 0 360px", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
             <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle at center,rgba(59,130,246,0.15) 0%,transparent 60%)" }} />
             <div style={{ position: "relative", width: 350, height: 350, borderRadius: 40, background: "linear-gradient(135deg,rgba(59,130,246,0.08) 0%,rgba(34,211,238,0.08) 100%)", border: "1px solid rgba(59,130,246,0.15)", animation: "float 6s ease-in-out infinite" }}>
@@ -283,39 +275,6 @@ export default function Page() {
           </div>
           <div style={{ position: "relative", height: 380, borderRadius: 24, overflow: "hidden", border: "1px solid rgba(51,65,85,0.3)" }}>
             <Image src="/landing-static/ai-receptionist.jpg" alt="IA Réceptionniste" fill sizes="50vw" quality={90} style={{ objectFit: "cover" }} />
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section id="testimonials" style={{ background: "#0F172A", padding: "80px 24px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.15em", color: "#22D3EE", textTransform: "uppercase" }}>TÉMOIGNAGES</span>
-            <h2 style={{ fontSize: "clamp(28px,4vw,48px)", fontWeight: 700, color: "#fff", marginTop: 12 }}>
-              Ils nous font confiance à <span className="gradient-text">Dijon & Côte-d&apos;Or</span>
-            </h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 24 }}>
-            {[
-              { avatar: "/landing-static/avatar-karima.jpg", name: "Karima O.", location: "Chenôve · douche italienne", text: "Baignoire fonte des années 70 remplacée par une douche à l'italienne. David a géré tout ça en 9 jours. 6 200€ tout compris. Notre bailleur a validé les travaux sans aucun problème.", stars: 5 },
-              { avatar: "/landing-static/avatar-patrick.jpg", name: "Patrick G.", location: "Chenôve · remise en état locative", text: "Entre deux locataires, Nadia a refait la salle de bain en 4 jours. Carrelage par-dessus, nouvelle robinetterie, joints refaits. 2 400€. Le nouveau locataire a commenté la propreté spontanément.", stars: 5 },
-              { avatar: "/landing-static/avatar-martine.jpg", name: "Martine L.", location: "Chenôve · PMR · MaPrimeAdapt'", text: "Sofiane a transformé ma salle de bain en douche PMR à 72 ans. Il a géré le dossier MaPrimeAdapt' avec moi. Sur 7 800€ de travaux, j'ai obtenu 5 460€ d'aides.", stars: 5 },
-            ].map(({ avatar, name, location, text, stars }) => (
-              <div key={name} style={{ background: "#1E293B", border: "1px solid #334155", borderRadius: 20, padding: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "2px solid #22D3EE", position: "relative" }}>
-                    <Image src={avatar} alt={name} fill sizes="56px" style={{ objectFit: "cover" }} />
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, color: "#fff", fontSize: 16 }}>{name}</div>
-                    <div style={{ fontSize: 12, color: "#60A5FA" }}>{location}</div>
-                  </div>
-                  <div style={{ marginLeft: "auto", color: "#22D3EE", fontSize: 14 }}>{"★".repeat(stars)}</div>
-                </div>
-                <p style={{ fontSize: 14, color: "#94A3B8", lineHeight: 1.7, fontStyle: "italic" }}>&ldquo;{text}&rdquo;</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -414,7 +373,7 @@ export default function Page() {
       {/* ── CTA ── */}
       <section style={{ background: "linear-gradient(90deg,#3B82F6 0%,#22D3EE 100%)", padding: "80px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <h2 style={{ fontSize: "clamp(32px,5vw,48px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 16, color: "#fff" }}>
+          <h2 style={{ fontSize: "clamp(32px,5vw,48px)", fontWeight: 900, lineHeight: 1.1, marginBottom: 16, color: "#fff" }}>
             Prêt à démarrer votre projet ?
           </h2>
           <p style={{ fontSize: 17, color: "rgba(255,255,255,0.9)", marginBottom: 32, lineHeight: 1.6 }}>
