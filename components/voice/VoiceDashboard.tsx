@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react"
 
 type CallStatus = "nouveau" | "vu" | "rappele" | "devis" | "termine"
+type SectionTab = "client" | "employe" | "famille"
+type ContactType = "famille" | "employe" | "client"
 
 interface Call {
   id: string
@@ -19,6 +21,15 @@ interface Call {
   transcript: { role: "ai" | "client"; text: string; time: string }[]
 }
 
+interface Contact {
+  id: string
+  name: string
+  phone: string
+  type: ContactType
+  notes: string | null
+  created_at: string
+}
+
 function parseTranscript(raw: string | null): { role: "ai" | "client"; text: string; time: string }[] {
   if (!raw) return []
   try {
@@ -30,16 +41,12 @@ function parseTranscript(raw: string | null): { role: "ai" | "client"; text: str
       const secs = String((i * 30) % 60).padStart(2, "0")
       return { role: isAI ? "ai" : "client", text, time: `${mins}:${secs}` }
     })
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 function mapDbCall(row: Record<string, unknown>): Call {
   const rawStatus = (row.status as string) ?? "nouveau"
-  const status = rawStatus
-    .replace("terminé", "termine")
-    .replace("rappelé", "rappele") as CallStatus
+  const status = rawStatus.replace("terminé", "termine").replace("rappelé", "rappele") as CallStatus
   return {
     id: row.id as string,
     dt: row.created_at as string,
@@ -69,23 +76,41 @@ function fmtDur(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
 }
 
-type FilterKey = "all" | "new" | "urgent" | "done"
+function fmtPhone(phone: string) {
+  const p = phone.replace(/^\+33/, "0").replace(/\s/g, "")
+  return p.replace(/(\d{2})(?=\d)/g, "$1 ").trim()
+}
 
 const BADGE: Record<string, { bg: string; color: string; label: string }> = {
-  nouveau:  { bg: "#DCFCE7", color: "#166534", label: "Nouveau" },
-  vu:       { bg: "#F3F4F6", color: "#6B7280", label: "Vu" },
-  rappele:  { bg: "#FEF3C7", color: "#92400E", label: "Rappele" },
-  devis:    { bg: "#DBEAFE", color: "#1E40AF", label: "Devis" },
-  termine:  { bg: "#F3F4F6", color: "#6B7280", label: "Termine" },
-  urgent:   { bg: "#FEE2E2", color: "#DC2626", label: "Urgent" },
+  nouveau: { bg: "#DCFCE7", color: "#166534", label: "Nouveau" },
+  vu:      { bg: "#F3F4F6", color: "#6B7280", label: "Vu" },
+  rappele: { bg: "#FEF3C7", color: "#92400E", label: "Rappele" },
+  devis:   { bg: "#DBEAFE", color: "#1E40AF", label: "Devis" },
+  termine: { bg: "#F3F4F6", color: "#6B7280", label: "Termine" },
+  urgent:  { bg: "#FEE2E2", color: "#DC2626", label: "Urgent" },
+}
+
+const CONTACT_CFG: Record<string, { label: string; bg: string; color: string }> = {
+  employe: { label: "Employé", bg: "#DBEAFE", color: "#1E40AF" },
+  famille: { label: "Famille", bg: "#FEF3C7", color: "#92400E" },
 }
 
 export default function VoiceDashboard() {
-  const [calls, setCalls] = useState<Call[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<FilterKey>("all")
+  const [calls, setCalls]       = useState<Call[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState<string | null>(null)
+  const [tab, setTab]           = useState<SectionTab>("client")
   const [selected, setSelected] = useState<Call | null>(null)
+
+  // Contact form
+  const [showForm, setShowForm]     = useState(false)
+  const [saving, setSaving]         = useState(false)
+  const [cName, setCName]           = useState("")
+  const [cPhone, setCPhone]         = useState("")
+  const [cType, setCType]           = useState<ContactType>("employe")
+  const [cNotes, setCNotes]         = useState("")
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const fetchCalls = useCallback(async () => {
     try {
@@ -100,24 +125,29 @@ export default function VoiceDashboard() {
     }
   }, [])
 
+  const fetchContacts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/artisan/contacts")
+      const json = await res.json()
+      if (json.ok) setContacts(json.contacts)
+    } catch { /* silent */ }
+  }, [])
+
   useEffect(() => {
     void fetchCalls()
+    void fetchContacts()
     const interval = setInterval(() => void fetchCalls(), 30000)
     return () => clearInterval(interval)
-  }, [fetchCalls])
+  }, [fetchCalls, fetchContacts])
 
   const newCount    = calls.filter(c => c.isnew).length
   const urgentCount = calls.filter(c => c.urgent).length
-  const doneCount   = calls.filter(c => c.status === "termine").length
 
-  const filtered =
-    filter === "new"    ? calls.filter(c => c.isnew) :
-    filter === "urgent" ? calls.filter(c => c.urgent) :
-    filter === "done"   ? calls.filter(c => c.status === "termine") :
-    calls
+  const oldCalls = calls.filter(c => !c.isnew)
+  const newCalls = calls.filter(c => c.isnew)
 
-  const oldCalls = filtered.filter(c => !c.isnew)
-  const newCalls = filtered.filter(c => c.isnew)
+  const employeList = contacts.filter(c => c.type === "employe")
+  const familleList = contacts.filter(c => c.type === "famille")
 
   async function markDone(id: string) {
     setCalls(prev => prev.map(c => c.id === id ? { ...c, status: "termine" as CallStatus, isnew: false } : c))
@@ -137,6 +167,36 @@ export default function VoiceDashboard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     })
+  }
+
+  async function handleAddContact() {
+    if (!cName.trim() || !cPhone.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch("/api/artisan/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: cName, phone: cPhone, type: cType, notes: cNotes }),
+      })
+      const json = await res.json()
+      if (json.ok) {
+        setContacts(prev => [...prev, json.contact])
+        setCName(""); setCPhone(""); setCNotes("")
+        setShowForm(false)
+      }
+    } finally { setSaving(false) }
+  }
+
+  async function handleDeleteContact(id: string) {
+    setDeletingId(id)
+    try {
+      await fetch("/api/artisan/contacts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+      setContacts(prev => prev.filter(c => c.id !== id))
+    } finally { setDeletingId(null) }
   }
 
   function getBadge(call: Call) {
@@ -184,6 +244,56 @@ export default function VoiceDashboard() {
     )
   }
 
+  const ContactList = ({ list, type }: { list: Contact[]; type: "employe" | "famille" }) => {
+    const cfg = CONTACT_CFG[type]
+    return (
+      <>
+        {list.length === 0 ? (
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, textAlign: "center" as const, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Aucun {cfg.label.toLowerCase()}</div>
+            <div style={{ fontSize: 13, color: "#666", marginBottom: 20 }}>
+              Ajoutez un {cfg.label.toLowerCase()} pour que Marie le reconnaisse
+            </div>
+            <button
+              onClick={() => { setCType(type); setShowForm(true) }}
+              style={{ background: "#1A1A1A", color: "#fff", border: "none", borderRadius: 12, padding: "10px 20px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}
+            >
+              + Ajouter
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {list.map(c => (
+              <div key={c.id} style={{ background: "#fff", borderRadius: 14, padding: "14px 16px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 42, height: 42, borderRadius: "50%", background: cfg.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: cfg.color, flexShrink: 0 }}>
+                  {c.name.trim().split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 2 }}>{c.name}</div>
+                  <div style={{ fontSize: 13, color: "#666" }}>{fmtPhone(c.phone)}</div>
+                  {c.notes && <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.notes}</div>}
+                </div>
+                <button
+                  onClick={() => handleDeleteContact(c.id)}
+                  disabled={deletingId === c.id}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#D1D5DB", fontSize: 20, padding: 4, flexShrink: 0, lineHeight: 1 }}
+                >
+                  {deletingId === c.id ? "·" : "×"}
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => { setCType(type); setShowForm(true) }}
+              style={{ background: "#fff", border: "1.5px dashed #D1D5DB", borderRadius: 14, padding: "14px 16px", fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer", textAlign: "center" as const }}
+            >
+              + Ajouter un {cfg.label.toLowerCase()}
+            </button>
+          </div>
+        )}
+      </>
+    )
+  }
+
   if (loading) return (
     <div style={{ fontFamily: "sans-serif", padding: 32, textAlign: "center" as const, color: "#666" }}>
       Chargement...
@@ -203,6 +313,7 @@ export default function VoiceDashboard() {
 
       <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#F8F9FA", minHeight: "100vh", padding: "16px 16px 100px" }}>
 
+        {/* Header — identik me foton */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700 }}>Receptionniste IA</h1>
@@ -222,6 +333,7 @@ export default function VoiceDashboard() {
           </div>
         )}
 
+        {/* Stats — identik me foton */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 20 }}>
           {[
             { val: calls.length, label: "Appels" },
@@ -235,55 +347,60 @@ export default function VoiceDashboard() {
           ))}
         </div>
 
+        {/* Tabs: Client / Employé / Famille — zëvendësojnë Tous/Nouveaux/Urgents/Traités */}
         <div style={{ display: "flex", gap: 8, marginBottom: 16, overflowX: "auto" as const, paddingBottom: 4 }}>
           {([
-            { key: "all",    label: `Tous (${calls.length})` },
-            { key: "new",    label: `Nouveaux (${newCount})` },
-            { key: "urgent", label: `Urgents (${urgentCount})` },
-            { key: "done",   label: `Traites (${doneCount})` },
-          ] as { key: FilterKey; label: string }[]).map(t => (
-            <button key={t.key} className={`tab-btn ${filter === t.key ? "active" : "inactive"}`} onClick={() => setFilter(t.key)}>
+            { key: "client",  label: `Client (${calls.length})` },
+            { key: "employe", label: `Employé (${employeList.length})` },
+            { key: "famille", label: `Famille (${familleList.length})` },
+          ] as { key: SectionTab; label: string }[]).map(t => (
+            <button key={t.key} className={`tab-btn ${tab === t.key ? "active" : "inactive"}`} onClick={() => setTab(t.key)}>
               {t.label}
             </button>
           ))}
         </div>
 
-        {filter === "all" && oldCalls.length > 0 && (
+        {/* CLIENT — calls identike me foton */}
+        {tab === "client" && (
           <>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: 0.5, margin: "20px 0 12px" }}>
-              Appels anterieurs
-            </div>
-            {oldCalls.map(c => <CallCard key={c.id} call={c} />)}
+            {oldCalls.length > 0 && (
+              <>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: 0.5, margin: "20px 0 12px" }}>
+                  Appels anterieurs
+                </div>
+                {oldCalls.map(c => <CallCard key={c.id} call={c} />)}
+              </>
+            )}
+            {newCalls.length > 0 && (
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: 0.5, margin: "20px 0 12px" }}>
+                Nouveaux appels
+              </div>
+            )}
+            {newCalls.map(c => <CallCard key={c.id} call={c} />)}
+            {calls.length === 0 && (
+              <div style={{ textAlign: "center" as const, padding: 40, color: "#999", fontSize: 14 }}>
+                Aucun appel pour le moment
+              </div>
+            )}
           </>
         )}
 
-        {filter === "all" && newCalls.length > 0 && (
-          <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: 0.5, margin: "20px 0 12px" }}>
-            Nouveaux appels
-          </div>
-        )}
+        {/* EMPLOYÉ */}
+        {tab === "employe" && <ContactList list={employeList} type="employe" />}
 
-        {filter === "all"
-          ? newCalls.map(c => <CallCard key={c.id} call={c} />)
-          : filtered.map(c => <CallCard key={c.id} call={c} />)
-        }
+        {/* FAMILLE */}
+        {tab === "famille" && <ContactList list={familleList} type="famille" />}
 
-        {filtered.length === 0 && !loading && (
-          <div style={{ textAlign: "center" as const, padding: 40, color: "#999", fontSize: 14 }}>
-            {calls.length === 0 ? "Aucun appel pour le moment" : "Aucun appel dans cette categorie"}
-          </div>
-        )}
       </div>
 
+      {/* Detail modal — identik */}
       {selected && (
         <div onClick={() => setSelected(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "82vh", overflowY: "auto", padding: 24, animation: "slideUp .3s ease" }}>
-
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <h2 style={{ fontSize: 20, fontWeight: 700 }}>Details de l'appel</h2>
               <button onClick={() => setSelected(null)} style={{ width: 40, height: 40, borderRadius: "50%", border: "none", background: "#F3F4F6", fontSize: 20, cursor: "pointer" }}>x</button>
             </div>
-
             <div style={{ display: "grid", gap: 10, marginBottom: 16 }}>
               {[
                 { icon: "👤", label: "Client",    val: selected.name },
@@ -301,7 +418,6 @@ export default function VoiceDashboard() {
                 </div>
               ))}
             </div>
-
             {selected.transcript.length > 0 && (
               <div style={{ background: "#F8F9FA", borderRadius: 16, padding: 16, marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: 0.5, marginBottom: 12 }}>
@@ -321,7 +437,6 @@ export default function VoiceDashboard() {
                 ))}
               </div>
             )}
-
             <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
               <a href={selected.phone ? `tel:${selected.phone.replace(/\s/g, "")}` : "#"}
                 style={{ flex: 1, padding: 15, borderRadius: 12, border: "none", background: "#1A1A1A", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "center" as const, textDecoration: "none", display: "block" }}>
@@ -332,10 +447,53 @@ export default function VoiceDashboard() {
                 Marquer traite
               </button>
             </div>
-
             <button onClick={() => { if (confirm("Supprimer cet appel ?")) deleteCall(selected.id) }}
               style={{ width: "100%", padding: 13, borderRadius: 12, border: "1px solid #FEE2E2", background: "#FFF5F5", color: "#DC2626", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
               Supprimer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add contact modal */}
+      {showForm && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "flex-end" }}
+          onClick={e => { if (e.target === e.currentTarget) setShowForm(false) }}
+        >
+          <div style={{ background: "#fff", borderRadius: "20px 20px 0 0", padding: 24, width: "100%", animation: "slideUp .25s ease" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>Nouveau {CONTACT_CFG[cType].label.toLowerCase()}</div>
+              <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#666" }}>×</button>
+            </div>
+            {[
+              { label: "Prénom et nom *",  value: cName,  set: setCName,  placeholder: "Michel Dupont",    inputType: "text" },
+              { label: "Téléphone *",      value: cPhone, set: setCPhone, placeholder: "06 12 34 56 78",   inputType: "tel"  },
+              { label: "Note (optionnel)", value: cNotes, set: setCNotes, placeholder: "Ex: camion blanc", inputType: "text" },
+            ].map(f => (
+              <div key={f.label} style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 13, fontWeight: 500, color: "#374151", display: "block", marginBottom: 6 }}>{f.label}</label>
+                <input
+                  type={f.inputType}
+                  value={f.value}
+                  onChange={e => f.set(e.target.value)}
+                  placeholder={f.placeholder}
+                  style={{ width: "100%", padding: "12px 14px", borderRadius: 12, border: "1.5px solid #E5E7EB", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
+                />
+              </div>
+            ))}
+            <button
+              onClick={handleAddContact}
+              disabled={saving || !cName.trim() || !cPhone.trim()}
+              style={{
+                width: "100%",
+                background: saving || !cName.trim() || !cPhone.trim() ? "#E5E7EB" : "#1A1A1A",
+                color:      saving || !cName.trim() || !cPhone.trim() ? "#9CA3AF" : "#fff",
+                border: "none", borderRadius: 14, padding: "14px",
+                fontSize: 16, fontWeight: 700, cursor: saving ? "wait" : "pointer", marginTop: 4,
+              }}
+            >
+              {saving ? "Enregistrement..." : "Ajouter"}
             </button>
           </div>
         </div>
