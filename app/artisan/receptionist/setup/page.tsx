@@ -26,21 +26,13 @@ export default function ReceptionistSetupPage() {
       .then(r => r.json())
       .then(json => {
         if (json.settings) {
-          setNom(json.settings.artisan_name ?? "")
-          setEntreprise(json.settings.company_name ?? "")
-          const m = json.settings.metier?.[0] ?? ""
-          if (METIERS.slice(0, -1).includes(m)) {
-            setMetier(m)
-          } else if (m) {
-            setMetier("Autre")
-            setAutreMetier(m)
-          }
-          setTel(json.settings.phone ?? "")
-          setEmail(json.settings.email ?? "")
+          // Ka setup — ridrejto direkt te dashboard
+          router.replace("/artisan/receptionist")
+          return
         }
       })
       .catch(() => {})
-  }, [])
+  }, [router])
 
   function openMetier() {
     setTempMetier(metier)
@@ -132,7 +124,6 @@ export default function ReceptionistSetupPage() {
               <input value={entreprise} onChange={e => setEntreprise(e.target.value)} style={inp} />
             </div>
 
-            {/* Metier — trigger only, no outside input */}
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Metier</label>
               <div
@@ -176,7 +167,6 @@ export default function ReceptionistSetupPage() {
         </div>
       </div>
 
-      {/* Modal Metier */}
       {metierOpen && (
         <div
           onClick={() => setMetierOpen(false)}
@@ -256,7 +246,6 @@ export default function ReceptionistSetupPage() {
               ))}
             </div>
 
-            {/* Input Autre — hapet vetem kur zgjedhet Autre */}
             {tempMetier === "Autre" && (
               <div style={{ padding: "12px 20px 4px" }}>
                 <input
