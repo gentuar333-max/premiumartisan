@@ -4,56 +4,16 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 const plans = [
-  {
-    id: "trial",
-    name: "Trial",
-    price: "0",
-    unit: "€",
-    note: "15 min / 14 jours",
-    isTrial: true,
-    isPopular: false,
-    ctaLabel: "Essai gratuit",
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    price: "99",
-    unit: "€/mois",
-    note: "150 min",
-    isTrial: false,
-    isPopular: true,
-    ctaLabel: "Choisir",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "199",
-    unit: "€/mois",
-    note: "400 min",
-    isTrial: false,
-    isPopular: false,
-    ctaLabel: "Choisir",
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: "349",
-    unit: "€/mois",
-    note: "800 min",
-    isTrial: false,
-    isPopular: false,
-    ctaLabel: "Choisir",
-  },
-  {
-    id: "payg",
-    name: "Pay as you go",
-    price: "0.65",
-    unit: "€/min",
-    note: "par minute",
-    isTrial: false,
-    isPopular: false,
-    ctaLabel: "Choisir",
-  },
+  { id: "trial",    name: "Trial",    price: "0",   unit: "€",      note: "15 min / 14 jours", isTrial: true,  isPopular: false, ctaLabel: "Essai gratuit" },
+  { id: "starter",  name: "Starter",  price: "99",  unit: "€/mois", note: "150 min / mois",    isTrial: false, isPopular: true,  ctaLabel: "Choisir" },
+  { id: "pro",      name: "Pro",      price: "199", unit: "€/mois", note: "400 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+  { id: "business", name: "Business", price: "349", unit: "€/mois", note: "800 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+]
+
+const topups = [
+  { id: "mini",     name: "Mini",     minutes: 30,  price: "19",  pricePerMin: "0.63" },
+  { id: "standard", name: "Standard", minutes: 80,  price: "45",  pricePerMin: "0.60" },
+  { id: "maxi",     name: "Maxi",     minutes: 200, price: "99",  pricePerMin: "0.57" },
 ]
 
 const features = [
@@ -69,7 +29,7 @@ export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
 
-  async function handleSelect(planId: string) {
+  async function handlePlan(planId: string) {
     setLoading(planId)
     try {
       const res = await fetch("/api/marie/checkout", {
@@ -78,19 +38,27 @@ export default function PricingPage() {
         body: JSON.stringify({ plan: planId }),
       })
       const json = await res.json()
-      if (json.ok && json.redirect) {
-        router.push(json.redirect)
-      } else if (json.checkoutUrl) {
-        window.location.href = json.checkoutUrl
-      }
-    } finally {
-      setLoading(null)
-    }
+      if (json.ok && json.redirect) router.push(json.redirect)
+      else if (json.checkoutUrl) window.location.href = json.checkoutUrl
+    } finally { setLoading(null) }
+  }
+
+  async function handleTopup(pkg: string) {
+    setLoading(`topup_${pkg}`)
+    try {
+      const res = await fetch("/api/marie/topup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ package: pkg }),
+      })
+      const json = await res.json()
+      if (json.checkoutUrl) window.location.href = json.checkoutUrl
+    } finally { setLoading(null) }
   }
 
   return (
     <div style={{ minHeight: "100dvh", background: "#fff", padding: "48px 16px 80px", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -98,57 +66,40 @@ export default function PricingPage() {
             Nos forfaits
           </h1>
           <p style={{ fontSize: 15, color: "#737373", maxWidth: 480, margin: "0 auto", lineHeight: 1.6 }}>
-            Tous nos forfaits incluent l&apos;ensemble des fonctionnalités. Choisissez celui qui correspond à vos besoins.
+            Tous les forfaits incluent l&apos;ensemble des fonctionnalités. Choisissez celui qui correspond à vos besoins.
           </p>
         </div>
 
-        {/* Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+        {/* Plans abonnement */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginBottom: 64 }}>
           {plans.map(plan => (
             <div
               key={plan.id}
               style={{
                 border: plan.isPopular ? "1.5px solid #6B2737" : "1.5px solid #e5e5e5",
-                background: "#fff",
-                padding: "20px",
-                display: "flex",
-                flexDirection: "column",
+                background: "#fff", padding: "20px",
+                display: "flex", flexDirection: "column",
               }}
             >
-              {/* Popular badge */}
               {plan.isPopular && (
                 <div style={{ marginBottom: 10 }}>
-                  <span style={{ background: "#6B2737", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <span style={{ background: "#6B2737", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
                     Le plus populaire
                   </span>
                 </div>
               )}
-
-              {/* Trial label */}
               {plan.isTrial && (
-                <p style={{ fontSize: 10, color: "#a3a3a3", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <p style={{ fontSize: 10, color: "#a3a3a3", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
                   14 jours d&apos;essai
                 </p>
               )}
-
-              {/* Name */}
-              <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>
-                {plan.name}
-              </h3>
-
-              {/* Price */}
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{plan.name}</h3>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
                 <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{plan.price}</span>
                 <span style={{ fontSize: 12, color: "#737373" }}>{plan.unit}</span>
               </div>
-
-              {/* Note */}
               <p style={{ fontSize: 11, color: "#a3a3a3", marginBottom: 16 }}>{plan.note}</p>
-
-              {/* Divider */}
               <div style={{ borderTop: "1px solid #e5e5e5", marginBottom: 16 }} />
-
-              {/* Features */}
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
                 {features.map(f => (
                   <li key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -159,22 +110,16 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-
-              {/* CTA */}
               <button
-                onClick={() => handleSelect(plan.id)}
+                onClick={() => handlePlan(plan.id)}
                 disabled={loading === plan.id}
                 style={{
-                  width: "100%",
-                  padding: "9px 12px",
-                  fontSize: 12,
-                  fontWeight: 600,
+                  width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
                   cursor: loading === plan.id ? "wait" : "pointer",
                   border: plan.isPopular ? "none" : "1.5px solid #d4d4d4",
                   background: plan.isPopular ? "#6B2737" : "#fff",
                   color: plan.isPopular ? "#fff" : "#1a1a1a",
-                  fontFamily: "inherit",
-                  transition: "all .15s",
+                  fontFamily: "inherit", transition: "all .15s",
                   opacity: loading === plan.id ? 0.7 : 1,
                 }}
               >
@@ -184,8 +129,52 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Footer note */}
-        <p style={{ textAlign: "center", fontSize: 12, color: "#a3a3a3", marginTop: 32 }}>
+        {/* Séparateur Pay as you go */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 16 }}>
+            <div style={{ width: 60, height: 1, background: "#e5e5e5" }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#737373", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+              Pay as you go
+            </span>
+            <div style={{ width: 60, height: 1, background: "#e5e5e5" }} />
+          </div>
+          <p style={{ fontSize: 13, color: "#a3a3a3", marginTop: 8 }}>
+            Sans abonnement — achetez des minutes à la carte, valables 6 mois
+          </p>
+        </div>
+
+        {/* Topup packages */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, maxWidth: 700, margin: "0 auto" }}>
+          {topups.map(t => (
+            <div
+              key={t.id}
+              style={{ border: "1.5px solid #e5e5e5", background: "#fff", padding: "20px", display: "flex", flexDirection: "column" }}
+            >
+              <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{t.name}</h3>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
+                <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{t.price}</span>
+                <span style={{ fontSize: 12, color: "#737373" }}>€</span>
+              </div>
+              <p style={{ fontSize: 12, color: "#a3a3a3", marginBottom: 4 }}>{t.minutes} minutes</p>
+              <p style={{ fontSize: 11, color: "#d4d4d4", marginBottom: 20 }}>{t.pricePerMin}€ / min</p>
+              <button
+                onClick={() => handleTopup(t.id)}
+                disabled={loading === `topup_${t.id}`}
+                style={{
+                  width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
+                  cursor: loading === `topup_${t.id}` ? "wait" : "pointer",
+                  border: "1.5px solid #d4d4d4", background: "#fff", color: "#1a1a1a",
+                  fontFamily: "inherit", transition: "all .15s",
+                  opacity: loading === `topup_${t.id}` ? 0.7 : 1,
+                }}
+              >
+                {loading === `topup_${t.id}` ? "..." : "Acheter"}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <p style={{ textAlign: "center", fontSize: 12, color: "#a3a3a3", marginTop: 40 }}>
           Sans engagement — résiliable à tout moment
         </p>
       </div>
