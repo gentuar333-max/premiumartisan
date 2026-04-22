@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 const plans = [
@@ -8,7 +8,7 @@ const plans = [
   { id: "starter",  name: "Starter",  price: "99",   unit: "€/mois", note: "150 min / mois",    isTrial: false, isPopular: true,  ctaLabel: "Choisir" },
   { id: "pro",      name: "Pro",      price: "199",  unit: "€/mois", note: "400 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
   { id: "business", name: "Business", price: "349",  unit: "€/mois", note: "800 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
-  { id: "payg",     name: "Pay as you go", price: "0.65", unit: "€/min", note: "par minute",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+  { id: "payg",     name: "Pay as you go", price: "0.65", unit: "€/min", note: "par minute",   isTrial: false, isPopular: false, ctaLabel: "Choisir" },
 ]
 
 const features = [
@@ -22,19 +22,45 @@ const features = [
 
 const PRICE_PER_MIN = 0.65
 
+interface Subscription {
+  plan: string
+  status: string
+  minutes_remaining: number
+  minutes_total: number
+}
+
 export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [showPaygModal, setShowPaygModal] = useState(false)
   const [minutes, setMinutes] = useState(30)
+  const [subscription, setSubscription] = useState<Subscription | null>(null)
+  const [subLoading, setSubLoading] = useState(true)
 
   const totalPrice = (minutes * PRICE_PER_MIN).toFixed(2)
 
+  useEffect(() => {
+    fetch("/api/marie/subscription")
+      .then(r => r.json())
+      .then(json => {
+        if (json.subscription) setSubscription(json.subscription)
+      })
+      .catch(() => {})
+      .finally(() => setSubLoading(false))
+  }, [])
+
+  function isCurrentPlan(planId: string) {
+    return subscription?.status === "active" && subscription?.plan === planId
+  }
+
+  function getCtaLabel(plan: typeof plans[0]) {
+    if (isCurrentPlan(plan.id)) return "Plan actuel ✓"
+    return plan.ctaLabel
+  }
+
   async function handlePlan(planId: string) {
-    if (planId === "payg") {
-      setShowPaygModal(true)
-      return
-    }
+    if (isCurrentPlan(planId)) return
+    if (planId === "payg") { setShowPaygModal(true); return }
     setLoading(planId)
     try {
       const res = await fetch("/api/marie/checkout", {
@@ -80,63 +106,95 @@ export default function PricingPage() {
             </p>
           </div>
 
-          {/* Grid — 5 kartela */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-            {plans.map(plan => (
-              <div
-                key={plan.id}
-                style={{
-                  border: plan.isPopular ? "1.5px solid #6B2737" : "1.5px solid #e5e5e5",
-                  background: "#fff", padding: "20px",
-                  display: "flex", flexDirection: "column",
-                }}
+          {/* Plan actuel banner */}
+          {!subLoading && subscription?.status === "active" && (
+            <div style={{ background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: 12, padding: "12px 20px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#166534" }}>
+                  Plan actuel — {plans.find(p => p.id === subscription.plan)?.name ?? subscription.plan}
+                </span>
+                {subscription.minutes_remaining > 0 && (
+                  <span style={{ fontSize: 12, color: "#16a34a", marginLeft: 12 }}>
+                    {subscription.minutes_remaining} min restantes
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => router.push("/artisan/receptionist")}
+                style={{ fontSize: 12, fontWeight: 600, color: "#166534", background: "none", border: "1px solid #86efac", borderRadius: 8, padding: "4px 12px", cursor: "pointer" }}
               >
-                {plan.isPopular && (
-                  <div style={{ marginBottom: 10 }}>
-                    <span style={{ background: "#6B2737", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
-                      Le plus populaire
-                    </span>
-                  </div>
-                )}
-                {plan.isTrial && (
-                  <p style={{ fontSize: 10, color: "#a3a3a3", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
-                    14 jours d&apos;essai
-                  </p>
-                )}
-                <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{plan.name}</h3>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                  <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{plan.price}</span>
-                  <span style={{ fontSize: 12, color: "#737373" }}>{plan.unit}</span>
-                </div>
-                <p style={{ fontSize: 11, color: "#a3a3a3", marginBottom: 16 }}>{plan.note}</p>
-                <div style={{ borderTop: "1px solid #e5e5e5", marginBottom: 16 }} />
-                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-                  {features.map(f => (
-                    <li key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                        <path d="M2 6.5L5 9.5L11 3.5" stroke="#a3a3a3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span style={{ fontSize: 12, color: "#525252" }}>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => handlePlan(plan.id)}
-                  disabled={loading === plan.id}
+                Dashboard →
+              </button>
+            </div>
+          )}
+
+          {/* Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+            {plans.map(plan => {
+              const isCurrent = isCurrentPlan(plan.id)
+              return (
+                <div
+                  key={plan.id}
                   style={{
-                    width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
-                    cursor: loading === plan.id ? "wait" : "pointer",
-                    border: plan.isPopular ? "none" : "1.5px solid #d4d4d4",
-                    background: plan.isPopular ? "#6B2737" : "#fff",
-                    color: plan.isPopular ? "#fff" : "#1a1a1a",
-                    fontFamily: "inherit", transition: "all .15s",
-                    opacity: loading === plan.id ? 0.7 : 1,
+                    border: isCurrent ? "1.5px solid #22c55e" : plan.isPopular ? "1.5px solid #6B2737" : "1.5px solid #e5e5e5",
+                    background: isCurrent ? "#f0fdf4" : "#fff",
+                    padding: "20px", display: "flex", flexDirection: "column",
                   }}
                 >
-                  {loading === plan.id ? "..." : plan.ctaLabel}
-                </button>
-              </div>
-            ))}
+                  {isCurrent && (
+                    <div style={{ marginBottom: 10 }}>
+                      <span style={{ background: "#22c55e", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
+                        Plan actuel
+                      </span>
+                    </div>
+                  )}
+                  {plan.isPopular && !isCurrent && (
+                    <div style={{ marginBottom: 10 }}>
+                      <span style={{ background: "#6B2737", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
+                        Le plus populaire
+                      </span>
+                    </div>
+                  )}
+                  {plan.isTrial && !isCurrent && (
+                    <p style={{ fontSize: 10, color: "#a3a3a3", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
+                      14 jours d&apos;essai
+                    </p>
+                  )}
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{plan.name}</h3>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
+                    <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{plan.price}</span>
+                    <span style={{ fontSize: 12, color: "#737373" }}>{plan.unit}</span>
+                  </div>
+                  <p style={{ fontSize: 11, color: "#a3a3a3", marginBottom: 16 }}>{plan.note}</p>
+                  <div style={{ borderTop: "1px solid #e5e5e5", marginBottom: 16 }} />
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+                    {features.map(f => (
+                      <li key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                          <path d="M2 6.5L5 9.5L11 3.5" stroke={isCurrent ? "#22c55e" : "#a3a3a3"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span style={{ fontSize: 12, color: "#525252" }}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => handlePlan(plan.id)}
+                    disabled={loading === plan.id || isCurrent}
+                    style={{
+                      width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
+                      cursor: isCurrent ? "default" : loading === plan.id ? "wait" : "pointer",
+                      border: isCurrent ? "none" : plan.isPopular ? "none" : "1.5px solid #d4d4d4",
+                      background: isCurrent ? "#22c55e" : plan.isPopular ? "#6B2737" : "#fff",
+                      color: isCurrent || plan.isPopular ? "#fff" : "#1a1a1a",
+                      fontFamily: "inherit", transition: "all .15s",
+                      opacity: loading === plan.id ? 0.7 : 1,
+                    }}
+                  >
+                    {loading === plan.id ? "..." : getCtaLabel(plan)}
+                  </button>
+                </div>
+              )
+            })}
           </div>
 
           <p style={{ textAlign: "center", fontSize: 12, color: "#a3a3a3", marginTop: 32 }}>
@@ -145,24 +203,20 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Modal PAYG — slider */}
+      {/* Modal PAYG */}
       {showPaygModal && (
         <div
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "flex-end" }}
           onClick={e => { if (e.target === e.currentTarget) setShowPaygModal(false) }}
         >
           <div style={{ background: "#fff", borderRadius: "20px 20px 0 0", padding: 24, width: "100%", animation: "slideUp .25s ease" }}>
-
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>Pay as you go</div>
               <button onClick={() => setShowPaygModal(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#666" }}>×</button>
             </div>
-
             <p style={{ fontSize: 13, color: "#a3a3a3", marginBottom: 20 }}>
               Sans abonnement · {PRICE_PER_MIN}€ / min · valable 6 mois
             </p>
-
-            {/* Slider */}
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                 <label style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>Nombre de minutes</label>
@@ -178,8 +232,6 @@ export default function PricingPage() {
                 <span style={{ fontSize: 11, color: "#a3a3a3" }}>300 min</span>
               </div>
             </div>
-
-            {/* Prix */}
             <div style={{ background: "#f9f9f9", padding: "16px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <div style={{ fontSize: 12, color: "#737373", marginBottom: 2 }}>Total à payer</div>
@@ -187,8 +239,6 @@ export default function PricingPage() {
               </div>
               <div style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a" }}>{totalPrice}€</div>
             </div>
-
-            {/* Input manuel */}
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 12, color: "#737373", display: "block", marginBottom: 6 }}>Ou saisissez directement</label>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -200,7 +250,6 @@ export default function PricingPage() {
                 <span style={{ fontSize: 13, color: "#737373" }}>minutes</span>
               </div>
             </div>
-
             <button
               onClick={handlePayg}
               disabled={loading === "payg"}
