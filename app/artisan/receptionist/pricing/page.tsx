@@ -10,12 +10,6 @@ const plans = [
   { id: "business", name: "Business", price: "349", unit: "€/mois", note: "800 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
 ]
 
-const topups = [
-  { id: "mini",     name: "Mini",     minutes: 30,  price: "19",  pricePerMin: "0.63" },
-  { id: "standard", name: "Standard", minutes: 80,  price: "45",  pricePerMin: "0.60" },
-  { id: "maxi",     name: "Maxi",     minutes: 200, price: "99",  pricePerMin: "0.57" },
-]
-
 const features = [
   "Réceptionniste IA 24h/7j",
   "SMS après chaque appel",
@@ -25,9 +19,14 @@ const features = [
   "Support par email",
 ]
 
+const PRICE_PER_MIN = 0.65
+
 export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [minutes, setMinutes] = useState(30)
+
+  const totalPrice = (minutes * PRICE_PER_MIN).toFixed(2)
 
   async function handlePlan(planId: string) {
     setLoading(planId)
@@ -43,13 +42,13 @@ export default function PricingPage() {
     } finally { setLoading(null) }
   }
 
-  async function handleTopup(pkg: string) {
-    setLoading(`topup_${pkg}`)
+  async function handlePayg() {
+    setLoading("payg")
     try {
       const res = await fetch("/api/marie/topup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ package: pkg }),
+        body: JSON.stringify({ minutes }),
       })
       const json = await res.json()
       if (json.checkoutUrl) window.location.href = json.checkoutUrl
@@ -129,49 +128,94 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Séparateur Pay as you go */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 16 }}>
-            <div style={{ width: 60, height: 1, background: "#e5e5e5" }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#737373", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
-              Pay as you go
-            </span>
-            <div style={{ width: 60, height: 1, background: "#e5e5e5" }} />
-          </div>
-          <p style={{ fontSize: 13, color: "#a3a3a3", marginTop: 8 }}>
-            Sans abonnement — achetez des minutes à la carte, valables 6 mois
-          </p>
-        </div>
-
-        {/* Topup packages */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, maxWidth: 700, margin: "0 auto" }}>
-          {topups.map(t => (
-            <div
-              key={t.id}
-              style={{ border: "1.5px solid #e5e5e5", background: "#fff", padding: "20px", display: "flex", flexDirection: "column" }}
-            >
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{t.name}</h3>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{t.price}</span>
-                <span style={{ fontSize: 12, color: "#737373" }}>€</span>
-              </div>
-              <p style={{ fontSize: 12, color: "#a3a3a3", marginBottom: 4 }}>{t.minutes} minutes</p>
-              <p style={{ fontSize: 11, color: "#d4d4d4", marginBottom: 20 }}>{t.pricePerMin}€ / min</p>
-              <button
-                onClick={() => handleTopup(t.id)}
-                disabled={loading === `topup_${t.id}`}
-                style={{
-                  width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
-                  cursor: loading === `topup_${t.id}` ? "wait" : "pointer",
-                  border: "1.5px solid #d4d4d4", background: "#fff", color: "#1a1a1a",
-                  fontFamily: "inherit", transition: "all .15s",
-                  opacity: loading === `topup_${t.id}` ? 0.7 : 1,
-                }}
-              >
-                {loading === `topup_${t.id}` ? "..." : "Acheter"}
-              </button>
+        {/* Pay as you go — interaktiv */}
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 16 }}>
+              <div style={{ width: 60, height: 1, background: "#e5e5e5" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#737373", textTransform: "uppercase" as const, letterSpacing: "0.08em" }}>
+                Pay as you go
+              </span>
+              <div style={{ width: 60, height: 1, background: "#e5e5e5" }} />
             </div>
-          ))}
+            <p style={{ fontSize: 13, color: "#a3a3a3", marginTop: 8 }}>
+              Sans abonnement · {PRICE_PER_MIN}€ / min · valable 6 mois
+            </p>
+          </div>
+
+          <div style={{ border: "1.5px solid #e5e5e5", padding: 28 }}>
+
+            {/* Slider */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>
+                  Nombre de minutes
+                </label>
+                <span style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a" }}>
+                  {minutes} min
+                </span>
+              </div>
+              <input
+                type="range"
+                min={10}
+                max={300}
+                step={5}
+                value={minutes}
+                onChange={e => setMinutes(Number(e.target.value))}
+                style={{ width: "100%", accentColor: "#1a1a1a", cursor: "pointer" }}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+                <span style={{ fontSize: 11, color: "#a3a3a3" }}>10 min</span>
+                <span style={{ fontSize: 11, color: "#a3a3a3" }}>300 min</span>
+              </div>
+            </div>
+
+            {/* Prix calculé */}
+            <div style={{ background: "#f9f9f9", padding: "16px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: 12, color: "#737373", marginBottom: 2 }}>Total à payer</div>
+                <div style={{ fontSize: 11, color: "#a3a3a3" }}>{minutes} min × {PRICE_PER_MIN}€</div>
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a" }}>
+                {totalPrice}€
+              </div>
+            </div>
+
+            {/* Input manuel */}
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 12, color: "#737373", display: "block", marginBottom: 6 }}>
+                Ou saisissez directement
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="number"
+                  min={10}
+                  max={300}
+                  value={minutes}
+                  onChange={e => {
+                    const v = Math.min(300, Math.max(10, Number(e.target.value)))
+                    setMinutes(v)
+                  }}
+                  style={{ width: 80, padding: "8px 12px", border: "1.5px solid #e5e5e5", fontSize: 14, fontWeight: 600, outline: "none", fontFamily: "inherit", textAlign: "center" as const }}
+                />
+                <span style={{ fontSize: 13, color: "#737373" }}>minutes</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handlePayg}
+              disabled={loading === "payg"}
+              style={{
+                width: "100%", padding: "12px", fontSize: 13, fontWeight: 600,
+                cursor: loading === "payg" ? "wait" : "pointer",
+                border: "1.5px solid #1a1a1a", background: "#1a1a1a", color: "#fff",
+                fontFamily: "inherit", transition: "all .15s",
+                opacity: loading === "payg" ? 0.7 : 1,
+              }}
+            >
+              {loading === "payg" ? "..." : `Acheter ${minutes} min — ${totalPrice}€`}
+            </button>
+          </div>
         </div>
 
         <p style={{ textAlign: "center", fontSize: 12, color: "#a3a3a3", marginTop: 40 }}>

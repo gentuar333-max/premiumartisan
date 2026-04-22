@@ -10,13 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
-// Paketa minutash — one-time payment
-export const TOPUP_PACKAGES: Record<string, { minutes: number; amount: number; label: string }> = {
-  mini:     { minutes: 30,  amount: 1900, label: "Mini — 30 min"      }, // 19€
-  standard: { minutes: 80,  amount: 4500, label: "Standard — 80 min"  }, // 45€
-  maxi:     { minutes: 200, amount: 9900, label: "Maxi — 200 min"     }, // 99€
-}
+const PRICE_PER_MIN = 0.65 // €
 
 async function getSupabase() {
   const cookieStore = await cookies();
@@ -33,18 +27,19 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
-    const { package: pkg } = await req.json();
-    const topup = TOPUP_PACKAGES[pkg];
-    if (!topup) return NextResponse.json({ error: "Package invalide" }, { status: 400 });
+    const { minutes } = await req.json();
+    const mins = Math.min(300, Math.max(10, parseInt(minutes) || 30));
+    const amountEur = parseFloat((mins * PRICE_PER_MIN).toFixed(2));
+    const amountCents = Math.round(amountEur * 100);
 
-    // Crée la ligne dans marie_topups
+    // Enregistre le topup
     const { data: topupRow } = await supabase
       .from("marie_topups")
       .insert({
         artisan_id: user.id,
-        package: pkg,
-        minutes: topup.minutes,
-        amount_eur: topup.amount / 100,
+        package: `payg_${mins}min`,
+        minutes: mins,
+        amount_eur: amountEur,
         status: "pending",
       })
       .select()
@@ -56,27 +51,27 @@ export async function POST(req: Request) {
       line_items: [{
         price_data: {
           currency: "eur",
-          unit_amount: topup.amount,
+          unit_amount: amountCents,
           product_data: {
-            name: topup.label,
-            description: `${topup.minutes} minutes pour votre réceptionniste IA`,
+            name: `Réceptionniste IA — ${mins} minutes`,
+            description: `${mins} minutes à ${PRICE_PER_MIN}€/min — valables 6 mois`,
           },
         },
         quantity: 1,
       }],
       metadata: {
         artisan_id: user.id,
-        package: pkg,
-        minutes: String(topup.minutes),
+        package: `payg_${mins}min`,
+        minutes: String(mins),
         topup_id: topupRow?.id ?? "",
       },
-      success_url: `${APP_URL}/artisan/receptionist?topup=success&minutes=${topup.minutes}`,
+      success_url: `${APP_URL}/artisan/receptionist?topup=success&minutes=${mins}`,
       cancel_url:  `${APP_URL}/artisan/receptionist/pricing?topup=cancel`,
     });
 
     return NextResponse.json({ ok: true, checkoutUrl: session.url });
   } catch (err) {
-    console.error("Topup checkout error:", err);
+    console.error("Topup error:", err);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
