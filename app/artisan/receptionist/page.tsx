@@ -12,15 +12,18 @@ export default function ReceptionistPage() {
     fetch("/api/artisan/vapi/setup")
       .then(r => r.json())
       .then(json => {
-        if (!json.settings?.artisan_name) {
-          // Nuk ka setup — redirect te setup
+        // Ka setup nëse settings ekziston dhe nuk është null
+        const hasSetup = json.settings !== null && json.settings !== undefined
+        if (!hasSetup) {
           router.replace("/artisan/receptionist/setup")
         } else {
-          // Ka setup — shfaq dashboard direkt
           setReady(true)
         }
       })
-      .catch(() => setReady(true))
+      .catch(() => {
+        // Nëse ka error — lejo të hyjë
+        setReady(true)
+      })
   }, [router])
 
   if (!ready) return (
