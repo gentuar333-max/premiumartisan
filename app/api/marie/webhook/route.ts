@@ -36,10 +36,14 @@ export async function POST(req: NextRequest) {
 
   const supabase = getSupabase();
 
+  // ── Checkout complété ──
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const { artisan_id, plan, package: pkg, minutes, topup_id } = session.metadata ?? {};
-    if (!artisan_id) return NextResponse.json({ ok: true });
+    if (!artisan_id) {
+      console.log("No artisan_id in metadata");
+      return NextResponse.json({ ok: true });
+    }
 
     // Abonnement
     if (plan && session.mode === "subscription") {
@@ -89,13 +93,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (event.type === "customer.subscription.deleted" || event.type === "customer.subscription.paused") {
+  // ── Abonnement annulé ──
+  if (event.type === "customer.subscription.deleted" || event.type === "customer.subscription.updated") {
     const subscription = event.data.object as Stripe.Subscription;
-    await supabase.from("marie_subscriptions")
-      .update({ status: "inactive", updated_at: new Date().toISOString() })
-      .eq("stripe_subscription_id", subscription.id);
+    if (subscription.status === "canceled" || subscription.status === "unpaid") {
+      await supabase.from("marie_subscriptions")
+        .update({ status: "inactive", updated_at: new Date().toISOString() })
+        .eq("stripe_subscription_id", subscription.id);
+      console.log(`Abonnement annulé: ${subscription.id}`);
+    }
   }
 
+  // ── Renouvellement — invoice.paid ──
   if (event.type === "invoice.paid") {
     const invoice = event.data.object as Stripe.Invoice;
     const customerId = invoice.customer as string;
@@ -104,12 +113,35 @@ export async function POST(req: NextRequest) {
       .select("plan, artisan_id")
       .eq("stripe_customer_id", customerId)
       .single();
-    if (sub && sub.plan !== "payg") {
+    if (sub && sub.plan && sub.plan !== "payg") {
       const planMinutes = PLAN_MINUTES[sub.plan] ?? 0;
       await supabase.from("marie_subscriptions")
         .update({ minutes_remaining: planMinutes, minutes_total: planMinutes, status: "active", updated_at: new Date().toISOString() })
         .eq("artisan_id", sub.artisan_id);
       console.log(`Renouvellement ${sub.plan} — ${planMinutes} min pour ${sub.artisan_id}`);
+    }
+  }
+
+  // ── invoice_payment.paid — renouvellement alternatif ──
+  if (event.type === "invoice_payment.paid") {
+    const invoicePayment = event.data.object as { invoice: string };
+    try {
+      const invoice = await stripe.invoices.retrieve(invoicePayment.invoice);
+      const customerId = invoice.customer as string;
+      const { data: sub } = await supabase
+        .from("marie_subscriptions")
+        .select("plan, artisan_id")
+        .eq("stripe_customer_id", customerId)
+        .single();
+      if (sub && sub.plan && sub.plan !== "payg") {
+        const planMinutes = PLAN_MINUTES[sub.plan] ?? 0;
+        await supabase.from("marie_subscriptions")
+          .update({ minutes_remaining: planMinutes, minutes_total: planMinutes, status: "active", updated_at: new Date().toISOString() })
+          .eq("artisan_id", sub.artisan_id);
+        console.log(`invoice_payment.paid — ${sub.plan} — ${planMinutes} min pour ${sub.artisan_id}`);
+      }
+    } catch (err) {
+      console.error("invoice_payment.paid error:", err);
     }
   }
 
