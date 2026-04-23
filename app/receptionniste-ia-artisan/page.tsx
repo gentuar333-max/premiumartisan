@@ -361,8 +361,66 @@ export default function LandingPage() {
         </div>
       </section>
 
+
       <div className="divider" />
 
+      {/* FAQ */}
+      <section style={{ padding: "96px 0", background: "#09090B" }}>
+        <div className="container-p" style={{ maxWidth: 800, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div className="font-display" style={{ fontSize: 14, letterSpacing: "0.08em", color: "#D4A853", textTransform: "uppercase", marginBottom: 16 }}>
+              FAQ
+            </div>
+            <h2 className="font-display" style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 600, color: "#F0EDE6" }}>
+              Questions fréquentes
+            </h2>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {[
+              {
+                q: "Comment ça marche exactement ?",
+                a: "Vous activez le renvoi d'appel sur votre téléphone vers notre numéro. Quand vous ne pouvez pas répondre, Marie décroche en moins de 7 secondes, collecte les informations du client et vous envoie un SMS résumé immédiatement."
+              },
+              {
+                q: "Est-ce que mes clients sauront que c'est une IA ?",
+                a: "Marie parle de façon naturelle et professionnelle. La grande majorité des clients ne font pas la différence. Elle se présente comme votre assistante — ce qu'elle est réellement."
+              },
+              {
+                q: "Combien de temps pour l'installer ?",
+                a: "5 minutes. Vous remplissez votre profil (nom, entreprise, métier), et Marie est opérationnelle. Il suffit ensuite d'activer le renvoi d'appel sur votre téléphone."
+              },
+              {
+                q: "Puis-je annuler à tout moment ?",
+                a: "Oui, sans engagement. Vous pouvez annuler votre abonnement à tout moment depuis votre tableau de bord. Aucun frais de résiliation."
+              },
+              {
+                q: "Que se passe-t-il quand mes minutes sont épuisées ?",
+                a: "Vous recevez une notification avant d'atteindre la limite. Vous pouvez recharger des minutes à la carte (Pay as you go à 0.65€/min) ou passer à un plan supérieur."
+              },
+              {
+                q: "Est-ce que ça marche avec mon opérateur ?",
+                a: "Oui — Orange, SFR, Bouygues, Free et tous les opérateurs français. Le renvoi d'appel est une fonctionnalité standard de votre ligne téléphonique."
+              },
+              {
+                q: "Mes données sont-elles sécurisées ?",
+                a: "Oui. Toutes les données sont hébergées en Europe, chiffrées, et ne sont jamais partagées avec des tiers. Nous respectons le RGPD."
+              },
+            ].map((item, i) => (
+              <details key={i} style={{ background: "#12121A", border: "1px solid #27273A", borderRadius: 12, overflow: "hidden" }}>
+                <summary style={{ padding: "20px 24px", cursor: "pointer", fontSize: 16, fontWeight: 600, color: "#F0EDE6", listStyle: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  {item.q}
+                  <span style={{ color: "#D4A853", fontSize: 20, flexShrink: 0, marginLeft: 16 }}>+</span>
+                </summary>
+                <div style={{ padding: "0 24px 20px", fontSize: 15, lineHeight: 1.7, color: "#9C9AAF", borderTop: "1px solid #27273A" }}>
+                  <p style={{ marginTop: 16 }}>{item.a}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="divider" />
       {/* FINAL CTA */}
       <section style={{ padding: "128px 0", background: "#09090B", textAlign: "center", position: "relative" }}>
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(212,168,83,0.03) 0%, transparent 60%)", pointerEvents: "none" }} />
