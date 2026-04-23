@@ -64,12 +64,14 @@ export async function POST(req: NextRequest) {
         .eq("artisan_id", artisan_id)
         .single();
       if (existing) {
-        await supabase.from("marie_subscriptions")
+        const { error: updateErr } = await supabase.from("marie_subscriptions")
           .update(subData)
           .eq("artisan_id", artisan_id);
+        console.log("UPDATE result:", updateErr ? updateErr.message : "OK");
       } else {
-        await supabase.from("marie_subscriptions")
+        const { error: insertErr } = await supabase.from("marie_subscriptions")
           .insert({ artisan_id, ...subData });
+        console.log("INSERT result:", insertErr ? insertErr.message : "OK");
       }
       console.log(`Abonnement ${plan} active — ${planMinutes} min pour ${artisan_id}`);
     }
