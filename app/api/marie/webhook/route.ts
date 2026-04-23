@@ -48,8 +48,7 @@ export async function POST(req: NextRequest) {
     // Abonnement
     if (plan && session.mode === "subscription") {
       const planMinutes = PLAN_MINUTES[plan] ?? 0;
-      await supabase.from("marie_subscriptions").upsert({
-        artisan_id,
+      const subData = {
         plan,
         status: "active",
         stripe_subscription_id: session.subscription as string ?? null,
@@ -57,7 +56,21 @@ export async function POST(req: NextRequest) {
         minutes_remaining: planMinutes,
         minutes_total: planMinutes,
         updated_at: new Date().toISOString(),
-      }, { onConflict: "artisan_id" });
+      };
+      // Tenton update fillimisht
+      const { data: existing } = await supabase
+        .from("marie_subscriptions")
+        .select("id")
+        .eq("artisan_id", artisan_id)
+        .single();
+      if (existing) {
+        await supabase.from("marie_subscriptions")
+          .update(subData)
+          .eq("artisan_id", artisan_id);
+      } else {
+        await supabase.from("marie_subscriptions")
+          .insert({ artisan_id, ...subData });
+      }
       console.log(`Abonnement ${plan} active — ${planMinutes} min pour ${artisan_id}`);
     }
 
