@@ -112,6 +112,17 @@ export default function VoiceDashboard() {
   const [cNotes, setCNotes]         = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  const [menuOpen, setMenuOpen]           = useState(false)
+  const [marieActive, setMarieActive]     = useState(true)
+  const [subscription, setSubscription] = useState<{ plan: string; status: string; minutes_remaining: number; minutes_total: number } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/marie/subscription')
+      .then(r => r.json())
+      .then(json => { if (json.subscription) setSubscription(json.subscription) })
+      .catch(() => {})
+  }, [])
+
   const fetchCalls = useCallback(async () => {
     try {
       const res = await fetch("/api/artisan/calls")
@@ -313,19 +324,152 @@ export default function VoiceDashboard() {
 
       <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#F8F9FA", minHeight: "100vh", padding: "16px 16px 100px" }}>
 
-        {/* Header — identik me foton */}
+        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700 }}>Receptionniste IA</h1>
             <p style={{ fontSize: 13, color: "#666", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-              <span style={{ width: 8, height: 8, background: "#22C55E", borderRadius: "50%", display: "inline-block", animation: "pulse 2s infinite" }} />
-              En ligne 24/7
+              <span style={{ width: 8, height: 8, background: marieActive ? "#22C55E" : "#D1D5DB", borderRadius: "50%", display: "inline-block", animation: marieActive ? "pulse 2s infinite" : "none" }} />
+              {marieActive ? "En ligne 24/7" : "Hors ligne"}
             </p>
           </div>
-          <button onClick={() => void fetchCalls()} style={{ fontSize: 12, color: "#666", background: "#fff", border: "1px solid #e5e7eb", borderRadius: 8, padding: "6px 12px", cursor: "pointer" }}>
-            Actualiser
+          {/* Hamburger menu */}
+          <button
+            onClick={() => setMenuOpen(true)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 8, display: "flex", flexDirection: "column", gap: 5 }}
+          >
+            <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
+            <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
+            <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
           </button>
         </div>
+
+        {/* Side menu */}
+        {menuOpen && (
+          <>
+            <div
+              onClick={() => setMenuOpen(false)}
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200 }}
+            />
+            <div style={{
+              position: "fixed", top: 0, right: 0, height: "100%", width: 280,
+              background: "#fff", zIndex: 201, padding: 24, boxShadow: "-4px 0 20px rgba(0,0,0,0.1)",
+              display: "flex", flexDirection: "column",
+            }}>
+              {/* Close */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#1A1A1A" }}>Menu</span>
+                <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#666" }}>×</button>
+              </div>
+
+              {/* Marie status toggle */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 12 }}>
+                  Statut
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", background: "#F8F9FA", borderRadius: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#1A1A1A" }}>Marie</div>
+                    <div style={{ fontSize: 12, color: marieActive ? "#22C55E" : "#9CA3AF" }}>
+                      {marieActive ? "Active" : "Inactive"}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setMarieActive(a => !a)}
+                    style={{
+                      width: 48, height: 26, borderRadius: 13, border: "none", cursor: "pointer",
+                      background: marieActive ? "#22C55E" : "#D1D5DB",
+                      position: "relative", transition: "background .2s",
+                    }}
+                  >
+                    <span style={{
+                      position: "absolute", top: 3, left: marieActive ? 24 : 3,
+                      width: 20, height: 20, borderRadius: "50%", background: "#fff",
+                      transition: "left .2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                    }} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#999", textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 12 }}>
+                  Navigation
+                </div>
+                {[
+                  { label: "Paramètres", href: "/artisan/receptionist/setup" },
+                  { label: "Forfait & Minutes", href: "/artisan/receptionist/pricing" },
+                ].map(item => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "13px 16px", marginBottom: 8,
+                      background: "#F8F9FA", borderRadius: 12,
+                      textDecoration: "none", color: "#1A1A1A", fontSize: 14, fontWeight: 500,
+                    }}
+                  >
+                    {item.label}
+                    <span style={{ color: "#9CA3AF", fontSize: 16 }}>›</span>
+                  </a>
+                ))}
+              </div>
+
+              {/* Spacer */}
+              <div style={{ flex: 1 }} />
+
+              {/* Logout */}
+              <button
+                onClick={async () => {
+                  const { createSupabaseBrowserClient } = await import("@/lib/supabaseBrowser")
+                  const s = createSupabaseBrowserClient()
+                  await s.auth.signOut()
+                  window.location.href = "/artisan/login"
+                }}
+                style={{
+                  width: "100%", padding: "13px", borderRadius: 12,
+                  border: "1px solid #E5E7EB", background: "#fff",
+                  fontSize: 14, fontWeight: 600, color: "#374151",
+                  cursor: "pointer", textAlign: "center" as const,
+                }}
+              >
+                Se déconnecter
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Balance minutash */}
+        {subscription && (
+          <div style={{
+            background: subscription.minutes_remaining > 20 ? "#F0FDF4" : subscription.minutes_remaining > 5 ? "#FEF9C3" : "#FEF2F2",
+            border: `1.5px solid ${subscription.minutes_remaining > 20 ? "#86EFAC" : subscription.minutes_remaining > 5 ? "#FDE047" : "#FCA5A5"}`,
+            borderRadius: 14, padding: "12px 16px", marginBottom: 16,
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+          }}>
+            <div>
+              <div style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>
+                Plan {subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)}
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: subscription.minutes_remaining > 20 ? "#166534" : subscription.minutes_remaining > 5 ? "#713F12" : "#DC2626" }}>
+                {subscription.minutes_remaining} min restantes
+              </div>
+            </div>
+            <div style={{ textAlign: "right" as const }}>
+              <div style={{ fontSize: 11, color: "#999", marginBottom: 4 }}>
+                {subscription.minutes_total} min / mois
+              </div>
+              <a href="/artisan/receptionist/pricing" style={{
+                fontSize: 11, fontWeight: 600, color: "#1A1A1A",
+                background: "#fff", border: "1px solid #E5E7EB",
+                borderRadius: 8, padding: "4px 10px", textDecoration: "none",
+              }}>
+                + Minutes
+              </a>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div style={{ background: "#FEE2E2", color: "#DC2626", padding: 12, borderRadius: 12, marginBottom: 16, fontSize: 13 }}>
