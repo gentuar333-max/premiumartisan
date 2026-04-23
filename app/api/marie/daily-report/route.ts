@@ -81,13 +81,15 @@ export async function GET(req: NextRequest) {
     // Urgents en premier
     if (urgents.length > 0) {
       urgents.slice(0, 3).forEach(c => {
-        lines.push(`🔴 ${c.nom_client ?? "Client"} — ${c.probleme ?? "-"}`)
+        const tel = c.caller_phone ? " — " + c.caller_phone.replace(/^\+33/, "0").replace(/(\d{2})(?=\d)/g, "$1 ").trim() : ""
+        lines.push(`🔴 ${c.nom_client ?? "Client"} — ${c.probleme ?? "-"}${tel}`)
       })
     }
 
     // Normaux
     normaux.slice(0, 3).forEach(c => {
-      lines.push(`• ${c.nom_client ?? "Client"} — ${c.probleme ?? "-"}`)
+      const tel = c.caller_phone ? " — " + c.caller_phone.replace(/^\+33/, "0").replace(/(\d{2})(?=\d)/g, "$1 ").trim() : ""
+      lines.push(`• ${c.nom_client ?? "Client"} — ${c.probleme ?? "-"}${tel}`)
     })
 
     if (calls.length > 6) {
