@@ -165,6 +165,87 @@ export default function ReceptionistSetupPage() {
             </button>
           </div>
         </div>
+
+        {/* Instructions renvoi d appel */}
+        <div style={{ width: "100%", maxWidth: 420, marginTop: 20 }}>
+          <div style={{ background: "#fff", borderRadius: 14, padding: 20, border: "1px solid #e5e7eb" }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1e293b", marginBottom: 4 }}>
+              Comment activer le renvoi d&apos;appel
+            </div>
+            <p style={{ fontSize: 13, color: "#666", marginBottom: 16, lineHeight: 1.6 }}>
+              Pour que Marie réponde à votre place, activez le renvoi d&apos;appel sur votre téléphone vers le numéro Marie.
+            </p>
+
+            {/* iPhone */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                iPhone
+              </div>
+              <div style={{ background: "#f8f9fa", borderRadius: 10, padding: 12 }}>
+                <div style={{ fontSize: 12, color: "#374151", lineHeight: 1.8 }}>
+                  <div>1. Réglages → Téléphone</div>
+                  <div>2. Renvoi d&apos;appel → Activer</div>
+                  <div>3. Entrez le numéro Marie :</div>
+                  <div style={{ fontWeight: 700, color: "#d45f08", fontSize: 14, marginTop: 4, letterSpacing: 1 }}>
+                    +1 (775) 312-8993
+                  </div>
+                  <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>
+                    Ou composez : <span style={{ fontWeight: 600 }}>*21*+17753128993#</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Android */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                Android
+              </div>
+              <div style={{ background: "#f8f9fa", borderRadius: 10, padding: 12 }}>
+                <div style={{ fontSize: 12, color: "#374151", lineHeight: 1.8 }}>
+                  <div>1. Téléphone → Paramètres → Comptes</div>
+                  <div>2. Renvoi d&apos;appel → Si pas de réponse</div>
+                  <div>3. Entrez le numéro Marie :</div>
+                  <div style={{ fontWeight: 700, color: "#d45f08", fontSize: 14, marginTop: 4, letterSpacing: 1 }}>
+                    +1 (775) 312-8993
+                  </div>
+                  <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>
+                    Ou composez : <span style={{ fontWeight: 600 }}>**61*+17753128993**5#</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Orange / SFR / Bouygues */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                Code universel (tous opérateurs)
+              </div>
+              <div style={{ background: "#f8f9fa", borderRadius: 10, padding: 12 }}>
+                <div style={{ fontSize: 12, color: "#374151", lineHeight: 1.8 }}>
+                  <div>Composez depuis votre téléphone :</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, marginTop: 4, color: "#1e293b", letterSpacing: 0.5 }}>
+                    **61*+17753128993**7#
+                  </div>
+                  <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>
+                    Renvoi après 7 secondes sans réponse
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Désactiver */}
+            <div style={{ borderTop: "1px solid #f0f0f0", paddingTop: 14 }}>
+              <div style={{ fontSize: 12, color: "#666", marginBottom: 6, fontWeight: 600 }}>
+                Pour désactiver le renvoi :
+              </div>
+              <div style={{ background: "#f8f9fa", borderRadius: 10, padding: 10 }}>
+                <code style={{ fontSize: 12, color: "#374151" }}>#61#</code>
+                <span style={{ fontSize: 11, color: "#9ca3af", marginLeft: 8 }}>composez depuis votre téléphone</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {metierOpen && (
