@@ -63,18 +63,23 @@ export default function PricingPage() {
   }
 
   async function handlePlan(planId: string) {
-    if (isCurrentPlan(planId)) return
+    console.log('handlePlan called:', planId, 'isCurrent:', isCurrentPlan(planId))
+    if (isCurrentPlan(planId)) { console.log('blocked by isCurrentPlan'); return }
     if (planId === "payg") { setShowPaygModal(true); return }
     setLoading(planId)
     try {
+      console.log('fetching checkout for:', planId)
       const res = await fetch("/api/marie/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId }),
       })
       const json = await res.json()
+      console.log('checkout response:', json)
       if (json.ok && json.redirect) router.push(json.redirect)
       else if (json.checkoutUrl) window.location.href = json.checkoutUrl
+    } catch(err) {
+      console.error('checkout error:', err)
     } finally { setLoading(null) }
   }
 
