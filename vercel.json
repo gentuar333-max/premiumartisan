@@ -3,6 +3,10 @@
     {
       "path": "/api/marie/daily-report",
       "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/marie/reminder",
+      "schedule": "0 8 * * *"
     }
   ]
 }
