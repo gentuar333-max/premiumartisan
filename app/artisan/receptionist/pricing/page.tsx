@@ -43,11 +43,15 @@ export default function PricingPage() {
     fetch("/api/marie/subscription")
       .then(r => r.json())
       .then(json => {
+        if (json.error === "Non authentifié") {
+          router.replace("/artisan/login?redirect=/artisan/receptionist/pricing")
+          return
+        }
         if (json.subscription) setSubscription(json.subscription)
       })
       .catch(() => {})
       .finally(() => setSubLoading(false))
-  }, [])
+  }, [router])
 
   function isCurrentPlan(planId: string) {
     return subscription?.status === "active" && subscription?.plan === planId
