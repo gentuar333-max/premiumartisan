@@ -1,3 +1,4 @@
+﻿import React from "react";
 ﻿"use client";
 
 import Link from "next/link";
@@ -574,6 +575,80 @@ function FilterPanel({
   );
 }
 
+function AvatarDropdown({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+  const [open, setOpen] = React.useState(false)
+  const [sub, setSub] = React.useState<{ plan: string; minutes_remaining: number } | null>(null)
+
+  React.useEffect(() => {
+    fetch("/api/marie/subscription")
+      .then(r => r.json())
+      .then(json => { if (json.subscription) setSub(json.subscription) })
+      .catch(() => {})
+  }, [])
+
+  const initial = (email || "A")[0].toUpperCase()
+  const planLabel = sub ? sub.plan.charAt(0).toUpperCase() + sub.plan.slice(1) : null
+
+  return (
+    <div style={{ position: "relative", marginBottom: 16 }}>
+      {/* Avatar button */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 12, border: "none", background: open ? "#F1F5F9" : "transparent", cursor: "pointer", textAlign: "left" as const }}
+      >
+        <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+          {initial}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</div>
+          <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }}>
+          <path d="M3 5l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", overflow: "hidden", marginTop: 4, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
+          {/* Mon profil */}
+          <a href="/artisan/receptionist/setup"
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", fontSize: 13, fontWeight: 500, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F1F5F9" }}
+          >
+            Mon profil
+            <span style={{ color: "#CBD5E1" }}>›</span>
+          </a>
+
+          {/* Mes minutes */}
+          <div style={{ padding: "12px 14px", borderBottom: "1px solid #F1F5F9" }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "#374151", marginBottom: 6 }}>Mes minutes</div>
+            {sub ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, color: "#64748B" }}>Plan {planLabel}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: sub.minutes_remaining > 20 ? "#16A34A" : sub.minutes_remaining > 5 ? "#D97706" : "#DC2626" }}>
+                  {sub.minutes_remaining} min
+                </span>
+              </div>
+            ) : (
+              <a href="/artisan/receptionist/pricing" style={{ fontSize: 12, color: "#3B82F6", textDecoration: "none" }}>
+                Activer un forfait →
+              </a>
+            )}
+          </div>
+
+          {/* Se déconnecter */}
+          <button
+            onClick={onSignOut}
+            style={{ width: "100%", padding: "12px 14px", fontSize: 13, fontWeight: 500, color: "#DC2626", background: "none", border: "none", cursor: "pointer", textAlign: "left" as const }}
+          >
+            Se déconnecter
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function DashboardShell({
   projects, count, cp, sort, error, categoryLabel, sortRecentUrl, sortBudgetUrl,
 }: {
@@ -916,47 +991,12 @@ export function DashboardShell({
             {/* Avatar + Se déconnecter */}
             <div className="border-t border-slate-100 p-5">
               {currentUser && (
-                <>
-                  {/* Avatar clickable */}
-                  <div className="flex items-center gap-3 mb-4 px-1 cursor-pointer rounded-xl hover:bg-slate-50 p-2 -mx-2 transition"
-                    onClick={() => {
-                      const el = document.getElementById("profile-dropdown")
-                      if (el) el.style.display = el.style.display === "none" ? "block" : "none"
-                    }}
-                  >
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
-                      {(currentUser.email ?? "A")[0].toUpperCase()}
-                    </div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {currentUser.email}
-                      </div>
-                      <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  </div>
-
-                  {/* Dropdown */}
-                  <div id="profile-dropdown" style={{ display: "none", background: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0", marginBottom: 12, overflow: "hidden" }}>
-                    {[
-                      { label: "Mon profil", href: "/artisan/receptionist/setup" },
-                      { label: "Paramètres", href: "/artisan/receptionist/setup" },
-                      { label: "Mes dépenses", href: "/artisan/receptionist/pricing" },
-                    ].map((item, i, arr) => (
-                      <a key={item.label} href={item.href}
-                        style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          padding: "11px 14px", fontSize: 13, fontWeight: 500, color: "#374151",
-                          textDecoration: "none", borderBottom: i < arr.length - 1 ? "1px solid #E2E8F0" : "none",
-                          background: "#fff",
-                        }}
-                      >
-                        {item.label}
-                        <span style={{ color: "#CBD5E1", fontSize: 16 }}>›</span>
-                      </a>
-                    ))}
-                  </div>
-                </>
+                <AvatarDropdown email={currentUser.email ?? ""} onSignOut={async () => {
+                  const s = createSupabaseBrowserClient()
+                  await s.auth.signOut()
+                  router.push("/artisan/login")
+                  setMenuOpen(false)
+                }} />
               )}
               <button type="button"
                 onClick={async () => {
