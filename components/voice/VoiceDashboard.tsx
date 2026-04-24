@@ -321,10 +321,10 @@ export default function VoiceDashboard() {
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.5; } }
       `}</style>
 
-      <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#F8F9FA", minHeight: "100vh", padding: "16px 16px 100px" }}>
+      <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: "#F8F9FA", minHeight: "100vh" }}>
 
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        {/* Sticky Header */}
+        <div style={{ position: "sticky", top: 0, zIndex: 50, background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 0 }}>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700 }}>Receptionniste IA</h1>
             <p style={{ fontSize: 13, color: "#666", display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
