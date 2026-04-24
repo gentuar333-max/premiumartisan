@@ -476,36 +476,7 @@ export default function VoiceDashboard() {
           </>
         )}
 
-        {/* Balance minutash */}
-        {subscription && (
-          <div style={{
-            background: subscription.minutes_remaining > 20 ? "#F0FDF4" : subscription.minutes_remaining > 5 ? "#FEF9C3" : "#FEF2F2",
-            border: `1.5px solid ${subscription.minutes_remaining > 20 ? "#86EFAC" : subscription.minutes_remaining > 5 ? "#FDE047" : "#FCA5A5"}`,
-            borderRadius: 14, padding: "12px 16px", marginBottom: 16,
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-          }}>
-            <div>
-              <div style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>
-                Plan {subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)}
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: subscription.minutes_remaining > 20 ? "#166534" : subscription.minutes_remaining > 5 ? "#713F12" : "#DC2626" }}>
-                {subscription.minutes_remaining} min restantes
-              </div>
-            </div>
-            <div style={{ textAlign: "right" as const }}>
-              <div style={{ fontSize: 11, color: "#999", marginBottom: 4 }}>
-                {subscription.minutes_total} min / mois
-              </div>
-              <a href="/artisan/receptionist/pricing" style={{
-                fontSize: 11, fontWeight: 600, color: "#1A1A1A",
-                background: "#fff", border: "1px solid #E5E7EB",
-                borderRadius: 8, padding: "4px 10px", textDecoration: "none",
-              }}>
-                + Minutes
-              </a>
-            </div>
-          </div>
-        )}
+
 
         {error && (
           <div style={{ background: "#FEE2E2", color: "#DC2626", padding: 12, borderRadius: 12, marginBottom: 16, fontSize: 13 }}>
