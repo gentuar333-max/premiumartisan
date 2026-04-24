@@ -15,7 +15,6 @@ export default function ReceptionistSetupPage() {
   const [metier, setMetier] = useState("")
   const [autreMetier, setAutreMetier] = useState("")
   const [tel, setTel] = useState("")
-  const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [metierOpen, setMetierOpen] = useState(false)
   const [tempMetier, setTempMetier] = useState("")
@@ -57,7 +56,6 @@ export default function ReceptionistSetupPage() {
           company_name: entreprise,
           metier: finalMetier ? [finalMetier] : [],
           phone: tel,
-          email,
         }),
       })
       if (res.ok) {
@@ -149,11 +147,6 @@ export default function ReceptionistSetupPage() {
             <div style={{ marginBottom: 13 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Numero de telephone</label>
               <input value={tel} onChange={e => setTel(e.target.value)} style={inp} />
-            </div>
-
-            <div style={{ marginBottom: 13 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Email</label>
-              <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inp} />
             </div>
 
             <button
