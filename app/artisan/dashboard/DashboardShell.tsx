@@ -774,7 +774,7 @@ export function DashboardShell({
           {/* Logo */}
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-1.5 no-underline mr-1">
             <div style={{ background: "#3B82F6", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0 }}>
-              <span style={{ transform: "rotate(-45deg)", display: "block" }}>&#9874;’</span>
+              <span style={{ transform: "rotate(-45deg)", display: "block" }}>âš’</span>
             </div>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#1e293b", letterSpacing: 1, lineHeight: 1 }}>
               PremiumArtisan
@@ -913,8 +913,21 @@ export function DashboardShell({
               </div>
             </div>
 
-            {/* Se déconnecter */}
+            {/* Avatar + Se déconnecter */}
             <div className="border-t border-slate-100 p-5">
+              {currentUser && (
+                <div className="flex items-center gap-3 mb-4 px-1">
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                    {(currentUser.email ?? "A")[0].toUpperCase()}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {currentUser.email}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
+                  </div>
+                </div>
+              )}
               <button type="button"
                 onClick={async () => {
                   if (currentUser) {
