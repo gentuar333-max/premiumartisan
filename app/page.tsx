@@ -98,7 +98,7 @@ export default function Page() {
       <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(11,17,32,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(51,65,85,0.3)" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <div style={{ width: 28, height: 28, background: "#F59E0B", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, transform: "rotate(45deg)", flexShrink: 0 }}>
+            <div style={{ width: 28, height: 28, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, transform: "rotate(45deg)", flexShrink: 0 }}>
               <span style={{ transform: "rotate(-45deg)", display: "block", fontSize: 14 }}>⚒</span>
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
@@ -396,7 +396,7 @@ export default function Page() {
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 40 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <div style={{ width: 28, height: 28, background: "#F59E0B", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, transform: "rotate(45deg)" }}>
+              <div style={{ width: 28, height: 28, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, transform: "rotate(45deg)" }}>
                 <span style={{ transform: "rotate(-45deg)", display: "block", fontSize: 14 }}>⚒</span>
               </div>
               <div>
