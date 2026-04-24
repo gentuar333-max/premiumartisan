@@ -16,13 +16,23 @@ export default function ReceptionistPage() {
     fetch("/api/artisan/vapi/setup")
       .then(r => r.json())
       .then(json => {
-        if (!json.settings) {
-          router.replace("/artisan/receptionist/setup")
-        } else {
-          setReady(true)
+        if (json.error === "Non authentifié" || json.status === 401) {
+          // Pas i kyçur → dërgo te login me redirect
+          router.replace("/artisan/login?redirect=/artisan/receptionist")
+          return
         }
+        if (!json.settings) {
+          // I kyçur por pa setup → dërgo te setup
+          router.replace("/artisan/receptionist/setup")
+          return
+        }
+        // I kyçur + ka setup → shfaq dashboard
+        setReady(true)
       })
-      .catch(() => setReady(true))
+      .catch(() => {
+        // Error rrjeti → shfaq dashboard (API do të mbrojë të dhënat)
+        setReady(true)
+      })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!ready) return (
