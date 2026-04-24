@@ -773,7 +773,7 @@ export function DashboardShell({
 
           {/* Logo */}
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-1.5 no-underline mr-1">
-            <div style={{ background: "#ff6b35", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0 }}>
+            <div style={{ background: "#3B82F6", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0 }}>
               <span style={{ transform: "rotate(-45deg)", display: "block" }}>âš’</span>
             </div>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#1e293b", letterSpacing: 1, lineHeight: 1 }}>
