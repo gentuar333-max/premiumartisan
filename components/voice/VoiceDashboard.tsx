@@ -113,7 +113,18 @@ export default function VoiceDashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const [menuOpen, setMenuOpen]           = useState(false)
+  const [userEmail, setUserEmail]         = useState("")
+  const [avatarOpen, setAvatarOpen]       = useState(false)
   const [subscription, setSubscription] = useState<{ plan: string; status: string; minutes_remaining: number; minutes_total: number } | null>(null)
+
+  useEffect(() => {
+    import("@/lib/supabaseBrowser").then(({ createSupabaseBrowserClient }) => {
+      const s = createSupabaseBrowserClient()
+      s.auth.getUser().then(({ data }) => {
+        if (data.user?.email) setUserEmail(data.user.email)
+      })
+    })
+  }, [])
 
   useEffect(() => {
     fetch('/api/marie/subscription')
@@ -332,15 +343,68 @@ export default function VoiceDashboard() {
               En ligne 24/7
             </p>
           </div>
-          {/* Hamburger menu */}
-          <button
-            onClick={() => setMenuOpen(true)}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 8, display: "flex", flexDirection: "column", gap: 5 }}
-          >
-            <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
-            <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
-            <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
-          </button>
+          {/* Avatar + Hamburger */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {/* Avatar [G] */}
+            {userEmail && (
+              <div style={{ position: "relative" }}>
+                <button
+                  onClick={() => setAvatarOpen(o => !o)}
+                  style={{ width: 34, height: 34, borderRadius: "50%", background: "#3B82F6", border: "none", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  {userEmail[0].toUpperCase()}
+                </button>
+                {avatarOpen && (
+                  <>
+                    <div onClick={() => setAvatarOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 300 }} />
+                    <div style={{ position: "absolute", top: 42, right: 0, width: 240, background: "#fff", borderRadius: 12, border: "1px solid #E5E7EB", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", zIndex: 301, overflow: "hidden" }}>
+                      {/* User info */}
+                      <div style={{ padding: "12px 14px", borderBottom: "1px solid #F1F5F9" }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
+                        <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
+                      </div>
+                      {/* Mon profil */}
+                      <a href="/artisan/receptionist/setup" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", fontSize: 13, fontWeight: 500, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F1F5F9" }}>
+                        Mon profil <span style={{ color: "#CBD5E1" }}>›</span>
+                      </a>
+                      {/* Mes minutes */}
+                      <div style={{ padding: "11px 14px", borderBottom: "1px solid #F1F5F9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>Mes minutes</span>
+                        {subscription ? (
+                          <span style={{ fontSize: 13, fontWeight: 700, color: subscription.minutes_remaining > 20 ? "#16A34A" : subscription.minutes_remaining > 5 ? "#D97706" : "#DC2626" }}>
+                            {subscription.minutes_remaining} min
+                          </span>
+                        ) : (
+                          <a href="/artisan/receptionist/pricing" style={{ fontSize: 12, color: "#3B82F6", textDecoration: "none" }}>Activer →</a>
+                        )}
+                      </div>
+                      {/* Logout */}
+                      <button
+                        onClick={async () => {
+                          const { createSupabaseBrowserClient } = await import("@/lib/supabaseBrowser")
+                          const s = createSupabaseBrowserClient()
+                          await s.auth.signOut()
+                          window.location.href = "/artisan/login"
+                        }}
+                        style={{ width: "100%", padding: "11px 14px", fontSize: 13, fontWeight: 500, color: "#DC2626", background: "none", border: "none", cursor: "pointer", textAlign: "left" as const }}
+                      >
+                        Se déconnecter
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            {/* Hamburger */}
+            <button
+              onClick={() => setMenuOpen(true)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 8, display: "flex", flexDirection: "column", gap: 5 }}
+            >
+              <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
+              <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
+              <span style={{ display: "block", width: 20, height: 2, background: "#1A1A1A", borderRadius: 2 }} />
+            </button>
+          </div>
         </div>
 
         {/* Side menu */}
