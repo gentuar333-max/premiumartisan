@@ -916,17 +916,47 @@ export function DashboardShell({
             {/* Avatar + Se déconnecter */}
             <div className="border-t border-slate-100 p-5">
               {currentUser && (
-                <div className="flex items-center gap-3 mb-4 px-1">
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
-                    {(currentUser.email ?? "A")[0].toUpperCase()}
-                  </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {currentUser.email}
+                <>
+                  {/* Avatar clickable */}
+                  <div className="flex items-center gap-3 mb-4 px-1 cursor-pointer rounded-xl hover:bg-slate-50 p-2 -mx-2 transition"
+                    onClick={() => {
+                      const el = document.getElementById("profile-dropdown")
+                      if (el) el.style.display = el.style.display === "none" ? "block" : "none"
+                    }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                      {(currentUser.email ?? "A")[0].toUpperCase()}
                     </div>
-                    <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {currentUser.email}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round"/></svg>
                   </div>
-                </div>
+
+                  {/* Dropdown */}
+                  <div id="profile-dropdown" style={{ display: "none", background: "#F8FAFC", borderRadius: 12, border: "1px solid #E2E8F0", marginBottom: 12, overflow: "hidden" }}>
+                    {[
+                      { label: "Mon profil", href: "/artisan/receptionist/setup" },
+                      { label: "Paramètres", href: "/artisan/receptionist/setup" },
+                      { label: "Mes dépenses", href: "/artisan/receptionist/pricing" },
+                    ].map((item, i, arr) => (
+                      <a key={item.label} href={item.href}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "11px 14px", fontSize: 13, fontWeight: 500, color: "#374151",
+                          textDecoration: "none", borderBottom: i < arr.length - 1 ? "1px solid #E2E8F0" : "none",
+                          background: "#fff",
+                        }}
+                      >
+                        {item.label}
+                        <span style={{ color: "#CBD5E1", fontSize: 16 }}>›</span>
+                      </a>
+                    ))}
+                  </div>
+                </>
               )}
               <button type="button"
                 onClick={async () => {
