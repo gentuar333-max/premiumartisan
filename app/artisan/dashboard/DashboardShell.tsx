@@ -1,4 +1,3 @@
-﻿import React from "react";
 ﻿"use client";
 
 import Link from "next/link";
@@ -576,10 +575,10 @@ function FilterPanel({
 }
 
 function AvatarDropdown({ email, onSignOut }: { email: string; onSignOut: () => void }) {
-  const [open, setOpen] = React.useState(false)
-  const [sub, setSub] = React.useState<{ plan: string; minutes_remaining: number } | null>(null)
+  const [open, setOpen] = useState(false)
+  const [sub, setSub] = useState<{ plan: string; minutes_remaining: number } | null>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/api/marie/subscription")
       .then(r => r.json())
       .then(json => { if (json.subscription) setSub(json.subscription) })
