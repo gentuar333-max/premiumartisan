@@ -489,9 +489,9 @@ export default function VoiceDashboard() {
                     { label: "Problème",  val: selectedCall.problem || "Non renseigné" },
                     { label: "Durée",     val: fmtDur(selectedCall.dur) },
                   ].map(item => (
-                    <div key={item.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", background: "#F8F9FA", borderRadius: 12 }}>
-                      <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{item.label}</div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#111", textAlign: "right", maxWidth: "65%" }}>{item.val}</div>
+                    <div key={item.label} style={{ padding: "12px 14px", background: "#F8F9FA", borderRadius: 12 }}>
+                      <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 4 }}>{item.label}</div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: "#111" }}>{item.val}</div>
                     </div>
                   ))}
                 </div>
