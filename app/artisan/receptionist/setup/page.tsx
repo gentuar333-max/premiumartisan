@@ -2,29 +2,32 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { Phone, User, Building2, Wrench, Sparkles } from "lucide-react"
 
 const METIERS = [
-  "Peintre","Plombier","Electricien","Macon",
-  "Carreleur","Menuisier","Couvreur","Chauffagiste","Autre",
+  { value: "Plombier",     label: "Plombier" },
+  { value: "Electricien",  label: "Électricien" },
+  { value: "Peintre",      label: "Peintre" },
+  { value: "Menuisier",    label: "Menuisier" },
+  { value: "Macon",        label: "Maçon" },
+  { value: "Couvreur",     label: "Couvreur" },
+  { value: "Chauffagiste", label: "Chauffagiste" },
+  { value: "Carreleur",    label: "Carreleur" },
+  { value: "Autre",        label: "Autre" },
 ]
 
 export default function ReceptionistSetupPage() {
   const router = useRouter()
-  const [nom, setNom] = useState("")
+  const [nom, setNom]           = useState("")
   const [entreprise, setEntreprise] = useState("")
-  const [metier, setMetier] = useState("")
-  const [autreMetier, setAutreMetier] = useState("")
-  const [tel, setTel] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [metierOpen, setMetierOpen] = useState(false)
-  const [tempMetier, setTempMetier] = useState("")
-  const [tempAutre, setTempAutre] = useState("")
+  const [metier, setMetier]     = useState("")
+  const [tel, setTel]           = useState("")
+  const [loading, setLoading]   = useState(false)
 
   useEffect(() => {
     fetch("/api/artisan/vapi/setup")
       .then(r => r.json())
       .then(json => {
-        // Pas i kyçur → login
         if (json.error === "Non authentifié") {
           router.replace("/artisan/login?redirect=/artisan/receptionist/setup")
           return
@@ -33,12 +36,7 @@ export default function ReceptionistSetupPage() {
           setNom(json.settings.artisan_name ?? "")
           setEntreprise(json.settings.company_name ?? "")
           const m = json.settings.metier?.[0] ?? ""
-          if (METIERS.slice(0, -1).includes(m)) {
-            setMetier(m)
-          } else if (m) {
-            setMetier("Autre")
-            setAutreMetier(m)
-          }
+          setMetier(m)
           setTel(json.settings.phone ?? "")
           setTimeout(() => router.replace("/artisan/receptionist"), 100)
         }
@@ -48,21 +46,12 @@ export default function ReceptionistSetupPage() {
       })
   }, [router])
 
-  function openMetier() {
-    setTempMetier(metier)
-    setTempAutre(autreMetier)
-    setMetierOpen(true)
-  }
+  const isValid = nom.trim() && entreprise.trim() && metier && tel.trim()
 
-  function confirmMetier() {
-    setMetier(tempMetier)
-    setAutreMetier(tempAutre)
-    setMetierOpen(false)
-  }
-
-  async function handleSubmit() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!isValid) return
     setLoading(true)
-    const finalMetier = metier === "Autre" ? autreMetier : metier
     try {
       const res = await fetch("/api/artisan/vapi/setup", {
         method: "POST",
@@ -70,7 +59,7 @@ export default function ReceptionistSetupPage() {
         body: JSON.stringify({
           artisan_name: nom,
           company_name: entreprise,
-          metier: finalMetier ? [finalMetier] : [],
+          metier: [metier],
           phone: tel,
         }),
       })
@@ -82,218 +71,140 @@ export default function ReceptionistSetupPage() {
         }).catch(() => {})
         router.push("/artisan/receptionist")
       }
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false)
-    }
+    } catch { /* ignore */ }
+    finally { setLoading(false) }
   }
 
-  const orange = "#e8650a"
-  const orangeLabel = "#c2540a"
   const inp: React.CSSProperties = {
-    width: "100%",
-    padding: "13px 16px",
-    borderRadius: 10,
-    border: "none",
-    background: "#fff",
-    fontSize: 14,
-    color: "#1e293b",
-    outline: "none",
-    fontFamily: "inherit",
+    width: "100%", height: 48, paddingLeft: 40, paddingRight: 14,
+    borderRadius: 12, border: "1.5px solid #E5E7EB",
+    background: "#F9FAFB", fontSize: 15, outline: "none",
+    fontFamily: "inherit", color: "#111", boxSizing: "border-box",
+    appearance: "none",
   }
 
-  const displayMetier = metier === "Autre"
-    ? (autreMetier || "Autre")
-    : metier || "Selectionnez votre metier"
+  const iconStyle: React.CSSProperties = {
+    position: "absolute", left: 12, top: "50%",
+    transform: "translateY(-50%)", color: "#9CA3AF",
+    pointerEvents: "none",
+  }
 
   return (
-    <>
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .metier-row:hover { background: #fdf6ee !important; }
-      `}</style>
+    <div style={{ minHeight: "100vh", background: "#F5F5F7", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", display: "flex", flexDirection: "column" }}>
 
-      <div style={{
-        fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
-        background: "#f0f0f0",
-        minHeight: "100vh",
-        padding: "24px 16px 100px",
-        display: "flex",
-        justifyContent: "center",
-      }}>
-        <div style={{ width: "100%", maxWidth: 420 }}>
-          <div style={{ background: "#fff8e7", border: `2px solid ${orange}`, borderRadius: 14, padding: 20 }}>
-
-            <div style={{ fontSize: 20, fontWeight: 700, color: orange, marginBottom: 20 }}>
-              Configurer votre assistant
-            </div>
-
-            <div style={{ marginBottom: 13 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Nom complet</label>
-              <input value={nom} onChange={e => setNom(e.target.value)} style={inp} />
-            </div>
-
-            <div style={{ marginBottom: 13 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Nom de l'entreprise</label>
-              <input value={entreprise} onChange={e => setEntreprise(e.target.value)} style={inp} />
-            </div>
-
-            <div style={{ marginBottom: 13 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Metier</label>
-              <div
-                onClick={openMetier}
-                style={{
-                  ...inp,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  color: metier ? "#1e293b" : "#9ca3af",
-                }}
-              >
-                <span>{displayMetier}</span>
-                <span style={{ color: "#9ca3af", fontSize: 11 }}>&#9660;</span>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 13 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: orangeLabel, marginBottom: 6, display: "block" }}>Numero de telephone</label>
-              <input value={tel} onChange={e => setTel(e.target.value)} style={inp} />
-            </div>
-
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              style={{
-                width: "100%", padding: 14, borderRadius: 10, border: "none",
-                background: "#d45f08", color: "#fff", fontSize: 13, fontWeight: 700,
-                letterSpacing: ".07em", cursor: "pointer", marginTop: 4,
-              }}
-            >
-              {loading ? "Activation..." : "ACTIVER MON ASSISTANT"}
-            </button>
-          </div>
+      {/* Header */}
+      <header style={{ padding: "40px 24px 24px", textAlign: "center" }}>
+        <div style={{ width: 64, height: 64, borderRadius: 20, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <Sparkles size={28} color="#fff" />
         </div>
-      </div>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: "#111", margin: 0 }}>Bienvenue sur Marie</h1>
+        <p style={{ fontSize: 15, color: "#6B7280", marginTop: 8 }}>Votre assistante vocale IA pour artisans</p>
+      </header>
 
-      {metierOpen && (
-        <div
-          onClick={() => setMetierOpen(false)}
-          style={{
-            position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.45)",
-            zIndex: 1000,
-            display: "flex", alignItems: "flex-end", justifyContent: "center",
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: "#fff",
-              borderRadius: "22px 22px 0 0",
-              width: "100%",
-              maxWidth: 500,
-              animation: "slideUp .3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              overflow: "hidden",
-              boxShadow: "0 -4px 40px rgba(0,0,0,0.12)",
-            }}
-          >
-            <div style={{
-              padding: "18px 20px 14px",
-              borderBottom: "1px solid #f0f0f0",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>Votre metier</span>
-              <button
-                onClick={() => setMetierOpen(false)}
-                style={{
-                  border: "none", background: "#f3f4f6",
-                  width: 30, height: 30, borderRadius: "50%",
-                  cursor: "pointer", fontSize: 18, color: "#6b7280",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >
-                x
-              </button>
-            </div>
+      {/* Form */}
+      <main style={{ flex: 1, padding: "0 16px 32px" }}>
+        <div style={{ background: "#fff", borderRadius: 20, padding: 24, maxWidth: 480, margin: "0 auto", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
-            <div style={{ overflowY: "auto", maxHeight: "45vh" }}>
-              {METIERS.map((m, i) => (
-                <div key={m}>
-                  <div
-                    className="metier-row"
-                    onClick={() => setTempMetier(m)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "15px 20px",
-                      cursor: "pointer",
-                      background: "#fff",
-                    }}
-                  >
-                    <span style={{ fontSize: 15, color: "#1e293b", fontWeight: tempMetier === m ? 600 : 400 }}>
-                      {m}
-                    </span>
-                    <div style={{
-                      width: 22, height: 22, borderRadius: "50%",
-                      border: `2px solid ${tempMetier === m ? orange : "#d1d5db"}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}>
-                      {tempMetier === m && (
-                        <div style={{ width: 11, height: 11, borderRadius: "50%", background: orange }} />
-                      )}
-                    </div>
-                  </div>
-                  {i < METIERS.length - 1 && (
-                    <div style={{ height: 1, background: "#f5f5f5", marginLeft: 20 }} />
-                  )}
+              {/* Nom complet */}
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 8 }}>Nom complet</label>
+                <div style={{ position: "relative" }}>
+                  <User size={16} style={iconStyle} />
+                  <input value={nom} onChange={e => setNom(e.target.value)} placeholder="Jean Dupont" style={inp} />
                 </div>
-              ))}
-            </div>
-
-            {tempMetier === "Autre" && (
-              <div style={{ padding: "12px 20px 4px" }}>
-                <input
-                  value={tempAutre}
-                  onChange={e => setTempAutre(e.target.value)}
-                  placeholder="Precisez votre metier..."
-                  autoFocus
-                  style={{
-                    width: "100%", padding: "12px 14px",
-                    borderRadius: 10, border: `1.5px solid ${orange}`,
-                    background: "#fff8f0", fontSize: 14, color: "#1e293b",
-                    outline: "none", fontFamily: "inherit",
-                  }}
-                />
               </div>
-            )}
 
-            <div style={{ padding: 16 }}>
+              {/* Entreprise */}
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 8 }}>{"Nom de l'entreprise"}</label>
+                <div style={{ position: "relative" }}>
+                  <Building2 size={16} style={iconStyle} />
+                  <input value={entreprise} onChange={e => setEntreprise(e.target.value)} placeholder="Plomberie Martin SARL" style={inp} />
+                </div>
+              </div>
+
+              {/* Métier */}
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 8 }}>Métier</label>
+                <div style={{ position: "relative" }}>
+                  <Wrench size={16} style={iconStyle} />
+                  <select value={metier} onChange={e => setMetier(e.target.value)} style={{ ...inp, color: metier ? "#111" : "#9CA3AF" }}>
+                    <option value="" disabled>Sélectionnez votre métier</option>
+                    {METIERS.map(m => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Téléphone */}
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 8 }}>{"Numéro de téléphone"}</label>
+                <div style={{ position: "relative" }}>
+                  <Phone size={16} style={iconStyle} />
+                  <input type="tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="06 12 34 56 78" style={inp} />
+                </div>
+              </div>
+
+              {/* Submit */}
               <button
-                onClick={confirmMetier}
-                disabled={!tempMetier || (tempMetier === "Autre" && !tempAutre.trim())}
+                type="submit"
+                disabled={!isValid || loading}
                 style={{
-                  width: "100%", padding: 15, borderRadius: 12,
-                  border: "none",
-                  background: (!tempMetier || (tempMetier === "Autre" && !tempAutre.trim())) ? "#fcd9b6" : orange,
-                  color: "#fff", fontSize: 14, fontWeight: 700,
-                  letterSpacing: ".05em", cursor: "pointer",
+                  width: "100%", height: 56, borderRadius: 14, border: "none",
+                  background: !isValid || loading ? "#BFDBFE" : "#3B82F6",
+                  color: "#fff", fontSize: 16, fontWeight: 700,
+                  cursor: !isValid || loading ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  fontFamily: "inherit", marginTop: 4, transition: "background .2s",
                 }}
               >
-                Confirmer
+                {loading ? (
+                  <>
+                    <span style={{ width: 18, height: 18, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", animation: "spin 0.8s linear infinite", display: "inline-block" }} />
+                    Activation en cours...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={18} />
+                    ACTIVER MON ASSISTANT
+                  </>
+                )}
               </button>
             </div>
+          </form>
+
+          <p style={{ marginTop: 20, textAlign: "center", fontSize: 12, color: "#9CA3AF", lineHeight: 1.6 }}>
+            En activant Marie, vous acceptez nos{" "}
+            <a href="/terms" style={{ color: "#3B82F6", textDecoration: "none" }}>{"conditions d'utilisation"}</a>
+            {" "}et notre{" "}
+            <a href="/privacy" style={{ color: "#3B82F6", textDecoration: "none" }}>{"politique de confidentialité"}</a>.
+          </p>
+        </div>
+
+        {/* Features preview */}
+        <div style={{ maxWidth: 480, margin: "24px auto 0", padding: "0 2px" }}>
+          <p style={{ textAlign: "center", fontSize: 13, color: "#9CA3AF", marginBottom: 14 }}>{"Marie va s'occuper de vos appels"}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+            {[
+              { icon: <Phone size={20} color="#3B82F6" />, bg: "#EFF6FF", label: "Répond 24h/24" },
+              { icon: <Sparkles size={20} color="#22C55E" />, bg: "#F0FDF4", label: "Prend les RDV" },
+              { icon: <Building2 size={20} color="#F59E0B" />, bg: "#FFFBEB", label: "Note les urgences" },
+            ].map(f => (
+              <div key={f.label} style={{ background: "#fff", borderRadius: 14, padding: "16px 10px", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: f.bg, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
+                  {f.icon}
+                </div>
+                <p style={{ fontSize: 12, color: "#6B7280", margin: 0, lineHeight: 1.4 }}>{f.label}</p>
+              </div>
+            ))}
           </div>
         </div>
-      )}
-    </>
+      </main>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
   )
 }
