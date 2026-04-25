@@ -470,76 +470,68 @@ export default function VoiceDashboard() {
 
         {/* ── CALL DETAIL ── */}
         {detailOpen && selectedCall && (
-          <div onClick={() => setDetailOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end" }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxHeight: "88vh", overflow: "hidden", display: "flex", flexDirection: "column", animation: "slideUp .3s ease" }}>
-              {/* Detail Header */}
-              <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid #F3F4F6", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-                <h2 style={{ fontSize: 17, fontWeight: 700, color: "#111" }}>Détail de l'appel</h2>
-                <button onClick={() => setDetailOpen(false)} className="btn-icon"><X size={18} /></button>
+          <div onClick={() => setDetailOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "85vh", overflowY: "auto", animation: "slideUp .3s ease" }}>
+
+              {/* Header */}
+              <div style={{ padding: "20px 20px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "#fff", borderBottom: "1px solid #F3F4F6", zIndex: 1 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111" }}>Détail de l&apos;appel</h2>
+                <button onClick={() => setDetailOpen(false)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "#F3F4F6", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
               </div>
 
-              {/* Detail Content */}
-              <div style={{ overflowY: "auto", flex: 1, padding: 16 }}>
-                {/* Status + time */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  {(() => { const sc = getStatusConfig(selectedCall); return (
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{sc.label}</span>
-                  )})()}
-                  <span style={{ fontSize: 12, color: "#9CA3AF" }}>{fmtTimeAgo(selectedCall.dt)}</span>
+              <div style={{ padding: "16px 20px" }}>
+                {/* 5 info cards */}
+                <div style={{ display: "grid", gap: 8, marginBottom: 20 }}>
+                  {[
+                    { label: "Client",    val: selectedCall.name },
+                    { label: "Téléphone", val: selectedCall.phone ? fmtPhone(selectedCall.phone) : "Non renseigné" },
+                    { label: "Adresse",   val: selectedCall.address || "Non renseignée" },
+                    { label: "Problème",  val: selectedCall.problem || "Non renseigné" },
+                    { label: "Durée",     val: fmtDur(selectedCall.dur) },
+                  ].map(item => (
+                    <div key={item.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 14px", background: "#F8F9FA", borderRadius: 12 }}>
+                      <div style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{item.label}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "#111", textAlign: "right", maxWidth: "65%" }}>{item.val}</div>
+                    </div>
+                  ))}
                 </div>
-
-                <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111", marginBottom: 4 }}>{selectedCall.name}</h2>
-                {selectedCall.phone && <p style={{ fontSize: 14, color: "#3B82F6", fontWeight: 600, marginBottom: 12 }}>{fmtPhone(selectedCall.phone)}</p>}
-
-                {selectedCall.address && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#6B7280", marginBottom: 8 }}>
-                    <MapPin size={16} /> {selectedCall.address}
-                  </div>
-                )}
-                {selectedCall.dur > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#6B7280", marginBottom: 12 }}>
-                    <Clock size={16} /> Durée : {fmtDur(selectedCall.dur)}
-                  </div>
-                )}
-                {selectedCall.problem && (
-                  <div style={{ background: "#F9FAFB", borderRadius: 12, padding: 12, marginBottom: 16 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#111", marginBottom: 4 }}>Résumé</p>
-                    <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.6 }}>{selectedCall.problem}</p>
-                  </div>
-                )}
 
                 {/* Transcript */}
                 {selectedCall.transcript.length > 0 && (
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "#111", marginBottom: 12 }}>Transcription IA</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ marginBottom: 20 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
+                      Transcription IA
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       {selectedCall.transcript.map((msg, i) => (
                         <div key={i} style={{ display: "flex", gap: 10, flexDirection: msg.role === "ai" ? "row" : "row-reverse" }}>
-                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: msg.role === "ai" ? "#3B82F6" : "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            {msg.role === "ai" ? <Bot size={16} color="#fff" /> : <User size={16} color="#6B7280" />}
+                          <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, background: msg.role === "ai" ? "#6366F1" : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: msg.role === "ai" ? "#fff" : "#6B7280", flexShrink: 0 }}>
+                            {msg.role === "ai" ? "M" : "C"}
                           </div>
-                          <div style={{ maxWidth: "75%", background: msg.role === "ai" ? "#3B82F6" : "#F3F4F6", borderRadius: msg.role === "ai" ? "16px 16px 16px 4px" : "16px 16px 4px 16px", padding: "10px 14px" }}>
-                            <p style={{ fontSize: 13, color: msg.role === "ai" ? "#fff" : "#111", lineHeight: 1.5 }}>{msg.text}</p>
-                            <p style={{ fontSize: 10, color: msg.role === "ai" ? "rgba(255,255,255,0.6)" : "#9CA3AF", marginTop: 4 }}>{msg.time}</p>
+                          <div style={{ maxWidth: "75%", background: msg.role === "ai" ? "linear-gradient(135deg,#6366F1,#8B5CF6)" : "#F3F4F6", borderRadius: msg.role === "ai" ? "4px 16px 16px 16px" : "16px 4px 16px 16px", padding: "10px 14px" }}>
+                            <p style={{ fontSize: 13, color: msg.role === "ai" ? "#fff" : "#111", lineHeight: 1.5, margin: 0 }}>{msg.text}</p>
+                            <p style={{ fontSize: 10, color: msg.role === "ai" ? "rgba(255,255,255,0.6)" : "#9CA3AF", marginTop: 4, marginBottom: 0 }}>{msg.time}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* Action Buttons */}
-              <div style={{ padding: "12px 16px", borderTop: "1px solid #F3F4F6", display: "flex", gap: 10, flexShrink: 0 }}>
-                <button className="btn-primary" style={{ flex: 1, justifyContent: "center" }}
-                  onClick={() => selectedCall.phone && (window.location.href = `tel:${selectedCall.phone.replace(/\s/g, "")}`)}>
-                  <Phone size={16} /> Appeler
-                </button>
-                <button className="btn-outline" style={{ flex: 1, justifyContent: "center" }} onClick={() => markDone(selectedCall.id)}>
-                  Traité
-                </button>
-                <button className="btn-icon danger" onClick={() => { if (confirm("Supprimer cet appel ?")) deleteCall(selectedCall.id) }}>
-                  <Trash2 size={16} />
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                  <a href={selectedCall.phone ? "tel:" + selectedCall.phone.replace(/\s/g, "") : "#"}
+                    style={{ flex: 1, padding: 15, borderRadius: 12, background: "#1A1A1A", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "center", textDecoration: "none", display: "block" }}>
+                    Appeler
+                  </a>
+                  <button onClick={() => markDone(selectedCall.id)}
+                    style={{ flex: 1, padding: 15, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                    Marquer traité
+                  </button>
+                </div>
+                <button onClick={() => { if (confirm("Supprimer cet appel ?")) deleteCall(selectedCall.id) }}
+                  style={{ width: "100%", padding: 13, borderRadius: 12, border: "1px solid #FEE2E2", background: "#FFF5F5", color: "#DC2626", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", marginBottom: 8 }}>
+                  Supprimer
                 </button>
               </div>
             </div>
