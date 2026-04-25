@@ -24,12 +24,28 @@ export default function ReceptionistSetupPage() {
     fetch("/api/artisan/vapi/setup")
       .then(r => r.json())
       .then(json => {
-        if (json.settings) {
-          router.replace("/artisan/receptionist")
+        // Pas i kyçur → login
+        if (json.error === "Non authentifié") {
+          router.replace("/artisan/login?redirect=/artisan/receptionist/setup")
           return
         }
+        if (json.settings) {
+          setNom(json.settings.artisan_name ?? "")
+          setEntreprise(json.settings.company_name ?? "")
+          const m = json.settings.metier?.[0] ?? ""
+          if (METIERS.slice(0, -1).includes(m)) {
+            setMetier(m)
+          } else if (m) {
+            setMetier("Autre")
+            setAutreMetier(m)
+          }
+          setTel(json.settings.phone ?? "")
+          setTimeout(() => router.replace("/artisan/receptionist"), 100)
+        }
       })
-      .catch(() => {})
+      .catch(() => {
+        router.replace("/artisan/login?redirect=/artisan/receptionist/setup")
+      })
   }, [router])
 
   function openMetier() {
