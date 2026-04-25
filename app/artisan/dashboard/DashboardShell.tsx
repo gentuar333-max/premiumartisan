@@ -203,6 +203,52 @@ const WaIcon = () => (
   </svg>
 );
 
+function ExclusifTooltip() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ position: "relative", display: "flex", alignItems: "stretch" }}>
+      <button
+        type="button"
+        onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
+        style={{
+          width: 24, background: "transparent", border: "none", cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 700,
+          position: "absolute", right: -24, top: 0, bottom: 0,
+        }}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+      </button>
+      {open && (
+        <>
+          <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 50 }} />
+          <div style={{
+            position: "absolute", bottom: "calc(100% + 8px)", right: -24, zIndex: 51,
+            background: "#1A1A1A", borderRadius: 12, padding: "12px 14px",
+            width: 220, boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
+              Acces exclusif
+            </div>
+            <div style={{ fontSize: 12, color: "#D1D5DB", lineHeight: 1.6 }}>
+              Vous serez le seul artisan a recevoir ce projet. Les autres artisans ne pourront pas y acceder.
+            </div>
+            <div style={{
+              position: "absolute", bottom: -6, right: 30,
+              width: 12, height: 12, background: "#1A1A1A",
+              transform: "rotate(45deg)",
+            }} />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 const ProjectCard = memo(function ProjectCard({
   p, categoryLabel, unlockState, contact,
   onUnlockClick, onUnlockExclusive, onPrefetch,
@@ -369,15 +415,18 @@ const ProjectCard = memo(function ProjectCard({
                 disabled={!p.id || p.id === "undefined" || unlocking}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #E5E7EB", background: "#F9FAFB", fontSize: 13, fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "inherit" }}>
                 <Phone size={15} />
-                Numero ({price.normal}e)
+                Numero — <Euro size={13} style={{ marginLeft: 2 }} />{price.normal}
               </button>
-              <button type="button"
-                onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
-                disabled={!p.id || p.id === "undefined" || unlocking || !isFirstSlot}
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "none", background: isFirstSlot ? "#3B82F6" : "#E5E7EB", fontSize: 13, fontWeight: 600, color: isFirstSlot ? "#fff" : "#9CA3AF", cursor: isFirstSlot ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
-                <Star size={15} />
-                Exclusif ({price.exclusive}e)
-              </button>
+              <div style={{ position: "relative", display: "flex" }}>
+                <button type="button"
+                  onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
+                  disabled={!p.id || p.id === "undefined" || unlocking || !isFirstSlot}
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "none", background: isFirstSlot ? "#3B82F6" : "#E5E7EB", fontSize: 13, fontWeight: 600, color: isFirstSlot ? "#fff" : "#9CA3AF", cursor: isFirstSlot ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+                  <Star size={15} />
+                  Exclusif — <Euro size={13} style={{ marginLeft: 2 }} />{price.exclusive}
+                </button>
+                <ExclusifTooltip />
+              </div>
             </div>
           )}
 
