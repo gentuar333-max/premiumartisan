@@ -505,7 +505,7 @@ export default function VoiceDashboard() {
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       {selectedCall.transcript.map((msg, i) => (
                         <div key={i} style={{ display: "flex", gap: 10, flexDirection: msg.role === "ai" ? "row" : "row-reverse" }}>
-                          <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, background: msg.role === "ai" ? "#6366F1" : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: msg.role === "ai" ? "#fff" : "#6B7280", flexShrink: 0 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, background: msg.role === "ai" ? "#6366F1" : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: msg.role === "ai" ? "#fff" : "#6B7280" }}>
                             {msg.role === "ai" ? "M" : "C"}
                           </div>
                           <div style={{ maxWidth: "75%", background: msg.role === "ai" ? "linear-gradient(135deg,#6366F1,#8B5CF6)" : "#F3F4F6", borderRadius: msg.role === "ai" ? "4px 16px 16px 16px" : "16px 4px 16px 16px", padding: "10px 14px" }}>
@@ -518,21 +518,24 @@ export default function VoiceDashboard() {
                   </div>
                 )}
 
-                {/* Actions */}
+              </div>
+
+              {/* Sticky action buttons */}
+              <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid #F3F4F6", padding: "12px 20px 20px" }}>
                 <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                   <a href={selectedCall.phone ? "tel:" + selectedCall.phone.replace(/\s/g, "") : "#"}
-                    style={{ flex: 1, padding: 15, borderRadius: 12, background: "#1A1A1A", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "center", textDecoration: "none", display: "block" }}>
+                    style={{ flex: 1, padding: 14, borderRadius: 12, background: "#1A1A1A", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "center", textDecoration: "none", display: "block" }}>
                     Appeler
                   </a>
                   <button onClick={() => markDone(selectedCall.id)}
-                    style={{ flex: 1, padding: 15, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                    style={{ flex: 1, padding: 14, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
                     Marquer traité
                   </button>
+                  <button onClick={() => { if (confirm("Supprimer cet appel ?")) deleteCall(selectedCall.id) }}
+                    style={{ width: 48, height: 48, borderRadius: 12, border: "1px solid #FEE2E2", background: "#FFF5F5", color: "#DC2626", fontSize: 20, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    ✕
+                  </button>
                 </div>
-                <button onClick={() => { if (confirm("Supprimer cet appel ?")) deleteCall(selectedCall.id) }}
-                  style={{ width: "100%", padding: 13, borderRadius: 12, border: "1px solid #FEE2E2", background: "#FFF5F5", color: "#DC2626", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", marginBottom: 8 }}>
-                  Supprimer
-                </button>
               </div>
             </div>
           </div>
