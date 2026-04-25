@@ -504,13 +504,13 @@ export default function VoiceDashboard() {
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {selectedCall.transcript.map((msg, i) => (
-                        <div key={i} style={{ display: "flex", gap: 10, flexDirection: msg.role === "ai" ? "row" : "row-reverse" }}>
-                          <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, background: msg.role === "ai" ? "#3B82F6" : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: msg.role === "ai" ? "#fff" : "#6B7280", letterSpacing: 0.3 }}>
+                        <div key={i} style={{ display: "flex", gap: 10, flexDirection: msg.role === "ai" ? "row-reverse" : "row" }}>
+                          <div style={{ width: 30, height: 30, borderRadius: "50%", flexShrink: 0, background: msg.role === "ai" ? "#E8EFFD" : "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: msg.role === "ai" ? "#3B82F6" : "#9CA3AF", letterSpacing: 0.3 }}>
                             {msg.role === "ai" ? "IA" : "C"}
                           </div>
-                          <div style={{ maxWidth: "75%", background: msg.role === "ai" ? "#3B82F6" : "#F3F4F6", borderRadius: msg.role === "ai" ? "4px 16px 16px 16px" : "16px 4px 16px 16px", padding: "10px 14px" }}>
-                            <p style={{ fontSize: 13, color: msg.role === "ai" ? "#fff" : "#111", lineHeight: 1.5, margin: 0 }}>{msg.text}</p>
-                            <p style={{ fontSize: 10, color: msg.role === "ai" ? "rgba(255,255,255,0.6)" : "#9CA3AF", marginTop: 4, marginBottom: 0 }}>{msg.time}</p>
+                          <div style={{ maxWidth: "75%", background: msg.role === "ai" ? "#F0F4FF" : "#fff", border: msg.role === "ai" ? "1px solid #DBEAFE" : "1px solid #E5E7EB", borderRadius: msg.role === "ai" ? "16px 4px 16px 16px" : "4px 16px 16px 16px", padding: "10px 14px" }}>
+                            <p style={{ fontSize: 13, color: "#111", lineHeight: 1.5, margin: 0 }}>{msg.text}</p>
+                            <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4, marginBottom: 0 }}>{msg.time}</p>
                           </div>
                         </div>
                       ))}
@@ -524,7 +524,7 @@ export default function VoiceDashboard() {
               <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid #F3F4F6", padding: "12px 20px 20px" }}>
                 <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                   <a href={selectedCall.phone ? "tel:" + selectedCall.phone.replace(/\s/g, "") : "#"}
-                    style={{ flex: 1, padding: 14, borderRadius: 12, background: "#3B82F6", color: "#fff", fontSize: 15, fontWeight: 600, textAlign: "center", textDecoration: "none", display: "block" }}>
+                    style={{ flex: 1, padding: 14, borderRadius: 12, background: "#F3F4F6", color: "#374151", fontSize: 15, fontWeight: 600, textAlign: "center", textDecoration: "none", display: "block" }}>
                     Appeler
                   </a>
                   <button onClick={() => markDone(selectedCall.id)}
