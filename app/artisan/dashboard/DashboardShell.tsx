@@ -8,6 +8,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { pickRandomProjectImage } from "@/lib/projectImages";
 import { formatPhone, phoneToWhatsApp } from "@/lib/formatPhone";
 import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
+import { MapPin, Ruler, Euro, Users, Eye, Star, Phone, Clock } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 const PROJECT_FALLBACK_IMAGES = [
@@ -227,7 +228,6 @@ const ProjectCard = memo(function ProjectCard({
   const nameParts = rawName.split(" ").filter(Boolean);
   const name = nameParts.length >= 2 ? `${nameParts[0]} ${nameParts[1][0]}.` : rawName;
   const zoneLabel = p.location?.trim() || `Département ${p.postal_prefix ?? ""}`;
-  const locLine = zoneLabel ? truncate(zoneLabel, 56) : "—”";
   const descriptionLine = p.description?.trim() || "";
   const isUnlocked = unlockState?.status === "paid";
   const unlockedPhone = isUnlocked ? (contact?.phone ?? p.client_phone ?? p.phone ?? null) : null;
@@ -235,174 +235,190 @@ const ProjectCard = memo(function ProjectCard({
   const isFull = projectUnlockCount >= 3;
   const isFirstSlot = projectUnlockCount === 0;
   const price = getUnlockPrice(p.budget);
+  const placesLeft = 3 - projectUnlockCount;
+
+  const timeAgo = p.created_at ? (() => {
+    const diff = Date.now() - new Date(p.created_at).getTime();
+    const h = Math.floor(diff / 3600000);
+    const d = Math.floor(diff / 86400000);
+    return h < 1 ? "A l instant" : h < 24 ? `Il y a ${h}h` : `Il y a ${d}j`;
+  })() : "";
 
   return (
     <div
-      className={`group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-md ${isLockedForMe ? "border-slate-300 opacity-80" : "border-slate-200"}`}
+      style={{ borderRadius: 16, overflow: "hidden", background: "#fff", border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
       onMouseEnter={() => p.id && p.id !== "undefined" && onPrefetch(p.id)}
     >
-      <div className="relative h-40 w-full overflow-hidden sm:h-44 lg:h-48">
+      {/* Image */}
+      <div style={{ position: "relative", height: 160, background: "#F3F4F6", overflow: "hidden" }}>
         <Image src={imageSrc} alt="Projet" fill
-          className={`object-cover transition-transform duration-300 group-hover:scale-[1.02] ${isLockedForMe ? "grayscale" : ""}`}
+          style={{ objectFit: "cover", filter: isLockedForMe ? "grayscale(1)" : "none" }}
           sizes="(max-width: 768px) 100vw, 33vw"
         />
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute left-2.5 top-2.5">
-          <FireBadge count={projectUnlockCount} isLocked={isLockedForMe} />
-        </div>
-        {isLockedForMe && (
-          <div className="absolute inset-x-0 top-0 flex items-center justify-center gap-1.5 bg-slate-900/80 px-3 py-2 backdrop-blur-sm">
-            <svg className="h-3.5 w-3.5 shrink-0 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <span className="text-[12px] font-semibold text-slate-200">Projet réservé —” déjà  attribué à  un artisan</span>
-          </div>
-        )}
-        {showFallbackBadge && !isLockedForMe && (
-          <span className="absolute bottom-2 right-2 rounded bg-black/60 px-2 py-1 text-xs text-white">Photo illustrative</span>
-        )}
-      </div>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 40%, rgba(0,0,0,0.4) 100%)" }} />
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className={`text-lg font-semibold leading-tight ${isLockedForMe ? "text-slate-400" : "text-rose-600"}`}>{name}</h3>
-          <div className={`whitespace-nowrap text-sm font-semibold ${isLockedForMe ? "text-slate-400" : "text-emerald-600"}`}>{formatBudget(p.budget)}</div>
-        </div>
-
-        {categoryLine && (
-          <div className="mt-2">
-            <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${isLockedForMe ? "border-slate-200 bg-slate-50 text-slate-400" : "border-sky-100 bg-sky-50 text-sky-700"}`}>
+        {/* Top left badges */}
+        <div style={{ position: "absolute", top: 10, left: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {categoryLine && (
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20, background: "#3B82F6", color: "#fff" }}>
               {categoryLine}
+            </span>
+          )}
+          {isFirstSlot && !isUnlocked && !isLockedForMe && (
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20, background: "#F59E0B", color: "#fff", display: "flex", alignItems: "center", gap: 4 }}>
+              <Star size={10} style={{ flexShrink: 0 }} />
+              Offre exclusive
+            </span>
+          )}
+        </div>
+
+        {/* Time badge top right */}
+        {timeAgo && (
+          <div style={{ position: "absolute", top: 10, right: 10 }}>
+            <span style={{ fontSize: 11, fontWeight: 500, padding: "4px 10px", borderRadius: 20, background: "rgba(0,0,0,0.5)", color: "#fff", display: "flex", alignItems: "center", gap: 4 }}>
+              <Clock size={10} />
+              {timeAgo}
             </span>
           </div>
         )}
 
-        <p className="mt-2 text-sm text-slate-500">{locLine}</p>
-
-        {(p.piece_type || p.surface_m2) && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {formatPieceType(p.piece_type ?? null).map((label) => (
-              <span key={label} className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs text-slate-600">{label}</span>
-            ))}
-            {p.surface_m2 && (
-              <span className="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700">{p.surface_m2} m²</span>
-            )}
+        {/* Locked overlay */}
+        {isLockedForMe && (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, padding: "6px 16px", borderRadius: 20, background: "#EF4444", color: "#fff" }}>
+              Projet reserve
+            </span>
           </div>
         )}
 
+        {/* Fallback badge */}
+        {showFallbackBadge && !isLockedForMe && (
+          <span style={{ position: "absolute", bottom: 8, right: 8, fontSize: 11, padding: "3px 8px", borderRadius: 6, background: "rgba(0,0,0,0.55)", color: "#fff" }}>
+            Photo illustrative
+          </span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: 16 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, color: "#111", marginBottom: 8 }}>{name}</h3>
+
+        {/* Meta row */}
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px 16px", marginBottom: 10, fontSize: 13, color: "#6B7280" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <MapPin size={14} style={{ color: "#3B82F6", flexShrink: 0 }} />
+            {zoneLabel}
+          </span>
+          {p.surface_m2 && (
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <Ruler size={14} style={{ color: "#3B82F6", flexShrink: 0 }} />
+              {p.surface_m2} m2
+            </span>
+          )}
+          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <Euro size={14} style={{ color: "#3B82F6", flexShrink: 0 }} />
+            {formatBudget(p.budget)}
+          </span>
+        </div>
+
+        {/* Description */}
         {descriptionLine && (
-          <p className="mt-2 line-clamp-2 text-sm text-slate-600">{descriptionLine}</p>
+          <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.5, marginBottom: 10, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>
+            {descriptionLine}
+          </p>
         )}
 
+        {/* Unlocked phone */}
         {isUnlocked && !isLockedForMe && (
-          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-            <span className="font-semibold">Téléphone:</span>{" "}{unlockedPhone ? formatPhone(unlockedPhone) : "—”"}
+          <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "10px 12px", marginBottom: 10, fontSize: 13, color: "#166534" }}>
+            <span style={{ fontWeight: 700 }}>Telephone: </span>
+            {unlockedPhone ? formatPhone(unlockedPhone) : "Non disponible"}
           </div>
         )}
 
-        {isFirstSlot && !isUnlocked && !isLockedForMe && (
-          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
-            <div className="flex items-start gap-2">
-              <span className="text-base leading-none"></span>
-              <div className="min-w-0">
-                <p className="text-[12px] font-bold text-amber-800">Offre exclusive disponible</p>
-                <p className="mt-0.5 text-[11px] text-amber-700">Soyez le seul à  recevoir ce projet —” bloquez les autres artisans</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Artisans count */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, fontSize: 13 }}>
+          <Users size={15} style={{ color: "#9CA3AF", flexShrink: 0 }} />
+          <span style={{ fontWeight: 600, color: isFull ? "#EF4444" : "#111" }}>
+            {projectUnlockCount}/3 artisans
+          </span>
+          {!isFull && !isLockedForMe && (
+            <span style={{ color: "#9CA3AF" }}>
+              {" "} {placesLeft} place{placesLeft > 1 ? "s" : ""} restante{placesLeft > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
 
-        <div className="mt-3 flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {p.id && p.id !== "undefined" ? (
-              <Link prefetch href={`/artisan/project/${p.id}`} className="shrink-0 text-sm text-slate-600 underline underline-offset-4 hover:text-slate-900">Voir le projet</Link>
-            ) : (
-              <span className="shrink-0 text-sm text-slate-400">Voir le projet</span>
-            )}
+        {/* Action buttons */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
 
-            {isLockedForMe && null}
-
-            {!isLockedForMe && !isUnlocked && !isFull && (
-              <div className="ml-auto flex items-center gap-2">
-                <button type="button" onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
-                  disabled={!p.id || p.id === "undefined" || unlocking}
-                  className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50">
-                  <WaIcon />
-                  WhatsApp
-                  <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                </button>
-                <button type="button" onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
-                  disabled={!p.id || p.id === "undefined" || unlocking}
-                  className="inline-flex shrink-0 flex-col items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-b from-emerald-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(16,185,129,0.28)] transition hover:from-emerald-400 hover:to-emerald-600 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70">
-                  {unlocking ? (
-                    <><span className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/60 border-t-white" />Déblocage...</>
-                  ) : (
-                    <><span>Voir le numéro</span><span className="text-[11px] font-normal opacity-90">{price.normal}€</span></>
-                  )}
-                </button>
-              </div>
-            )}
-
-            {!isLockedForMe && isUnlocked && (
-              <div className="ml-auto flex items-center gap-2">
-                {waE164 ? (
-                  <a href={`https://wa.me/${waE164}?text=${encodeURIComponent("Bonjour, j'ai vu votre projet sur PremiumArtisan")}`}
-                    target="_blank" rel="noreferrer"
-                    className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100">
-                    <WaIcon />WhatsApp
-                  </a>
-                ) : null}
-                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  Débloqué
-                </span>
-              </div>
-            )}
-
-            {isFull && !isUnlocked && !isLockedForMe && (
-              <div className="ml-auto flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-                3 / 3 artisans —” complet
-              </div>
-            )}
-          </div>
-
-          {isFirstSlot && !isUnlocked && !isLockedForMe && (
-            <button type="button" onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
-              disabled={!p.id || p.id === "undefined" || unlocking}
-              className="flex w-full items-center gap-2 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 text-sm font-bold text-amber-800 transition hover:from-amber-100 hover:to-orange-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60">
-              <span className="text-base leading-none"></span>
-              <span>Réserver en exclusivité</span>
-              <span className="ml-auto flex flex-col items-end">
-                <span className="text-[13px] font-black text-amber-900">{price.exclusive}€</span>
-                <span className="text-[10px] font-normal text-amber-700">accès unique</span>
-              </span>
-            </button>
+          {/* Voir le projet */}
+          {p.id && p.id !== "undefined" && (
+            <Link prefetch href={`/artisan/project/${p.id}`}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: 11, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", fontSize: 14, fontWeight: 600, color: "#374151", textDecoration: "none" }}>
+              <Eye size={16} />
+              Voir le projet
+            </Link>
           )}
 
+          {/* Numero + Exclusif */}
+          {!isLockedForMe && !isUnlocked && !isFull && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <button type="button"
+                onClick={() => p.id && p.id !== "undefined" && onUnlockClick(p.id)}
+                disabled={!p.id || p.id === "undefined" || unlocking}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #E5E7EB", background: "#F9FAFB", fontSize: 13, fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "inherit" }}>
+                <Phone size={15} />
+                Numero ({price.normal}e)
+              </button>
+              <button type="button"
+                onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
+                disabled={!p.id || p.id === "undefined" || unlocking || !isFirstSlot}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "none", background: isFirstSlot ? "#3B82F6" : "#E5E7EB", fontSize: 13, fontWeight: 600, color: isFirstSlot ? "#fff" : "#9CA3AF", cursor: isFirstSlot ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
+                <Star size={15} />
+                Exclusif ({price.exclusive}e)
+              </button>
+            </div>
+          )}
+
+          {/* Debloque */}
+          {!isLockedForMe && isUnlocked && (
+            <div style={{ display: "flex", gap: 8 }}>
+              {waE164 && (
+                <a href={`https://wa.me/${waE164}?text=${encodeURIComponent("Bonjour, j ai vu votre projet sur PremiumArtisan")}`}
+                  target="_blank" rel="noreferrer"
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #BBF7D0", background: "#F0FDF4", fontSize: 13, fontWeight: 600, color: "#166534", textDecoration: "none" }}>
+                  <WaIcon /> WhatsApp
+                </a>
+              )}
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #BBF7D0", background: "#F0FDF4", fontSize: 13, fontWeight: 600, color: "#166534" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                Debloque
+              </div>
+            </div>
+          )}
+
+          {/* Complet */}
+          {isFull && !isUnlocked && !isLockedForMe && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #E5E7EB", background: "#F9FAFB", fontSize: 13, color: "#9CA3AF" }}>
+              <Users size={15} />
+              3/3 artisans complet
+            </div>
+          )}
+
+          {/* Reserve */}
           {isLockedForMe && (
-            <button type="button" disabled
-              className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-400">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              Projet réservé —” non disponible
-            </button>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #E5E7EB", background: "#F9FAFB", fontSize: 13, color: "#9CA3AF" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Projet reserve non disponible
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 });
+
 
 function CheckItem({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
   return (
@@ -847,8 +863,8 @@ export function DashboardShell({
 
           {/* Logo */}
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-1.5 no-underline mr-1">
-            <div style={{ background: "#3B82F6", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0, borderRadius: 6 }}>
-              <span style={{ transform: "rotate(-45deg)", display: "block" }}>&#9874;</span>
+            <div style={{ background: "#3B82F6", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0 }}>
+              <span style={{ transform: "rotate(-45deg)", display: "block" }}>âš’</span>
             </div>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#1e293b", letterSpacing: 1, lineHeight: 1 }}>
               PremiumArtisan
