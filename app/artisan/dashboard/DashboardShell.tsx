@@ -206,18 +206,18 @@ const WaIcon = () => (
 function ExclusifTooltip() {
   const [open, setOpen] = useState(false)
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "stretch" }}>
+    <div style={{ position: "relative", flexShrink: 0 }}>
       <button
         type="button"
         onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
         style={{
-          width: 24, background: "transparent", border: "none", cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 700,
-          position: "absolute", right: -24, top: 0, bottom: 0,
+          width: 22, height: 22, borderRadius: "50%",
+          background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)",
+          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 0,
         }}
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="16" x2="12" y2="12"/>
           <line x1="12" y1="8" x2="12.01" y2="8"/>
@@ -227,9 +227,9 @@ function ExclusifTooltip() {
         <>
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 50 }} />
           <div style={{
-            position: "absolute", bottom: "calc(100% + 8px)", right: -24, zIndex: 51,
+            position: "absolute", bottom: "calc(100% + 10px)", right: 0, zIndex: 51,
             background: "#1A1A1A", borderRadius: 12, padding: "12px 14px",
-            width: 220, boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+            width: 220, boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
           }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
               Acces exclusif
@@ -238,8 +238,8 @@ function ExclusifTooltip() {
               Vous serez le seul artisan a recevoir ce projet. Les autres artisans ne pourront pas y acceder.
             </div>
             <div style={{
-              position: "absolute", bottom: -6, right: 30,
-              width: 12, height: 12, background: "#1A1A1A",
+              position: "absolute", bottom: -5, right: 8,
+              width: 10, height: 10, background: "#1A1A1A",
               transform: "rotate(45deg)",
             }} />
           </div>
@@ -415,15 +415,15 @@ const ProjectCard = memo(function ProjectCard({
                 disabled={!p.id || p.id === "undefined" || unlocking}
                 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "1px solid #E5E7EB", background: "#F9FAFB", fontSize: 13, fontWeight: 600, color: "#374151", cursor: "pointer", fontFamily: "inherit" }}>
                 <Phone size={15} />
-                Numero — <Euro size={13} style={{ marginLeft: 2 }} />{price.normal}
+                Numero {price.normal}€
               </button>
-              <div style={{ position: "relative", display: "flex" }}>
+              <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6 }}>
                 <button type="button"
                   onClick={() => p.id && p.id !== "undefined" && onUnlockExclusive(p.id)}
                   disabled={!p.id || p.id === "undefined" || unlocking || !isFirstSlot}
                   style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: 11, borderRadius: 12, border: "none", background: isFirstSlot ? "#3B82F6" : "#E5E7EB", fontSize: 13, fontWeight: 600, color: isFirstSlot ? "#fff" : "#9CA3AF", cursor: isFirstSlot ? "pointer" : "not-allowed", fontFamily: "inherit" }}>
                   <Star size={15} />
-                  Exclusif — <Euro size={13} style={{ marginLeft: 2 }} />{price.exclusive}
+                  Exclusif {price.exclusive}€
                 </button>
                 <ExclusifTooltip />
               </div>
@@ -912,8 +912,8 @@ export function DashboardShell({
 
           {/* Logo */}
           <a href="/artisan/dashboard" className="flex shrink-0 items-center gap-1.5 no-underline mr-1">
-            <div style={{ background: "#3B82F6", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0 }}>
-              <span style={{ transform: "rotate(-45deg)", display: "block" }}>âš’</span>
+            <div style={{ background: "#3B82F6", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", color: "#000", transform: "rotate(45deg)", flexShrink: 0, borderRadius: 6 }}>
+              <span style={{ transform: "rotate(-45deg)", display: "block" }}>&#9874;</span>
             </div>
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#1e293b", letterSpacing: 1, lineHeight: 1 }}>
               PremiumArtisan
