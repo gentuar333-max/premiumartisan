@@ -2,13 +2,11 @@
 // app/artisan/factures-electroniques/parametres/ParametresPage.tsx
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { UserCircle, Pencil, Building2, FileText, Bell, Settings2, Sun, Moon, Monitor, Globe } from 'lucide-react'
+import { UserCircle, Pencil, Building2, FileText, Bell } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 
 const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1]
-const easeSpring:  [number, number, number, number] = [0.34, 1.56, 0.64, 1]
 
 const sectionItem = {
   hidden:  { opacity: 0, y: 20 },
@@ -16,7 +14,6 @@ const sectionItem = {
 }
 const sectionStagger = { visible: { transition: { staggerChildren: 0.08 } } }
 
-// ── Toggle row ────────────────────────────────────────────────────────────────
 function ToggleRow({ label, description, checked, onChange }: {
   label: string; description?: string; checked: boolean; onChange: (v: boolean) => void
 }) {
@@ -34,7 +31,6 @@ function ToggleRow({ label, description, checked, onChange }: {
   )
 }
 
-// ── Styled input ──────────────────────────────────────────────────────────────
 function StyledInput({ value, onChange, type = 'text' }: { value: string; onChange: (v: string) => void; type?: string }) {
   return (
     <input type={type} value={value} onChange={(e) => onChange(e.target.value)}
@@ -49,10 +45,10 @@ function Label({ children }: { children: React.ReactNode }) {
   return <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#8C7D6E', marginBottom: 6, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>{children}</label>
 }
 
-function GlassSection({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function GlassSection({ children }: { children: React.ReactNode }) {
   return (
     <motion.div variants={sectionItem}
-      style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(230,223,214,0.7)', borderRadius: 16, padding: 20, backdropFilter: 'blur(12px)', boxShadow: '0 2px 12px rgba(26,22,20,0.06)', ...style }}>
+      style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(230,223,214,0.7)', borderRadius: 16, padding: 20, backdropFilter: 'blur(12px)', boxShadow: '0 2px 12px rgba(26,22,20,0.06)' }}>
       {children}
     </motion.div>
   )
@@ -67,20 +63,11 @@ function SectionTitle({ icon, label }: { icon: React.ReactNode; label: string })
   )
 }
 
-type ThemeMode = 'clair' | 'sombre' | 'systeme'
-
 export default function ParametresPage() {
-  const [profile, setProfile] = useState({ prenom: 'Jean', nom: 'Dupont', email: 'jean.dupont@artisan.fr', telephone: '+33 6 12 34 56 78' })
+  const [profile, setProfile]       = useState({ prenom: 'Jean', nom: 'Dupont', email: 'jean.dupont@artisan.fr', telephone: '+33 6 12 34 56 78' })
   const [entreprise, setEntreprise] = useState({ raisonSociale: 'Dupont Renovation SARL', siret: '123 456 789 00012', adresse: '12 rue des Artisans', codePostal: '21000', ville: 'Dijon' })
   const [facturation, setFacturation] = useState({ tva: '10', conditions: '30', piedPage: 'TVA applicable selon la legislation en vigueur. TVA intracommunautaire: FR12 123456789.' })
-  const [notifs, setNotifs] = useState({ paiement: true, consultee: false, rappels: true })
-  const [theme, setTheme] = useState<ThemeMode>('clair')
-
-  const themeOptions: { value: ThemeMode; label: string; icon: React.ReactNode }[] = [
-    { value: 'clair',   label: 'Clair',   icon: <Sun size={15} strokeWidth={2} /> },
-    { value: 'systeme', label: 'Systeme', icon: <Monitor size={15} strokeWidth={2} /> },
-    { value: 'sombre',  label: 'Sombre',  icon: <Moon size={15} strokeWidth={2} /> },
-  ]
+  const [notifs, setNotifs]         = useState({ paiement: true, consultee: false, rappels: true })
 
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#FAF8F5', paddingBottom: 80 }}>
@@ -120,10 +107,9 @@ export default function ParametresPage() {
                 <div><Label>Telephone</Label><StyledInput type="tel" value={profile.telephone} onChange={(v) => setProfile((p) => ({ ...p, telephone: v }))} /></div>
               </div>
               <div className="mt-5 flex justify-end">
-                <motion.button whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.15, ease: easeSpring }}
-                  style={{ padding: '10px 24px', borderRadius: 14, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#FFFFFF', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(232,126,26,0.3)' }}>
+                <button style={{ padding: '10px 24px', borderRadius: 14, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#FFFFFF', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(232,126,26,0.3)' }}>
                   Enregistrer
-                </motion.button>
+                </button>
               </div>
             </GlassSection>
 
@@ -152,10 +138,6 @@ export default function ParametresPage() {
                     <option value="5.5">5,5% — renovation energetique</option>
                     <option value="0">0% — export</option>
                   </select>
-                </div>
-                <div>
-                  <Label>Devise</Label>
-                  <div style={{ height: 48, borderRadius: 14, border: '1.5px solid #E6DFD6', background: '#F2EEE8', fontSize: 15, color: '#6B5E52', padding: '0 16px', display: 'flex', alignItems: 'center' }}>EUR (€)</div>
                 </div>
                 <div>
                   <Label>Conditions de paiement par defaut</Label>
@@ -189,37 +171,6 @@ export default function ParametresPage() {
                 <div style={{ height: 1, background: '#E6DFD6', margin: '12px 0' }} />
                 <ToggleRow label="Rappels de factures en retard" description="Recevez des rappels pour les paiements tardifs."
                   checked={notifs.rappels} onChange={(v) => setNotifs((n) => ({ ...n, rappels: v }))} />
-              </div>
-            </GlassSection>
-
-            {/* Application */}
-            <GlassSection>
-              <SectionTitle icon={<Settings2 size={22} style={{ color: '#E87E1A' }} />} label="Application" />
-              <div className="flex flex-col gap-5">
-                <div>
-                  <Label>Theme</Label>
-                  <div className="flex p-1 gap-1" style={{ background: '#F2EEE8', borderRadius: 12 }}>
-                    {themeOptions.map((opt) => {
-                      const isActive = theme === opt.value
-                      return (
-                        <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setTheme(opt.value)}
-                          className="relative flex-1 flex items-center justify-center gap-2 py-2.5"
-                          style={{ borderRadius: 10, fontSize: 14, fontWeight: isActive ? 600 : 500, color: isActive ? '#FFFFFF' : '#6B5E52', background: isActive ? 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)' : 'transparent', border: 'none', cursor: 'pointer', transition: 'all 0.3s', fontFamily: 'inherit' }}>
-                          {opt.icon} {opt.label}
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-                </div>
-                <div>
-                  <Label>Langue</Label>
-                  <div className="flex items-center gap-2 px-4"
-                    style={{ height: 48, borderRadius: 14, border: '1.5px solid #E6DFD6', background: '#F2EEE8', fontSize: 15, color: '#6B5E52' }}>
-                    <Globe size={16} style={{ color: '#A89B8C' }} />
-                    <span>Francais</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 12, color: '#A89B8C' }}>Lecture seule</span>
-                  </div>
-                </div>
               </div>
             </GlassSection>
 
