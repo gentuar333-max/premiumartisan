@@ -1042,6 +1042,18 @@ export function DashboardShell({
                 </button>
               )}
 
+              {/* Factures electroniques */}
+              <div>
+                <button type="button" disabled
+                  className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-400 flex items-center justify-between">
+                  <span>Factures electroniques</span>
+                  <span className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    2026
+                  </span>
+                </button>
+                <span className="mt-1.5 block text-xs text-slate-400">Bientôt disponible</span>
+              </div>
+
               {/* Aide */}
               <div>
                 <button type="button" disabled
