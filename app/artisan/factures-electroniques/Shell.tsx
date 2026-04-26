@@ -1,178 +1,212 @@
-"use client";
-
+'use client'
 // app/artisan/factures-electroniques/Shell.tsx
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FileText, Clock, CheckCircle2, Plus } from 'lucide-react'
+import CountUp from 'react-countup'
+import { MOCK_INVOICES, STATUS_CONFIG, type InvoiceStatus } from './mock-data'
 
-type Facture = {
-  id: string;
-  numero: string;
-  statut: "brouillon" | "envoyée" | "payée" | "annulée";
-  client_nom: string;
-  total_ttc: number;
-  date_emission: string;
-};
+const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1]
+const easeSpring:  [number, number, number, number] = [0.34, 1.56, 0.64, 1]
+const easeOutQuart:[number, number, number, number] = [0.25, 1, 0.5, 1]
 
-const STATUT: Record<string, { label: string; bg: string; color: string }> = {
-  "envoyée": { label: "Envoyee",  bg: "#fffbeb", color: "#d97706" },
-  "payée":   { label: "Payee",    bg: "#f0fdf4", color: "#16a34a" },
-  "brouillon":{ label: "Brouillon",bg:"#f8fafc", color: "#64748b" },
-  "annulée": { label: "Annulee",  bg: "#fff1f2", color: "#e11d48" },
-};
+const pageVariants = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: easeOutExpo } } }
+const cardStagger  = { visible: { transition: { staggerChildren: 0.05 } } }
+const cardSlideUp  = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: easeOutExpo } } }
+const listStagger  = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } }
+const listItem     = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: easeOutExpo } }, exit: { opacity: 0, transition: { duration: 0.2 } } }
 
-export default function Shell({ userEmail }: { userEmail?: string }) {
-  const router = useRouter();
-  const [factures, setFactures] = useState<Facture[]>([]);
-  const [loading, setLoading]   = useState(true);
+type FilterStatus = 'toutes' | InvoiceStatus
+const FILTERS: { label: string; value: FilterStatus }[] = [
+  { label: 'Toutes',     value: 'toutes'      },
+  { label: 'Brouillon',  value: 'brouillon'   },
+  { label: 'En attente', value: 'en-attente'  },
+  { label: 'Payee',      value: 'payee'       },
+  { label: 'En retard',  value: 'en-retard'   },
+  { label: 'Annulee',    value: 'annulee'     },
+]
 
-  useEffect(() => {
-    fetch("/api/artisan/factures")
-      .then(r => r.json())
-      .then(j => { if (j.ok) setFactures(j.factures); })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const fmt  = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €";
-  const fmtD = (d: string) => new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
-
-  const total    = factures.reduce((s, f) => s + f.total_ttc, 0);
-  const payees   = factures.filter(f => f.statut === "payée");
-  const encours  = factures.filter(f => f.statut === "envoyée");
-  const caPayees = payees.reduce((s, f) => s + f.total_ttc, 0);
-
-  const initials = userEmail ? userEmail.slice(0, 2).toUpperCase() : "ME";
-
+function StatsSection() {
+  const stats = [
+    { icon: FileText,     iconBg: '#FDEBD2', iconColor: '#A34C10', number: 12, label: 'TOTAL FACTURES', subNumber: null as number | null, trend: '+2 ce mois' },
+    { icon: Clock,        iconBg: '#FEF3C7', iconColor: '#92400E', number: 4,  label: 'EN ATTENTE',    subNumber: 5840.5,  trend: null },
+    { icon: CheckCircle2, iconBg: '#DCFCE7', iconColor: '#166534', number: 8,  label: 'ENCAISSE',      subNumber: 12450.75,trend: null },
+  ]
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", fontFamily: "'DM Sans', sans-serif" }}>
-
-      {/* ── HEADER ── */}
-      <header style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", position: "sticky", top: 0, zIndex: 10 }}>
-        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 20px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button onClick={() => router.push("/artisan/dashboard")}
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 8, color: "#94a3b8", display: "flex" }}>
-              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
-              </svg>
-            </button>
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.01em" }}>
-              Mes factures
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
-              {initials}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "24px 20px" }}>
-
-        {/* ── STATS 3 cartes ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
-          {[
-            { label: "Total factures", value: factures.length, sub: "ce mois",         accent: "#6366f1" },
-            { label: "En attente",     value: encours.length,  sub: fmt(encours.reduce((s,f) => s+f.total_ttc,0)), accent: "#f59e0b" },
-            { label: "Encaisse",       value: fmt(caPayees),   sub: `${payees.length} facture${payees.length > 1 ? "s" : ""}`, accent: "#10b981" },
-          ].map(s => (
-            <div key={s.label} style={{ background: "#fff", borderRadius: 14, padding: "16px 14px", border: "1px solid #e2e8f0", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.accent, borderRadius: "14px 14px 0 0" }} />
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>{s.label}</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", lineHeight: 1, marginBottom: 4 }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: "#94a3b8" }}>{s.sub}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── BOUTON PRINCIPAL ── */}
-        <Link href="/artisan/factures-electroniques/new"
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "14px", borderRadius: 14, background: "#0f172a", color: "#fff", fontSize: 15, fontWeight: 700, textDecoration: "none", marginBottom: 28, letterSpacing: "-0.01em", boxShadow: "0 4px 14px rgba(15,23,42,0.15)" }}>
-          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
-          </svg>
-          Creer une facture
-        </Link>
-
-        {/* ── LISTE ── */}
-        <div style={{ marginBottom: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>
-            {factures.length === 0 ? "Aucune facture" : `${factures.length} facture${factures.length > 1 ? "s" : ""}`}
-          </span>
-        </div>
-
-        {loading ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[1,2,3].map(i => (
-              <div key={i} style={{ background: "#fff", borderRadius: 14, height: 76, border: "1px solid #e2e8f0", animation: "pulse 1.5s infinite" }} />
-            ))}
-          </div>
-        ) : factures.length === 0 ? (
-          <div style={{ background: "#fff", borderRadius: 20, padding: "48px 24px", textAlign: "center", border: "1px solid #e2e8f0" }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              <svg width="24" height="24" fill="none" stroke="#94a3b8" strokeWidth={1.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-            </div>
-            <p style={{ fontSize: 15, fontWeight: 600, color: "#0f172a", marginBottom: 6 }}>Pas encore de factures</p>
-            <p style={{ fontSize: 13, color: "#94a3b8", marginBottom: 20 }}>Creez votre premiere facture en quelques secondes</p>
-            <Link href="/artisan/factures-electroniques/new"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 22px", background: "#0f172a", color: "#fff", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none" }}>
-              Commencer
-            </Link>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {factures.map(f => {
-              const s = STATUT[f.statut] ?? STATUT["brouillon"];
-              return (
-                <div key={f.id}
-                  onClick={() => router.push(`/artisan/factures/${f.id}`)}
-                  style={{ background: "#fff", borderRadius: 14, padding: "16px 18px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, transition: "box-shadow 0.15s" }}
-                  onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)")}
-                  onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}>
-
-                  {/* Left */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="18" height="18" fill="none" stroke="#64748b" strokeWidth={1.5} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                      </svg>
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {f.client_nom || "Client"}
-                      </div>
-                      <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                        {f.numero} · {fmtD(f.date_emission)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right */}
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: "#0f172a" }}>{fmt(f.total_ttc)}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 6, background: s.bg, color: s.color }}>
-                      {s.label}
-                    </span>
-                  </div>
+    <motion.section variants={cardStagger} initial="hidden" animate="visible" className="relative px-4 pt-6 pb-8"
+      style={{ background: 'linear-gradient(135deg,#FEF8F0 0%,#FDEBD2 50%,#FAD6A5 100%)' }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#D1C7BB 1px,transparent 1px)', backgroundSize: '16px 16px', opacity: 0.3 }} />
+      <div className="relative flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible" style={{ scrollbarWidth: 'none' as const }}>
+        {stats.map((s) => (
+          <motion.div key={s.label} variants={cardSlideUp} className="flex-shrink-0" style={{ minWidth: 'calc(75% - 8px)', maxWidth: '100%' }}>
+            <div style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(230,223,214,0.6)', borderRadius: 16, backdropFilter: 'blur(10px)', padding: 20, minHeight: 120 }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-center rounded-full" style={{ width: 36, height: 36, background: s.iconBg }}>
+                  <s.icon size={18} style={{ color: s.iconColor }} strokeWidth={2} />
                 </div>
-              );
-            })}
-          </div>
-        )}
+                {s.trend && <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: '#FDEBD2', color: '#A34C10' }}>{s.trend}</span>}
+              </div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: '#4D433A', lineHeight: 1 }}>
+                <CountUp end={s.number} duration={0.8} separator=" " />
+              </div>
+              {s.subNumber !== null && (
+                <div style={{ fontSize: 13, color: '#8C7D6E', marginTop: 4 }}>
+                  <CountUp end={s.subNumber} duration={0.8} separator=" " decimals={2} decimal="," suffix=" €" />
+                </div>
+              )}
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8C7D6E', marginTop: 8 }}>{s.label}</div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.section>
+  )
+}
 
-        {/* Total bottom */}
-        {factures.length > 0 && (
-          <div style={{ marginTop: 20, padding: "16px 20px", background: "#fff", borderRadius: 14, border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 13, color: "#64748b", fontWeight: 500 }}>Total toutes factures</span>
-            <span style={{ fontSize: 18, fontWeight: 800, color: "#0f172a" }}>{fmt(total)}</span>
-          </div>
-        )}
-
+function FilterChips({ active, onChange }: { active: FilterStatus; onChange: (f: FilterStatus) => void }) {
+  return (
+    <div className="relative px-4 py-3">
+      <div className="absolute right-0 top-0 bottom-0 pointer-events-none z-10" style={{ width: 96, background: 'linear-gradient(to right,transparent,#FAF8F5)' }} />
+      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' as const }}>
+        {FILTERS.map((f) => {
+          const isActive = active === f.value
+          return (
+            <motion.button key={f.value} whileTap={{ scale: 0.95 }} transition={{ duration: 0.2, ease: easeOutQuart }}
+              onClick={() => onChange(f.value)} className="flex-shrink-0 px-4 py-2 text-sm font-semibold transition-all duration-200"
+              style={{ borderRadius: 999, background: isActive ? '#4D433A' : '#FFFFFF', color: isActive ? '#FFFFFF' : '#6B5E52', border: isActive ? '1.5px solid #4D433A' : '1.5px solid #E6DFD6' }}>
+              {f.label}
+            </motion.button>
+          )
+        })}
       </div>
     </div>
-  );
+  )
+}
+
+function InvoiceCard({ invoice }: { invoice: typeof MOCK_INVOICES[0] }) {
+  const router = useRouter()
+  const config = STATUS_CONFIG[invoice.status]
+  const fmtAmt = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(invoice.amount)
+  return (
+    <motion.div layout variants={listItem} initial="hidden" animate="visible" exit="exit"
+      whileTap={{ scale: 0.98 }} transition={{ duration: 0.15, ease: easeSpring }}
+      onClick={() => router.push(`/artisan/factures-electroniques/${invoice.id}`)}
+      style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(230,223,214,0.7)', borderRadius: 16, padding: 16, cursor: 'pointer', backdropFilter: 'blur(12px)', boxShadow: '0 2px 12px rgba(26,22,20,0.06)' }}>
+      <div className="flex items-center justify-between mb-2">
+        <span style={{ fontSize: 15, fontWeight: 600, color: '#332B25' }}>{invoice.client}</span>
+        <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: config.bg, color: config.text, border: `1px solid ${config.border}` }}>{config.label}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: 12, color: '#A89B8C' }}>{invoice.number}</span>
+          <span style={{ color: '#D1C7BB' }}>·</span>
+          <span style={{ fontSize: 12, color: '#A89B8C' }}>{invoice.date}</span>
+        </div>
+        <span style={{ fontSize: 16, fontWeight: 700, color: '#4D433A' }}>{fmtAmt}</span>
+      </div>
+      {invoice.status === 'en-attente' && (
+        <div className="mt-3">
+          <div style={{ fontSize: 12, color: '#8C7D6E' }}>Echeance: {invoice.dueDate}</div>
+          <div style={{ height: 4, background: '#E6DFD6', borderRadius: 999, marginTop: 6 }}>
+            <div style={{ height: 4, width: '60%', borderRadius: 999, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)' }} />
+          </div>
+        </div>
+      )}
+      {invoice.status === 'payee' && (
+        <div className="mt-3 flex items-center gap-1" style={{ fontSize: 12, color: '#16A34A' }}>
+          <CheckCircle2 size={14} strokeWidth={2} /> Payee le {invoice.dueDate}
+        </div>
+      )}
+      {invoice.status === 'brouillon' && <div className="mt-3" style={{ fontSize: 12, color: '#8C7D6E' }}>Modifiee il y a 2h</div>}
+    </motion.div>
+  )
+}
+
+function EmptyState({ onCreate }: { onCreate: () => void }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: easeOutExpo }}
+      className="flex flex-col items-center justify-center px-4" style={{ minHeight: 400 }}>
+      <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3, ease: 'easeInOut', repeat: Infinity }}>
+        <div style={{ width: 160, height: 160, background: '#F2EEE8', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <FileText size={64} style={{ color: '#D1C7BB' }} strokeWidth={1} />
+        </div>
+      </motion.div>
+      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#4D433A', marginTop: 24, textAlign: 'center' }}>Aucune facture</h2>
+      <p style={{ fontSize: 14, color: '#8C7D6E', maxWidth: 280, textAlign: 'center', marginTop: 8, marginBottom: 24, lineHeight: 1.6 }}>
+        Pas encore de factures. Creez votre premiere facture en quelques secondes.
+      </p>
+      <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} onClick={onCreate}
+        className="flex items-center justify-center gap-2 px-6 py-4"
+        style={{ borderRadius: 14, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#FFFFFF', fontSize: 15, fontWeight: 600, boxShadow: '0 4px 14px rgba(232,126,26,0.3)', width: '100%', maxWidth: 320, border: 'none', cursor: 'pointer' }}>
+        <Plus size={20} strokeWidth={2.5} /> Creer une facture
+      </motion.button>
+    </motion.div>
+  )
+}
+
+export default function Shell() {
+  const router = useRouter()
+  const [activeFilter, setActiveFilter] = useState<FilterStatus>('toutes')
+  const [hasInvoices] = useState(true)
+  const filtered = useMemo(() => activeFilter === 'toutes' ? MOCK_INVOICES : MOCK_INVOICES.filter((i) => i.status === activeFilter), [activeFilter])
+
+  return (
+    <div style={{ minHeight: '100dvh', backgroundColor: '#FAF8F5', paddingBottom: 80 }}>
+      <motion.header initial={{ y: -56, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo }}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 lg:pl-[296px]"
+        style={{ height: 56, background: 'rgba(250,248,245,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(230,223,214,0.4)' }}>
+        <h1 style={{ fontSize: 16, fontWeight: 600, color: '#4D433A' }}>Mes Factures</h1>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={() => router.push('/artisan/factures-electroniques/new')}
+          className="flex items-center justify-center rounded-full"
+          style={{ width: 36, height: 36, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', border: 'none', cursor: 'pointer' }}>
+          <Plus size={20} strokeWidth={2.5} color="#fff" />
+        </motion.button>
+      </motion.header>
+
+      <motion.div variants={pageVariants} initial="hidden" animate="visible" style={{ paddingTop: 56 }}>
+        <StatsSection />
+        <FilterChips active={activeFilter} onChange={setActiveFilter} />
+        <div className="px-4 pb-6" style={{ minHeight: 400 }}>
+          <AnimatePresence mode="wait">
+            {!hasInvoices || filtered.length === 0 ? (
+              <EmptyState key="empty" onCreate={() => router.push('/artisan/factures-electroniques/new')} />
+            ) : (
+              <motion.div key={`list-${activeFilter}`} variants={listStagger} initial="hidden" animate="visible" exit="exit" className="flex flex-col gap-3">
+                {filtered.map((inv) => <InvoiceCard key={inv.id} invoice={inv} />)}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      <motion.button initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo, delay: 0.3 }}
+        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
+        onClick={() => router.push('/artisan/factures-electroniques/new')}
+        className="fixed z-40 flex items-center justify-center rounded-full lg:hidden"
+        style={{ bottom: 80, right: 16, width: 56, height: 56, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', boxShadow: '0 4px 20px rgba(232,126,26,0.4)', border: 'none', cursor: 'pointer' }}>
+        <Plus size={24} strokeWidth={2.5} color="#FFFFFF" />
+      </motion.button>
+
+      <motion.nav initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo, delay: 0.2 }}
+        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
+        style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(230,223,214,0.5)', height: 64 }}>
+        <div className="flex items-center justify-around h-full px-2">
+          {[
+            { label: 'Factures', path: '/artisan/factures-electroniques', active: true },
+            { label: 'Nouvelle',  path: '/artisan/factures-electroniques/new', active: false },
+            { label: 'Dashboard', path: '/artisan/dashboard', active: false },
+          ].map((item) => (
+            <motion.button key={item.path} whileTap={{ scale: 0.9 }} onClick={() => router.push(item.path)}
+              className="flex flex-col items-center justify-center gap-1"
+              style={{ width: 64, height: 56, background: 'none', border: 'none', cursor: 'pointer' }}>
+              <FileText size={22} strokeWidth={item.active ? 2.5 : 1.5} style={{ color: item.active ? '#E87E1A' : '#A89B8C' }} />
+              <span style={{ fontSize: 11, fontWeight: item.active ? 600 : 500, color: item.active ? '#C9650F' : '#A89B8C' }}>{item.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </motion.nav>
+    </div>
+  )
 }
