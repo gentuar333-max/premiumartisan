@@ -6,9 +6,8 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabaseServer";
 
-// ── Numero generator ────────────────────────────────────────────────────────
 async function generateNumero(svc: ReturnType<typeof createSupabaseServiceClient>): Promise<string> {
-  const year  = new Date().getFullYear();
+  const year = new Date().getFullYear();
   const { count } = await svc
     .from("factures_electroniques")
     .select("*", { count: "exact", head: true })
@@ -17,7 +16,6 @@ async function generateNumero(svc: ReturnType<typeof createSupabaseServiceClient
   return `FE-${year}-${next}`;
 }
 
-// ── POST — créer une facture ────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null);
@@ -31,16 +29,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Nom et SIRET obligatoires." }, { status: 400 });
     }
 
+    // ── Auth via cookies ────────────────────────────────────────────────────
     const serverSupabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
+
     if (authErr || !user) {
+      console.error("[factures-electroniques] Auth error:", authErr?.message ?? "no user");
       return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
     }
 
-    const svc = createSupabaseServiceClient();
+    const svc    = createSupabaseServiceClient();
     const numero = await generateNumero(svc);
 
-    // Calculs totaux
+    // Calculs
     const lignes = Array.isArray(services) ? services : [];
     let totalHT  = 0;
     let totalTVA = 0;
@@ -59,16 +60,18 @@ export async function POST(req: Request) {
       statut_efacture: null,
       client_nom:      client.companyName,
       client_siret:    client.siret.replace(/\s/g, ""),
-      client_email:    client.email     ?? "",
-      client_adresse:  client.address   ?? "",
+      client_email:    client.email    ?? "",
+      client_adresse:  client.address  ?? "",
       date_emission:   dates?.invoiceDate ?? new Date().toISOString().split("T")[0],
       date_echeance:   dates?.dueDate    ?? null,
-      lignes:          lignes,
+      lignes,
       notes:           notes ?? "",
       total_ht:        totalHT,
       total_tva:       totalTVA,
       total_ttc:       totalTTC,
     };
+
+    console.log("[factures-electroniques] inserting for user:", user.id);
 
     const { data, error } = await svc
       .from("factures_electroniques")
@@ -76,21 +79,25 @@ export async function POST(req: Request) {
       .select("id, numero")
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[factures-electroniques] insert error:", error.message);
+      throw new Error(error.message);
+    }
 
+    console.log("[factures-electroniques] created:", data.numero);
     return NextResponse.json({ ok: true, id: data.id, numero: data.numero });
 
   } catch (e) {
-    console.error("[factures-electroniques POST]", e);
+    console.error("[factures-electroniques POST] crash:", e);
     return NextResponse.json({ ok: false, error: "Erreur serveur." }, { status: 500 });
   }
 }
 
-// ── GET — liste des factures ────────────────────────────────────────────────
 export async function GET(req: Request) {
   try {
     const serverSupabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
+
     if (authErr || !user) {
       return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
     }
@@ -118,7 +125,6 @@ export async function GET(req: Request) {
   }
 }
 
-// ── PATCH — update statut ───────────────────────────────────────────────────
 export async function PATCH(req: Request) {
   try {
     const body = await req.json().catch(() => null);
@@ -130,6 +136,7 @@ export async function PATCH(req: Request) {
 
     const serverSupabase = await createSupabaseServerClient();
     const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
+
     if (authErr || !user) {
       return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
     }
