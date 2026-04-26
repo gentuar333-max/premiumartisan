@@ -1043,7 +1043,7 @@ export function DashboardShell({
               )}
 
               {/* Factures electroniques */}
-              <Link href="/artisan/factures"
+              <Link href="/artisan/factures-electroniques"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 onClick={() => setMenuOpen(false)}>
                 Factures electroniques
