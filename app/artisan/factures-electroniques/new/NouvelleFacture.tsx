@@ -10,6 +10,7 @@ import { FloatingInput, FloatingTextarea } from '../components/FloatingInput'
 import ServiceItemRow from '../components/ServiceItemRow'
 import TotalsCard from '../components/TotalsCard'
 import { type ServiceItem, type FormData, getTodayDate, getDefaultDueDate, createEmptyService } from '../types'
+import { createSupabaseBrowserClient } from '@/lib/supabaseBrowser'
 
 const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const easeSpring:  [number, number, number, number] = [0.34, 1.56, 0.64, 1]
@@ -118,9 +119,37 @@ export default function NouvelleFacture() {
     return Object.keys(newErrors).length === 0
   }, [formData])
 
-  const handleSubmit = useCallback(() => {
-    if (validateForm()) setShowSuccess(true)
-  }, [validateForm])
+  const handleSubmit = useCallback(async () => {
+    if (!validateForm()) return
+    try {
+      const supabase = createSupabaseBrowserClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { alert('Session expirée. Veuillez vous reconnecter.'); return }
+
+      const res = await fetch('/api/artisan/factures-electroniques', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          client:   formData.client,
+          dates:    formData.dates,
+          services: formData.services,
+          notes:    formData.notes,
+        }),
+      })
+      const json = await res.json()
+      if (json.ok) {
+        setShowSuccess(true)
+      } else {
+        alert(json.error ?? 'Erreur lors de la création.')
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Erreur de connexion.')
+    }
+  }, [validateForm, formData])
 
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#FAF8F5' }}>

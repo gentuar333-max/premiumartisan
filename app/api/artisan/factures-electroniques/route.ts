@@ -29,16 +29,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Nom et SIRET obligatoires." }, { status: 400 });
     }
 
-    // ── Auth via cookies ────────────────────────────────────────────────────
-    const serverSupabase = await createSupabaseServerClient();
-    const { data: { user }, error: authErr } = await serverSupabase.auth.getUser();
+    // ── Auth via Bearer token (client) ou cookies (server) ────────────────
+    const authHeader = req.headers.get("authorization") ?? "";
+    const token      = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
-    if (authErr || !user) {
-      console.error("[factures-electroniques] Auth error:", authErr?.message ?? "no user");
+    const svcAuth = createSupabaseServiceClient();
+    let user: { id: string } | null = null;
+
+    if (token) {
+      const { data } = await svcAuth.auth.getUser(token);
+      user = data.user;
+    } else {
+      const serverSupabase = await createSupabaseServerClient();
+      const { data } = await serverSupabase.auth.getUser();
+      user = data.user;
+    }
+
+    if (!user) {
+      console.error("[factures-electroniques] Auth error: no user");
       return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
     }
 
-    const svc    = createSupabaseServiceClient();
     const numero = await generateNumero(svc);
 
     // Calculs
