@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, Clock, CheckCircle2, Plus } from 'lucide-react'
 import CountUp from 'react-countup'
 import { MOCK_INVOICES, STATUS_CONFIG, type InvoiceStatus } from './mock-data'
+import BottomNav from './components/BottomNav'
 
 const easeOutExpo: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const easeSpring:  [number, number, number, number] = [0.34, 1.56, 0.64, 1]
@@ -154,8 +155,10 @@ export default function Shell() {
 
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#FAF8F5', paddingBottom: 80 }}>
+
+      {/* Navbar */}
       <motion.header initial={{ y: -56, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo }}
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 lg:pl-[296px]"
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4"
         style={{ height: 56, background: 'rgba(250,248,245,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(230,223,214,0.4)' }}>
         <h1 style={{ fontSize: 16, fontWeight: 600, color: '#4D433A' }}>Mes Factures</h1>
         <motion.button whileTap={{ scale: 0.9 }} onClick={() => router.push('/artisan/factures-electroniques/new')}
@@ -165,6 +168,7 @@ export default function Shell() {
         </motion.button>
       </motion.header>
 
+      {/* Content */}
       <motion.div variants={pageVariants} initial="hidden" animate="visible" style={{ paddingTop: 56 }}>
         <StatsSection />
         <FilterChips active={activeFilter} onChange={setActiveFilter} />
@@ -181,6 +185,7 @@ export default function Shell() {
         </div>
       </motion.div>
 
+      {/* FAB */}
       <motion.button initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo, delay: 0.3 }}
         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
         onClick={() => router.push('/artisan/factures-electroniques/new')}
@@ -189,24 +194,8 @@ export default function Shell() {
         <Plus size={24} strokeWidth={2.5} color="#FFFFFF" />
       </motion.button>
 
-      <motion.nav initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo, delay: 0.2 }}
-        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
-        style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(230,223,214,0.5)', height: 64 }}>
-        <div className="flex items-center justify-around h-full px-2">
-          {[
-            { label: 'Factures', path: '/artisan/factures-electroniques', active: true },
-            { label: 'Nouvelle',  path: '/artisan/factures-electroniques/new', active: false },
-            { label: 'Dashboard', path: '/artisan/dashboard', active: false },
-          ].map((item) => (
-            <motion.button key={item.path} whileTap={{ scale: 0.9 }} onClick={() => router.push(item.path)}
-              className="flex flex-col items-center justify-center gap-1"
-              style={{ width: 64, height: 56, background: 'none', border: 'none', cursor: 'pointer' }}>
-              <FileText size={22} strokeWidth={item.active ? 2.5 : 1.5} style={{ color: item.active ? '#E87E1A' : '#A89B8C' }} />
-              <span style={{ fontSize: 11, fontWeight: item.active ? 600 : 500, color: item.active ? '#C9650F' : '#A89B8C' }}>{item.label}</span>
-            </motion.button>
-          ))}
-        </div>
-      </motion.nav>
+      {/* Bottom Nav — 4 tabs */}
+      <BottomNav active="factures" />
     </div>
   )
 }
