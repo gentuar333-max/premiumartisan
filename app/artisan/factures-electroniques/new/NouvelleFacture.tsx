@@ -1,8 +1,8 @@
 'use client'
 // app/artisan/factures-electroniques/new/NouvelleFacture.tsx
 
-import { useState, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Plus, User, CalendarDays, Check } from 'lucide-react'
 import GlassCard from '../components/GlassCard'
@@ -47,7 +47,26 @@ function SuccessOverlay({ onClose }: { onClose: () => void }) {
 }
 
 export default function NouvelleFacture() {
-  const router = useRouter()
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const clientParam = searchParams.get('client')
+    if (clientParam) {
+      try {
+        const c = JSON.parse(decodeURIComponent(clientParam))
+        setFormData(prev => ({
+          ...prev,
+          client: {
+            companyName: c.companyName ?? '',
+            siret:       c.siret       ?? '',
+            email:       c.email       ?? '',
+            address:     c.address     ?? '',
+          }
+        }))
+      } catch {}
+    }
+  }, [searchParams])
   const [showSuccess, setShowSuccess] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     client: { companyName: '', siret: '', email: '', address: '' },
@@ -108,8 +127,8 @@ export default function NouvelleFacture() {
     if (!formData.client.email.trim())       newErrors['client.email']       = "L'email est requis"
     else if (!isValidEmail(formData.client.email)) newErrors['client.email'] = "Format d'email invalide"
     formData.services.forEach((s, i) => {
-      if (!s.description.trim()) newErrors[`service.${i}.description`] = 'La description est requise'
-      if (s.unitPrice <= 0)      newErrors[`service.${i}.price`]       = 'Le prix doit etre superieur a 0'
+      if (!s.description.trim()) newErrors[`service.${i}.description`] = 'Decrivez la prestation'
+      if (s.unitPrice <= 0)      newErrors[`service.${i}.price`]       = 'Le prix HT est obligatoire'
     })
     setErrors(newErrors)
     setTouched({
