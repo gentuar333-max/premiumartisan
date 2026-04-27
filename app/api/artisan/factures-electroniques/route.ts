@@ -138,12 +138,30 @@ export async function POST(req: Request) {
         const emailHtml = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#FAF8F5;font-family:'Segoe UI',sans-serif">
 <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08)">
-  <div style="background:#332B25;padding:32px 36px">
-    <p style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;margin:0 0 4px">${artisanNom}</p>
-    ${artisanSiret ? `<p style="color:rgba(255,255,255,0.4);font-size:11px;margin:0 0 12px">SIRET: ${artisanSiret}</p>` : ""}
-    <p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px">FACTURE ELECTRONIQUE</p>
-    <p style="color:#fff;font-size:24px;font-weight:700;margin:0">${data.numero}</p>
-    <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:6px 0 0">Emise le ${new Date(payload.date_emission).toLocaleDateString("fr-FR")}</p>
+
+  <!-- Badge 2026 -->
+  <div style="background:linear-gradient(135deg,#E87E1A 0%,#C9650F 100%);padding:10px 24px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#fff;opacity:0.9"></div>
+      <span style="color:#fff;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase">Facture electronique conforme 2026</span>
+    </div>
+    <span style="color:rgba(255,255,255,0.8);font-size:11px;font-weight:600">PremiumArtisan</span>
+  </div>
+
+  <!-- Header artisan -->
+  <div style="background:#332B25;padding:28px 36px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div>
+        <p style="color:rgba(255,255,255,0.9);font-size:15px;font-weight:700;margin:0 0 4px">${artisanNom}</p>
+        ${artisanSiret ? `<p style="color:rgba(255,255,255,0.4);font-size:11px;margin:0">SIRET: ${artisanSiret}</p>` : ""}
+        ${artisanVille ? `<p style="color:rgba(255,255,255,0.4);font-size:11px;margin:2px 0 0">${artisanVille}</p>` : ""}
+      </div>
+      <div style="text-align:right">
+        <p style="color:rgba(255,255,255,0.5);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 4px">Numero</p>
+        <p style="color:#fff;font-size:20px;font-weight:700;margin:0">${data.numero}</p>
+        <p style="color:rgba(255,255,255,0.4);font-size:11px;margin:4px 0 0">Emise le ${new Date(payload.date_emission).toLocaleDateString("fr-FR")}</p>
+      </div>
+    </div>
   </div>
   <div style="padding:24px 36px">
     <p style="font-size:14px;color:#8C7D6E;margin:0 0 4px">Facture pour</p>
