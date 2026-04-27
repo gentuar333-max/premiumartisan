@@ -91,6 +91,17 @@ export async function POST(req: Request) {
       total_ttc:       totalTTC,
     };
 
+    // ── Merr profilin e artizanit ───────────────────────────────────────────
+    const { data: artisanProfile } = await svc
+      .from("profiles")
+      .select("nom, prenom, siret, metier, phone, city, adresse, pied_page")
+      .eq("id", user.id)
+      .single();
+
+    const artisanNom = artisanProfile
+      ? `${artisanProfile.prenom ?? ""} ${artisanProfile.nom ?? ""}`.trim() || "Artisan"
+      : "Artisan";
+
     console.log("[factures-electroniques] inserting for user:", user.id);
 
     const { data, error } = await svc
@@ -107,6 +118,10 @@ export async function POST(req: Request) {
     console.log("[factures-electroniques] created:", data.numero);
 
     // ── Email via Resend ────────────────────────────────────────────────────
+    const artisanSiret = artisanProfile?.siret ?? ""
+    const artisanVille = artisanProfile?.city ?? ""
+    const piedPage     = artisanProfile?.pied_page ?? "TVA applicable selon la legislation en vigueur."
+
     if (client.email) {
       try {
         const resend   = getResend();
@@ -124,6 +139,8 @@ export async function POST(req: Request) {
 <body style="margin:0;padding:0;background:#FAF8F5;font-family:'Segoe UI',sans-serif">
 <div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08)">
   <div style="background:#332B25;padding:32px 36px">
+    <p style="color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;margin:0 0 4px">${artisanNom}</p>
+    ${artisanSiret ? `<p style="color:rgba(255,255,255,0.4);font-size:11px;margin:0 0 12px">SIRET: ${artisanSiret}</p>` : ""}
     <p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px">FACTURE ELECTRONIQUE</p>
     <p style="color:#fff;font-size:24px;font-weight:700;margin:0">${data.numero}</p>
     <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:6px 0 0">Emise le ${new Date(payload.date_emission).toLocaleDateString("fr-FR")}</p>
@@ -149,6 +166,7 @@ export async function POST(req: Request) {
     </div>
   </div>
   <div style="background:#FAF8F5;padding:16px 36px;text-align:center">
+    <p style="color:#6B5E52;font-size:11px;margin:0 0 6px">${piedPage}</p>
     <p style="color:#A89B8C;font-size:11px;margin:0">Document genere par <a href="https://premiumartisan.fr" style="color:#E87E1A;text-decoration:none">PremiumArtisan</a></p>
   </div>
 </div>
