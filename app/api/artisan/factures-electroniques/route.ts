@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     const payload = {
       artisan_id:      user.id,
       numero,
-      statut:          "brouillon",
+      statut:          "en-attente",
       statut_efacture: null,
       client_nom:      client.companyName,
       client_siret:    client.siret.replace(/\s/g, ""),
