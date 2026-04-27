@@ -49,6 +49,7 @@ function fmtDate(d: string | null) {
 export default function ApercuFacture({ id }: { id: string }) {
   const router  = useRouter()
   const [facture, setFacture]   = useState<Facture | null>(null)
+  const [artisan, setArtisan]   = useState<{ nom: string; prenom: string; siret: string; adresse: string; city: string } | null>(null)
   const [loading, setLoading]   = useState(true)
   const [marking, setMarking]   = useState(false)
   const [sending, setSending]   = useState(false)
@@ -70,11 +71,17 @@ export default function ApercuFacture({ id }: { id: string }) {
     setLoading(true)
     try {
       const token = await getToken()
-      const res   = await fetch(`/api/artisan/factures-electroniques/${id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
-      const json = await res.json()
-      if (json.ok) setFacture(json.facture)
+      const [resF, resP] = await Promise.all([
+        fetch(`/api/artisan/factures-electroniques/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }),
+        fetch('/api/artisan/parametres', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }),
+      ])
+      const [jsonF, jsonP] = await Promise.all([resF.json(), resP.json()])
+      if (jsonF.ok) setFacture(jsonF.facture)
+      if (jsonP.ok) setArtisan(jsonP.profile)
     } finally {
       setLoading(false)
     }
@@ -225,16 +232,30 @@ export default function ApercuFacture({ id }: { id: string }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #F2EEE8' }}>
               <div style={{ padding: '14px 16px', borderRight: '1px solid #F2EEE8' }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#A89B8C', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Client</p>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#A89B8C', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>De</p>
+                {artisan ? (
+                  <>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#332B25', marginBottom: 3 }}>{`${artisan.prenom ?? ''} ${artisan.nom ?? ''}`.trim() || 'Artisan'}</p>
+                    {artisan.siret && <p style={{ fontSize: 12, color: '#8C7D6E' }}>SIRET: {artisan.siret}</p>}
+                    {artisan.adresse && <p style={{ fontSize: 12, color: '#A89B8C' }}>{artisan.adresse}</p>}
+                    {artisan.city && <p style={{ fontSize: 12, color: '#A89B8C' }}>{artisan.city}</p>}
+                  </>
+                ) : (
+                  <p style={{ fontSize: 13, color: '#A89B8C' }}>—</p>
+                )}
+              </div>
+              <div style={{ padding: '14px 16px' }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#A89B8C', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Pour</p>
                 <p style={{ fontSize: 14, fontWeight: 700, color: '#332B25', marginBottom: 3 }}>{facture.client_nom}</p>
                 <p style={{ fontSize: 12, color: '#8C7D6E' }}>SIRET: {facture.client_siret}</p>
                 {facture.client_email && <p style={{ fontSize: 12, color: '#8C7D6E' }}>{facture.client_email}</p>}
                 {facture.client_adresse && <p style={{ fontSize: 12, color: '#A89B8C' }}>{facture.client_adresse}</p>}
               </div>
-              <div style={{ padding: '14px 16px' }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#A89B8C', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Echeance</p>
-                <p style={{ fontSize: 14, fontWeight: 700, color: '#332B25' }}>{fmtDate(facture.date_echeance)}</p>
-              </div>
+            </div>
+            {/* Echeance row */}
+            <div style={{ padding: '10px 16px', borderBottom: '1px solid #F2EEE8', display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 12, color: '#A89B8C' }}>Echeance</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#332B25' }}>{fmtDate(facture.date_echeance)}</span>
             </div>
 
             {facture.lignes.map((l, i) => {
