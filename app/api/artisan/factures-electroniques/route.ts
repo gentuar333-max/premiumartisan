@@ -4,7 +4,15 @@ export const runtime = "nodejs";
 // app/api/artisan/factures-electroniques/route.ts
 
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabaseServer";
+
+const FROM_EMAIL = process.env.RESEND_FROM ?? "noreply@premiumartisan.fr";
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY is missing");
+  return new Resend(key);
+}
 
 async function generateNumero(svc: ReturnType<typeof createSupabaseServiceClient>): Promise<string> {
   const year = new Date().getFullYear();
@@ -97,6 +105,68 @@ export async function POST(req: Request) {
     }
 
     console.log("[factures-electroniques] created:", data.numero);
+
+    // ── Email via Resend ────────────────────────────────────────────────────
+    if (client.email) {
+      try {
+        const resend   = getResend();
+        const fmt      = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €";
+        const lignesHtml = lignes.map((l: { description: string; quantity: number; unitPrice: number; tvaRate: number }) => `
+          <tr style="border-bottom:1px solid #F2EEE8">
+            <td style="padding:10px 12px;color:#332B25">${l.description || "—"}</td>
+            <td style="padding:10px 8px;text-align:right;color:#6B5E52">${l.quantity}</td>
+            <td style="padding:10px 8px;text-align:right;color:#6B5E52">${fmt(l.unitPrice)}</td>
+            <td style="padding:10px 8px;text-align:right;color:#6B5E52">${l.tvaRate}%</td>
+            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#332B25">${fmt(l.quantity * l.unitPrice)}</td>
+          </tr>`).join("");
+
+        const emailHtml = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FAF8F5;font-family:'Segoe UI',sans-serif">
+<div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08)">
+  <div style="background:#332B25;padding:32px 36px">
+    <p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px">FACTURE ELECTRONIQUE</p>
+    <p style="color:#fff;font-size:24px;font-weight:700;margin:0">${data.numero}</p>
+    <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:6px 0 0">Emise le ${new Date(payload.date_emission).toLocaleDateString("fr-FR")}</p>
+  </div>
+  <div style="padding:24px 36px">
+    <p style="font-size:14px;color:#8C7D6E;margin:0 0 4px">Facture pour</p>
+    <p style="font-size:18px;font-weight:700;color:#332B25;margin:0 0 20px">${client.companyName}</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:#FAF8F5">
+        <th style="text-align:left;padding:10px 12px;color:#8C7D6E">Description</th>
+        <th style="text-align:right;padding:10px 8px;color:#8C7D6E">Qte</th>
+        <th style="text-align:right;padding:10px 8px;color:#8C7D6E">Prix HT</th>
+        <th style="text-align:right;padding:10px 8px;color:#8C7D6E">TVA</th>
+        <th style="text-align:right;padding:10px 12px;color:#8C7D6E">Total HT</th>
+      </tr></thead>
+      <tbody>${lignesHtml}</tbody>
+    </table>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #E6DFD6;text-align:right">
+      <p style="font-size:13px;color:#8C7D6E;margin:4px 0">Total HT : <strong>${fmt(totalHT)}</strong></p>
+      <p style="font-size:13px;color:#8C7D6E;margin:4px 0">TVA : <strong>${fmt(totalTVA)}</strong></p>
+      <p style="font-size:20px;font-weight:700;color:#A34C10;margin:12px 0 4px">Total TTC : ${fmt(totalTTC)}</p>
+      ${payload.date_echeance ? `<p style="font-size:12px;color:#8C7D6E">Echeance : ${new Date(payload.date_echeance).toLocaleDateString("fr-FR")}</p>` : ""}
+    </div>
+  </div>
+  <div style="background:#FAF8F5;padding:16px 36px;text-align:center">
+    <p style="color:#A89B8C;font-size:11px;margin:0">Document genere par <a href="https://premiumartisan.fr" style="color:#E87E1A;text-decoration:none">PremiumArtisan</a></p>
+  </div>
+</div>
+</body></html>`;
+
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: client.email,
+          subject: `Facture ${data.numero} — PremiumArtisan`,
+          html: emailHtml,
+        });
+        console.log("[factures-electroniques] email sent to:", client.email);
+      } catch (emailErr) {
+        console.error("[factures-electroniques] email error:", emailErr);
+        // Ne pas bloquer si email echoue
+      }
+    }
+
     return NextResponse.json({ ok: true, id: data.id, numero: data.numero });
 
   } catch (e) {
