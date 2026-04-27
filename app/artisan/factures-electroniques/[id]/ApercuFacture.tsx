@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CheckCircle2, Download, Send, Trash2, ArrowLeft, Clock, FileText } from 'lucide-react'
+import { CheckCircle2, Download, Send, Trash2, ArrowLeft, Clock, FileText, Loader2 } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabaseBrowser'
 import BottomNav from '../components/BottomNav'
 
@@ -51,7 +51,14 @@ export default function ApercuFacture({ id }: { id: string }) {
   const [facture, setFacture]   = useState<Facture | null>(null)
   const [loading, setLoading]   = useState(true)
   const [marking, setMarking]   = useState(false)
+  const [sending, setSending]   = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [toast, setToast]       = useState<string | null>(null)
+
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const getToken = useCallback(async () => {
     const supabase = createSupabaseBrowserClient()
@@ -75,22 +82,46 @@ export default function ApercuFacture({ id }: { id: string }) {
 
   useEffect(() => { fetchFacture() }, [fetchFacture])
 
+  const patchStatut = useCallback(async (statut: string) => {
+    const token = await getToken()
+    const res   = await fetch(`/api/artisan/factures-electroniques/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ statut }),
+    })
+    return res.json()
+  }, [id, getToken])
+
   const markPaid = useCallback(async () => {
     if (!facture || marking) return
     setMarking(true)
     try {
-      const token = await getToken()
-      const res   = await fetch(`/api/artisan/factures-electroniques/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ statut: 'payee' }),
-      })
-      const json = await res.json()
-      if (json.ok) setFacture((f) => f ? { ...f, statut: 'payee' } : f)
+      const json = await patchStatut('payee')
+      if (json.ok) {
+        setFacture(f => f ? { ...f, statut: 'payee' } : f)
+        showToast('Facture marquee comme payee')
+      }
     } finally {
       setMarking(false)
     }
-  }, [facture, marking, id, getToken])
+  }, [facture, marking, patchStatut])
+
+  const sendEmail = useCallback(async () => {
+    if (!facture || sending) return
+    setSending(true)
+    try {
+      const json = await patchStatut('en-attente')
+      if (json.ok) {
+        setFacture(f => f ? { ...f, statut: 'en-attente' } : f)
+        showToast('Facture envoyee par email')
+      }
+    } finally {
+      setSending(false)
+    }
+  }, [facture, sending, patchStatut])
 
   const deleteFacture = useCallback(async () => {
     if (!confirm('Supprimer cette facture ?')) return
@@ -110,7 +141,7 @@ export default function ApercuFacture({ id }: { id: string }) {
   if (loading) {
     return (
       <div style={{ minHeight: '100dvh', backgroundColor: '#FAF8F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #E6DFD6', borderTopColor: '#E87E1A', animation: 'spin 0.8s linear infinite' }} />
+        <Loader2 size={32} style={{ color: '#E87E1A', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
     )
@@ -134,6 +165,13 @@ export default function ApercuFacture({ id }: { id: string }) {
   return (
     <div style={{ minHeight: '100dvh', backgroundColor: '#FAF8F5', paddingBottom: 80 }}>
 
+      {/* Toast */}
+      {toast && (
+        <div style={{ position: 'fixed', top: 70, left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: '#332B25', color: '#fff', padding: '10px 20px', borderRadius: 12, fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+          {toast}
+        </div>
+      )}
+
       {/* Navbar */}
       <motion.header initial={{ y: -56, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: easeOutExpo }}
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4"
@@ -147,7 +185,7 @@ export default function ApercuFacture({ id }: { id: string }) {
         </h1>
         <button onClick={deleteFacture} disabled={deleting}
           style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626' }}>
-          <Trash2 size={20} strokeWidth={2} />
+          {deleting ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Trash2 size={20} strokeWidth={2} />}
         </button>
       </motion.header>
 
@@ -166,26 +204,25 @@ export default function ApercuFacture({ id }: { id: string }) {
           </div>
           {facture.statut === 'en-attente' && (
             <button onClick={markPaid} disabled={marking}
-              style={{ padding: '8px 14px', borderRadius: 10, background: '#22C55E', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit' }}>
-              {marking ? '...' : 'Marquer payee'}
+              style={{ padding: '8px 14px', borderRadius: 10, background: '#22C55E', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {marking ? <Loader2 size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> : <CheckCircle2 size={14} />}
+              {marking ? '...' : 'Payee'}
             </button>
           )}
         </div>
 
         <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 720, margin: '0 auto' }}>
 
-          {/* Document facture */}
+          {/* Document */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: easeOutExpo }}
             style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(230,223,214,0.7)', borderRadius: 16, overflow: 'hidden', backdropFilter: 'blur(12px)' }}>
 
-            {/* Header doc */}
-            <div style={{ background: '#332B25', padding: '20px 20px' }}>
+            <div style={{ background: '#332B25', padding: '20px' }}>
               <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>FACTURE ELECTRONIQUE</p>
-              <p style={{ fontFamily: 'inherit', fontSize: 20, fontWeight: 700, color: '#fff' }}>{facture.numero}</p>
+              <p style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>{facture.numero}</p>
               <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Emise le {fmtDate(facture.date_emission)}</p>
             </div>
 
-            {/* Parties */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #F2EEE8' }}>
               <div style={{ padding: '14px 16px', borderRight: '1px solid #F2EEE8' }}>
                 <p style={{ fontSize: 10, fontWeight: 700, color: '#A89B8C', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Client</p>
@@ -200,24 +237,19 @@ export default function ApercuFacture({ id }: { id: string }) {
               </div>
             </div>
 
-            {/* Lignes */}
-            <div>
-              {facture.lignes.map((l, i) => {
-                const ht  = (l.quantity || 1) * (l.unitPrice || 0)
-                const ttc = ht * (1 + (l.tvaRate || 0) / 100)
-                return (
-                  <div key={i} style={{ padding: '12px 16px', borderBottom: i < facture.lignes.length - 1 ? '1px solid #F2EEE8' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 14, color: '#332B25', fontWeight: 500 }}>{l.description}</p>
-                      <p style={{ fontSize: 12, color: '#A89B8C', marginTop: 2 }}>{l.quantity} × {fmt(l.unitPrice)} HT · TVA {l.tvaRate}%</p>
-                    </div>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#4D433A', flexShrink: 0 }}>{fmt(ht)} HT</p>
+            {facture.lignes.map((l, i) => {
+              const ht = (l.quantity || 1) * (l.unitPrice || 0)
+              return (
+                <div key={i} style={{ padding: '12px 16px', borderBottom: i < facture.lignes.length - 1 ? '1px solid #F2EEE8' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 14, color: '#332B25', fontWeight: 500 }}>{l.description}</p>
+                    <p style={{ fontSize: 12, color: '#A89B8C', marginTop: 2 }}>{l.quantity} × {fmt(l.unitPrice)} HT · TVA {l.tvaRate}%</p>
                   </div>
-                )
-              })}
-            </div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: '#4D433A', flexShrink: 0 }}>{fmt(ht)} HT</p>
+                </div>
+              )
+            })}
 
-            {/* Totaux */}
             <div style={{ background: '#FAF8F5', padding: '14px 16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ fontSize: 13, color: '#8C7D6E' }}>Total HT</span>
@@ -234,7 +266,6 @@ export default function ApercuFacture({ id }: { id: string }) {
               </div>
             </div>
 
-            {/* Notes */}
             {facture.notes && (
               <div style={{ padding: '12px 16px', borderTop: '1px solid #F2EEE8' }}>
                 <p style={{ fontSize: 11, fontWeight: 700, color: '#A89B8C', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Notes</p>
@@ -247,22 +278,37 @@ export default function ApercuFacture({ id }: { id: string }) {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: easeOutExpo, delay: 0.1 }}
             style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(230,223,214,0.7)', borderRadius: 16, padding: 16, backdropFilter: 'blur(12px)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {facture.statut !== 'payee' && (
-                <button onClick={markPaid} disabled={marking}
-                  style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg,#22C55E 0%,#16A34A 100%)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <CheckCircle2 size={18} /> {marking ? 'Enregistrement...' : 'Marquer comme payee'}
+
+              {/* Envoyer par email */}
+              {(facture.statut === 'brouillon' || facture.statut === 'en-attente') && (
+                <button onClick={sendEmail} disabled={sending}
+                  style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#fff', border: 'none', cursor: sending ? 'not-allowed' : 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: sending ? 0.8 : 1 }}>
+                  {sending ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Send size={18} />}
+                  {sending ? 'Envoi en cours...' : 'Envoyer par email'}
                 </button>
               )}
-              <button style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Send size={18} /> Envoyer par email
-              </button>
+
+              {/* Marquer payee */}
+              {facture.statut !== 'payee' && (
+                <button onClick={markPaid} disabled={marking}
+                  style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg,#22C55E 0%,#16A34A 100%)', color: '#fff', border: 'none', cursor: marking ? 'not-allowed' : 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: marking ? 0.8 : 1 }}>
+                  {marking ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <CheckCircle2 size={18} />}
+                  {marking ? 'Enregistrement...' : 'Marquer comme payee'}
+                </button>
+              )}
+
+              {/* Telecharger PDF */}
               <button style={{ width: '100%', padding: '13px', borderRadius: 12, background: '#fff', color: '#4D433A', border: '1.5px solid #E6DFD6', cursor: 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <Download size={18} /> Telecharger PDF
               </button>
+
+              {/* Supprimer */}
               <button onClick={deleteFacture} disabled={deleting}
-                style={{ width: '100%', padding: '13px', borderRadius: 12, background: '#FEF2F2', color: '#DC2626', border: '1.5px solid #FECACA', cursor: 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <Trash2 size={18} /> {deleting ? 'Suppression...' : 'Supprimer'}
+                style={{ width: '100%', padding: '13px', borderRadius: 12, background: '#FEF2F2', color: '#DC2626', border: '1.5px solid #FECACA', cursor: deleting ? 'not-allowed' : 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                {deleting ? <Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Trash2 size={18} />}
+                {deleting ? 'Suppression...' : 'Supprimer'}
               </button>
+
             </div>
           </motion.div>
 
