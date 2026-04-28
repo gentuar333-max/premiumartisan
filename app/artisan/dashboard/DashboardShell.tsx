@@ -665,7 +665,7 @@ function AvatarDropdown({ email, onSignOut }: { email: string; onSignOut: () => 
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</div>
-          <div style={{ fontSize: 11, color: "#94a3b8" }}>Artisan</div>
+
         </div>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }}>
           <path d="M3 5l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1001,18 +1001,6 @@ export function DashboardShell({
             </div>
 
             <div className="flex flex-1 flex-col gap-3 p-5">
-              {/* Sort */}
-              <div className="flex gap-2">
-                <Link href={sortRecentUrl} onClick={() => setMenuOpen(false)}
-                  className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort !== "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                  Plus récents
-                </Link>
-                <Link href={sortBudgetUrl} onClick={() => setMenuOpen(false)}
-                  className={`flex-1 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${sort === "budget_desc" ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                  Budget élevé
-                </Link>
-              </div>
-
               {/* + Créer un devis */}
               <Link href="/artisan/devis/new"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
@@ -1041,13 +1029,6 @@ export function DashboardShell({
                   Effacer les filtres ({activeFilterCount})
                 </button>
               )}
-
-              {/* Factures electroniques */}
-              <Link href="/artisan/factures-electroniques"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                onClick={() => setMenuOpen(false)}>
-                Factures electroniques
-              </Link>
 
               {/* Aide */}
               <div>
