@@ -801,9 +801,7 @@ function InstallBanner() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: 0, textAlign: 'right', maxWidth: 140 }}>
-              {isIOS
-                ? 'Appuyez ⬆ puis "Sur l'écran d'accueil"'
-                : 'Menu ⋮ → "Installer l'application"'}
+              {isIOS ? "Appuyez sur Partager puis Sur l’ecran d’accueil" : "Menu puis Installer l’application"}
             </p>
           </div>
         )}
