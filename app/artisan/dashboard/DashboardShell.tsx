@@ -715,104 +715,6 @@ function AvatarDropdown({ email, onSignOut }: { email: string; onSignOut: () => 
 
 
 // ── Install Banner ────────────────────────────────────────────────────────────
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-function InstallBanner() {
-  const [show, setShow]   = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-  const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-
-  useEffect(() => {
-    // Already installed as PWA
-    if (window.matchMedia('(display-mode: standalone)').matches) return
-    // Already dismissed
-    if (localStorage.getItem('pwa-dismissed') === '1') return
-
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase())
-    setIsIOS(ios)
-
-    // Capture Android install prompt
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setPrompt(e as BeforeInstallPromptEvent)
-    }
-    window.addEventListener('beforeinstallprompt', handler)
-
-    // Show banner after 3 seconds regardless
-    const t = setTimeout(() => setShow(true), 3000)
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler)
-      clearTimeout(t)
-    }
-  }, [])
-
-  const handleInstall = async () => {
-    if (prompt) {
-      await prompt.prompt()
-      const { outcome } = await prompt.userChoice
-      if (outcome === 'accepted') { setShow(false); return }
-    }
-    setShow(false)
-  }
-
-  const handleDismiss = () => {
-    setShow(false)
-    localStorage.setItem('pwa-dismissed', '1')
-  }
-
-  if (!show) return null
-
-  return (
-    <div style={{
-      position: 'fixed', bottom: 16, left: 16, right: 16, zIndex: 999,
-      background: '#1e293b', borderRadius: 14, padding: '12px 16px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-      animation: 'slideUpBanner 0.3s ease',
-    }}>
-      <style>{`@keyframes slideUpBanner { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }`}</style>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          <div style={{ background: '#3B82F6', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', color: '#000', transform: 'rotate(45deg)', borderRadius: 6 }}>
-            <span style={{ transform: 'rotate(-45deg)', display: 'block' }}>&#9874;</span>
-          </div>
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Installez l&apos;app PremiumArtisan
-          </p>
-          {isIOS && (
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>
-              Appuyez sur ⬆ puis &quot;Sur l&apos;écran d&apos;accueil&quot;
-            </p>
-          )}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {prompt ? (
-          <button onClick={handleInstall}
-            style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-            Installer
-          </button>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: 0, textAlign: 'right', maxWidth: 140 }}>
-              {isIOS ? "Appuyez sur Partager puis Sur l’ecran d’accueil" : "Menu puis Installer l’application"}
-            </p>
-          </div>
-        )}
-        <button onClick={handleDismiss}
-          style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          ✕
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export function DashboardShell({
   projects, count, cp, sort, error, categoryLabel, sortRecentUrl, sortBudgetUrl,
@@ -1006,7 +908,6 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-[#f0f2f5]">
-      <InstallBanner />
 
       {/* â”€â”€ HEADER â”€â”€ */}
       <header className="sticky top-0 z-30 bg-[#eaecef] border-b border-[#d5d8dc] shadow-sm">
