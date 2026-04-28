@@ -5,6 +5,11 @@ import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 import { pickRandomProjectImage } from "@/lib/projectImages";
 import { formatPhone, phoneToWhatsApp } from "@/lib/formatPhone";
 import { createSupabaseBrowserClient } from "@/lib/supabaseBrowser";
@@ -735,6 +740,18 @@ export function DashboardShell({
   const [currentUser, setCurrentUser] = useState<User | null | undefined>(undefined);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "info" } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", () => { setInstalled(true); setInstallPrompt(null); });
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -1028,6 +1045,28 @@ export function DashboardShell({
                   className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100">
                   Effacer les filtres ({activeFilterCount})
                 </button>
+              )}
+
+              {/* Instalo app */}
+              {installPrompt && !installed && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!installPrompt) return;
+                    await installPrompt.prompt();
+                    const { outcome } = await installPrompt.userChoice;
+                    if (outcome === "accepted") { setInstalled(true); setInstallPrompt(null); }
+                    setMenuOpen(false);
+                  }}
+                  className="w-full rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                >
+                  Installer l&apos;application
+                </button>
+              )}
+              {installed && (
+                <div className="w-full rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-center text-sm font-semibold text-green-700">
+                  Application installée
+                </div>
               )}
 
               {/* Aide */}
