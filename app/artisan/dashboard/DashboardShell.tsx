@@ -721,76 +721,84 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function InstallBanner() {
-  const [show, setShow] = useState(false)
+  const [show, setShow]   = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    // Check if already installed
+    // Already installed as PWA
     if (window.matchMedia('(display-mode: standalone)').matches) return
-    // Check dismissed
-    if (localStorage.getItem('pwa-banner-dismissed') === '1') return
+    // Already dismissed
+    if (localStorage.getItem('pwa-dismissed') === '1') return
 
-    // iOS detection
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as unknown as Record<string, unknown>).MSStream
-    if (ios) { setIsIOS(true); setShow(true); return }
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase())
+    setIsIOS(ios)
 
-    // Android/Chrome
+    // Capture Android install prompt
     const handler = (e: Event) => {
       e.preventDefault()
       setPrompt(e as BeforeInstallPromptEvent)
-      setShow(true)
     }
     window.addEventListener('beforeinstallprompt', handler)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+
+    // Show banner after 3 seconds regardless
+    const t = setTimeout(() => setShow(true), 3000)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      clearTimeout(t)
+    }
   }, [])
 
   const handleInstall = async () => {
-    if (!prompt) return
-    await prompt.prompt()
-    const { outcome } = await prompt.userChoice
-    if (outcome === 'accepted') { setShow(false); setPrompt(null) }
+    if (prompt) {
+      await prompt.prompt()
+      const { outcome } = await prompt.userChoice
+      if (outcome === 'accepted') { setShow(false); return }
+    }
+    setShow(false)
   }
 
   const handleDismiss = () => {
     setShow(false)
-    setDismissed(true)
-    localStorage.setItem('pwa-banner-dismissed', '1')
+    localStorage.setItem('pwa-dismissed', '1')
   }
 
-  if (!show || dismissed) return null
+  if (!show) return null
 
   return (
     <div style={{
       position: 'fixed', bottom: 16, left: 16, right: 16, zIndex: 999,
-      background: '#1e293b', borderRadius: 14,
-      padding: '12px 16px',
+      background: '#1e293b', borderRadius: 14, padding: '12px 16px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-      boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      animation: 'slideUpBanner 0.3s ease',
     }}>
+      <style>{`@keyframes slideUpBanner { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }`}</style>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
         <div style={{ width: 32, height: 32, background: '#ff6b35', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transform: 'rotate(45deg)' }}>
-          <span style={{ transform: 'rotate(-45deg)', fontSize: 14 }}>⚒</span>
+          <span style={{ transform: 'rotate(-45deg)', fontSize: 14, display: 'block' }}>⚒</span>
         </div>
-        {isIOS ? (
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>Installez l&apos;app PremiumArtisan</p>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', margin: '2px 0 0' }}>Appuyez sur ⬆ puis &quot;Sur l&apos;écran d&apos;accueil&quot;</p>
-          </div>
-        ) : (
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>Installez l&apos;app PremiumArtisan</p>
-        )}
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            Installez l&apos;app PremiumArtisan
+          </p>
+          {isIOS && (
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', margin: '2px 0 0' }}>
+              Appuyez sur ⬆ puis &quot;Sur l&apos;écran d&apos;accueil&quot;
+            </p>
+          )}
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {!isIOS && prompt && (
+        {prompt && (
           <button onClick={handleInstall}
-            style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+            style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit' }}>
             Installer
           </button>
         )}
         <button onClick={handleDismiss}
-          style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           ✕
         </button>
       </div>
