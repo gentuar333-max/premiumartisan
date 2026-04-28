@@ -713,6 +713,91 @@ function AvatarDropdown({ email, onSignOut }: { email: string; onSignOut: () => 
   )
 }
 
+
+// ── Install Banner ────────────────────────────────────────────────────────────
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+function InstallBanner() {
+  const [show, setShow] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) return
+    // Check dismissed
+    if (localStorage.getItem('pwa-banner-dismissed') === '1') return
+
+    // iOS detection
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as unknown as Record<string, unknown>).MSStream
+    if (ios) { setIsIOS(true); setShow(true); return }
+
+    // Android/Chrome
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setPrompt(e as BeforeInstallPromptEvent)
+      setShow(true)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  const handleInstall = async () => {
+    if (!prompt) return
+    await prompt.prompt()
+    const { outcome } = await prompt.userChoice
+    if (outcome === 'accepted') { setShow(false); setPrompt(null) }
+  }
+
+  const handleDismiss = () => {
+    setShow(false)
+    setDismissed(true)
+    localStorage.setItem('pwa-banner-dismissed', '1')
+  }
+
+  if (!show || dismissed) return null
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 16, left: 16, right: 16, zIndex: 999,
+      background: '#1e293b', borderRadius: 14,
+      padding: '12px 16px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+      boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+        <div style={{ width: 32, height: 32, background: '#ff6b35', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transform: 'rotate(45deg)' }}>
+          <span style={{ transform: 'rotate(-45deg)', fontSize: 14 }}>⚒</span>
+        </div>
+        {isIOS ? (
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>Installez l&apos;app PremiumArtisan</p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', margin: '2px 0 0' }}>Appuyez sur ⬆ puis &quot;Sur l&apos;écran d&apos;accueil&quot;</p>
+          </div>
+        ) : (
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>Installez l&apos;app PremiumArtisan</p>
+        )}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {!isIOS && prompt && (
+          <button onClick={handleInstall}
+            style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+            Installer
+          </button>
+        )}
+        <button onClick={handleDismiss}
+          style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          ✕
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function DashboardShell({
   projects, count, cp, sort, error, categoryLabel, sortRecentUrl, sortBudgetUrl,
 }: {
@@ -905,6 +990,7 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-[#f0f2f5]">
+      <InstallBanner />
 
       {/* â”€â”€ HEADER â”€â”€ */}
       <header className="sticky top-0 z-30 bg-[#eaecef] border-b border-[#d5d8dc] shadow-sm">
