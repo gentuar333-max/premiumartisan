@@ -793,16 +793,20 @@ function InstallBanner() {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <button onClick={prompt ? handleInstall : () => {
-            if (isIOS) {
-              alert("Sur Safari : appuyez sur le bouton Partager ⬆ en bas, puis \"Sur l\'écran d\'accueil\"")
-            } else {
-              alert("Sur Chrome : appuyez sur les 3 points ⋮ en haut à droite, puis \"Installer l\'application\"")
-            }
-          }}
-          style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-          Installer
-        </button>
+        {prompt ? (
+          <button onClick={handleInstall}
+            style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+            Installer
+          </button>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: 0, textAlign: 'right', maxWidth: 140 }}>
+              {isIOS
+                ? 'Appuyez ⬆ puis "Sur l'écran d'accueil"'
+                : 'Menu ⋮ → "Installer l'application"'}
+            </p>
+          </div>
+        )}
         <button onClick={handleDismiss}
           style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           ✕
