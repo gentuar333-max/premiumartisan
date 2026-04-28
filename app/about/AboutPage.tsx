@@ -19,7 +19,7 @@ const schemaData = {
       "description": "Plateforme de mise en relation entre particuliers et artisans qualifiés à Dijon et en Bourgogne-Franche-Comté.",
       "founder": {
         "@type": "Person",
-        "name": "Riart Mehanja",
+        "name": "Le Fondateur",
         "jobTitle": "Fondateur & CEO"
       },
       "foundingDate": "2023",
@@ -553,7 +553,7 @@ export default function AboutPage() {
 
           <p style={styles.paragraph}>
             L&apos;histoire de <strong>PremiumArtisan</strong> commence en 2023, 
-            à Dijon. Riart Mehanja, alors consultant en digital, fait face à un 
+            à Dijon. Le Fondateur, alors consultant en digital, fait face à un 
             problème connu de millions de Français : trouver un artisan fiable 
             pour rénover son appartement. Entre les démarchages téléphoniques 
             insistants, les devis jamais reçus, et les artisans qui disparaissent 
@@ -614,7 +614,7 @@ export default function AboutPage() {
           <div style={styles.founderContainer}>
             <div style={styles.founderImage}>RM</div>
             <div style={styles.founderContent}>
-              <div style={styles.founderName}>Riart Mehanja</div>
+              <div style={styles.founderName}>Le Fondateur</div>
               <div style={styles.founderRole}>Fondateur & CEO</div>
               <p style={styles.founderQuote}>
                 &quot;Je crois profondément que la technologie doit servir les métiers 
