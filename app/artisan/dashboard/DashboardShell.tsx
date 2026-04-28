@@ -776,8 +776,10 @@ function InstallBanner() {
     }}>
       <style>{`@keyframes slideUpBanner { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }`}</style>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-        <div style={{ width: 32, height: 32, background: '#ff6b35', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transform: 'rotate(45deg)' }}>
-          <span style={{ transform: 'rotate(-45deg)', fontSize: 14, display: 'block' }}>⚒</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <div style={{ background: '#3B82F6', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', color: '#000', transform: 'rotate(45deg)', borderRadius: 6 }}>
+            <span style={{ transform: 'rotate(-45deg)', display: 'block' }}>&#9874;</span>
+          </div>
         </div>
         <div style={{ minWidth: 0 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -791,12 +793,16 @@ function InstallBanner() {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {prompt && (
-          <button onClick={handleInstall}
-            style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit' }}>
-            Installer
-          </button>
-        )}
+        <button onClick={prompt ? handleInstall : () => {
+            if (isIOS) {
+              alert("Sur Safari : appuyez sur le bouton Partager ⬆ en bas, puis \"Sur l\'écran d\'accueil\"")
+            } else {
+              alert("Sur Chrome : appuyez sur les 3 points ⋮ en haut à droite, puis \"Installer l\'application\"")
+            }
+          }}
+          style={{ padding: '7px 14px', borderRadius: 8, background: '#ff6b35', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+          Installer
+        </button>
         <button onClick={handleDismiss}
           style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           ✕
