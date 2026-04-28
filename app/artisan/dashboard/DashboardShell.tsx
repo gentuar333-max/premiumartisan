@@ -1022,6 +1022,13 @@ export function DashboardShell({
                 IA Réceptionniste
               </Link>
 
+              {/* Factures electroniques */}
+              <Link href="/artisan/factures-electroniques"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                onClick={() => setMenuOpen(false)}>
+                Factures electroniques
+              </Link>
+
               {/* Effacer filtres */}
               {activeFilterCount > 0 && (
                 <button type="button" onClick={() => { handleFilterReset(); setMenuOpen(false); }}
