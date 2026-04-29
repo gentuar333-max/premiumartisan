@@ -138,7 +138,7 @@ export default function NouvelleFacture() {
     return Object.keys(newErrors).length === 0
   }, [formData])
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (mode: 'simple' | 'official' = 'simple') => {
     if (!validateForm()) return
     try {
       const supabase = createSupabaseBrowserClient()
@@ -160,6 +160,17 @@ export default function NouvelleFacture() {
       })
       const json = await res.json()
       if (json.ok) {
+        // Si mode officiel → envoyer aussi à Super PDP
+        if (mode === 'official' && json.id) {
+          await fetch('/api/artisan/factures-electroniques/superpdp', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ facture_id: json.id }),
+          })
+        }
         setShowSuccess(true)
       } else {
         alert(json.error ?? 'Erreur lors de la création.')
@@ -330,11 +341,16 @@ export default function NouvelleFacture() {
 
         {/* Mobile sticky bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-          <div className="px-4 py-3" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', borderTop: '1px solid #E6DFD6' }}>
-            <motion.button whileTap={{ scale: 0.98 }} onClick={handleSubmit} type="button"
+          <div className="px-4 py-3" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', borderTop: '1px solid #E6DFD6', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <motion.button whileTap={{ scale: 0.98 }} onClick={() => handleSubmit('simple')} type="button"
               className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold"
               style={{ fontSize: 15, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#FFFFFF', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(232,126,26,0.3)' }}>
               <Send size={20} strokeWidth={2} /> Envoyer la facture
+            </motion.button>
+            <motion.button whileTap={{ scale: 0.98 }} onClick={() => handleSubmit('official')} type="button"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold"
+              style={{ fontSize: 14, background: 'linear-gradient(135deg,#6366F1 0%,#4F46E5 100%)', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}>
+               Envoyer officiellement à l&apos;État
             </motion.button>
           </div>
           <div style={{ height: 64 }} />

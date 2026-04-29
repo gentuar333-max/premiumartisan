@@ -335,7 +335,7 @@ export default function ApercuFacture({ id }: { id: string }) {
                   else showToast('Erreur: ' + json.error)
                 }}
                 style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg,#6366F1 0%,#4F46E5 100%)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                🏛 Transmettre a la Plateforme Agreee
+                🏛 Envoyer officiellement à l'État
               </button>
 
               {/* Telecharger PDF */}
