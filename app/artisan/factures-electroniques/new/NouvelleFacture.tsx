@@ -196,7 +196,7 @@ export default function NouvelleFacture() {
           <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 12H5m7-7-7 7 7 7"/></svg>
         </motion.button>
         <h1 style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 16, fontWeight: 600, color: '#4D433A' }}>Nouvelle facture</h1>
-        <motion.button whileTap={{ scale: 0.95 }} onClick={handleSubmit}
+        <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit('simple')}
           className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-xl text-white font-semibold"
           style={{ fontSize: 14, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', boxShadow: '0 4px 14px rgba(232,126,26,0.3)', border: 'none', cursor: 'pointer' }}>
           <Send size={18} strokeWidth={2} /> Envoyer
@@ -328,7 +328,7 @@ export default function NouvelleFacture() {
 
               {/* Desktop submit */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.35 }} className="hidden lg:block">
-                <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} onClick={handleSubmit} type="button"
+                <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} onClick={() => handleSubmit('simple')} type="button"
                   className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold"
                   style={{ fontSize: 15, background: 'linear-gradient(135deg,#E87E1A 0%,#C9650F 100%)', color: '#FFFFFF', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(232,126,26,0.3)' }}>
                   <Send size={20} strokeWidth={2} /> Envoyer la facture
