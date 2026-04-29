@@ -8,9 +8,8 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabaseServer";
 
 const SANDBOX    = process.env.SUPERPDP_SANDBOX === "true";
-const API_BASE   = "https://app.superpdp.tech/api";
-const TOKEN_URL  = "https://app.superpdp.tech/oauth/token";
-// Sandbox mode is handled by the client_id/secret credentials, not by URL
+const API_BASE   = "https://api.superpdp.tech";
+const TOKEN_URL  = "https://api.superpdp.tech/oauth2/token";
 
 // ── Get OAuth token ─────────────────────────────────────────────────────────
 async function getToken(): Promise<string> {
