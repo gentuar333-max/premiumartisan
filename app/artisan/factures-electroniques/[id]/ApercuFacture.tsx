@@ -318,6 +318,26 @@ export default function ApercuFacture({ id }: { id: string }) {
                 </button>
               )}
 
+              {/* Super PDP — Plateforme Agréée */}
+              <button
+                onClick={async () => {
+                  const token = await getToken()
+                  const res = await fetch('/api/artisan/factures-electroniques/superpdp', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: JSON.stringify({ facture_id: id }),
+                  })
+                  const json = await res.json()
+                  if (json.ok) showToast('Facture transmise a la Plateforme Agreee')
+                  else showToast('Erreur: ' + json.error)
+                }}
+                style={{ width: '100%', padding: '13px', borderRadius: 12, background: 'linear-gradient(135deg,#6366F1 0%,#4F46E5 100%)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                🏛 Transmettre a la Plateforme Agreee
+              </button>
+
               {/* Telecharger PDF */}
               <button style={{ width: '100%', padding: '13px', borderRadius: 12, background: '#fff', color: '#4D433A', border: '1.5px solid #E6DFD6', cursor: 'pointer', fontSize: 14, fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <Download size={18} /> Telecharger PDF
