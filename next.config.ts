@@ -11,12 +11,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // ── CUISINE statike → dynamic ──
       { source: "/devis-cuisine-chenove",             destination: "/devis-cuisine/chenove",            permanent: true },
       { source: "/devis-cuisine-dijon",               destination: "/devis-cuisine/dijon",              permanent: true },
       { source: "/devis-cuisine-fontaine-les-dijon",  destination: "/devis-cuisine/fontaine-les-dijon", permanent: true },
       { source: "/devis-cuisine-longvic",             destination: "/devis-cuisine/longvic",            permanent: true },
       { source: "/devis-cuisine-quetigny",            destination: "/devis-cuisine/quetigny",           permanent: true },
       { source: "/devis-cuisine-talant",              destination: "/devis-cuisine/talant",             permanent: true },
+
+      // ── PEINTURE statike → dynamic ──
       { source: "/devis-peinture-chenove",            destination: "/devis-peintre/chenove",            permanent: true },
       { source: "/devis-peinture-dijon",              destination: "/devis-peintre/dijon",              permanent: true },
       { source: "/devis-peinture-longvic",            destination: "/devis-peintre/longvic",            permanent: true },
@@ -26,6 +29,8 @@ const nextConfig: NextConfig = {
       { source: "/devis-peinture-marsannay",          destination: "/devis-peintre/marsannay-la-cote",  permanent: true },
       { source: "/devis-peinture-saint-apollinaire",  destination: "/devis-peintre/dijon",              permanent: true },
       { source: "/devis-peinture-chevigny",           destination: "/devis-peintre/dijon",              permanent: true },
+
+      // ── RENOVATION → homepage provisoire ──
       { source: "/devis-renovation",                  destination: "/",                                 permanent: false },
       { source: "/devis-renovation-quetigny",         destination: "/devis-peintre/quetigny",           permanent: false },
       { source: "/devis-renovation-chevigny",         destination: "/devis-peintre/dijon",              permanent: false },
@@ -34,12 +39,16 @@ const nextConfig: NextConfig = {
       { source: "/devis-renovation-velars-sur-ouche", destination: "/devis-peintre/dijon",              permanent: false },
       { source: "/devis-renovation-sennecey-les-dij", destination: "/devis-peintre/dijon",              permanent: false },
       { source: "/aides-renovation",                  destination: "/",                                 permanent: false },
+
+      // ── SALLE DE BAIN → homepage provisoire ──
       { source: "/devis-salle-de-bain",               destination: "/",                                 permanent: false },
       { source: "/devis-salle-de-bain-gevrey-chambertin", destination: "/devis-peintre/gevrey-chambertin", permanent: false },
       { source: "/devis-salle-de-bain-ahuy",          destination: "/devis-peintre/dijon",              permanent: false },
       { source: "/devis-salle-de-bain-plombieres-les-dijon", destination: "/devis-peintre/dijon",       permanent: false },
       { source: "/devis-salle-de-bain-daix",          destination: "/devis-peintre/dijon",              permanent: false },
       { source: "/devis-salle-de-bain-marsannay-la-cote", destination: "/devis-peintre/marsannay-la-cote", permanent: false },
+
+      // ── FAQE TЁ TJERA 404 ──
       { source: "/devis-facture-gratuit-peintre-bourgogne", destination: "/",                           permanent: false },
       { source: "/logiciel-devis-peintre-cote-dor",   destination: "/logiciel-devis-artisan/dijon",     permanent: true },
       { source: "/creer-facture-artisan",             destination: "/artisan/dashboard",                permanent: true },
@@ -49,6 +58,14 @@ const nextConfig: NextConfig = {
       { source: "/devis-isolation-dijon",             destination: "/devis-peintre/dijon",              permanent: true },
       { source: "/devis-facade-dijon",                destination: "/devis-peintre/dijon",              permanent: true },
       { source: "/application-devis-peintre",         destination: "/artisan/dashboard",                permanent: true },
+
+      // ── Nouvelles redirects 404 ──
+      { source: "/devis-peinture/marsannay-la-cote",   destination: "/devis-peintre/marsannay-la-cote",  permanent: true },
+      { source: "/devis-peinture/grenoble",            destination: "/devis-peintre/dijon",              permanent: false },
+      { source: "/devis-peinture/:ville",              destination: "/devis-peintre/:ville",             permanent: true },
+      { source: "/logiciel-devis-artisan/lille",       destination: "/logiciel-devis-artisan/dijon",     permanent: false },
+      { source: "/logiciel-devis-artisan/saint-etienne", destination: "/logiciel-devis-artisan/dijon",  permanent: false },
+      { source: "/devis-peintre/orleans",              destination: "/devis-peintre/dijon",              permanent: false },
     ];
   },
 };

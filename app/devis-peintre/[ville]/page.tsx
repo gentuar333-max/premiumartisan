@@ -80,12 +80,12 @@ export async function generateMetadata(
   return {
     title: `Devis Peintre ${nom} – Comparez 3 Artisans Qualifiés | PremiumArtisan`,
     description: `Obtenez jusqu'à 3 devis de peintres qualifiés à ${nom}. Artisans ${dept} vérifiés, réponse sous 24h, sans engagement. Peinture intérieure, rénovation.`,
-    alternates: { canonical: `https://www.premiumartisan.fr/devis-peintre/${ville}` },
+    alternates: { canonical: `https://premiumartisan.fr/devis-peintre/${ville}` },
     keywords: `devis peintre ${nom.toLowerCase()}, peintre ${nom.toLowerCase()}, devis peinture ${nom.toLowerCase()}, artisan peintre ${dept.toLowerCase()}`,
     openGraph: {
       title: `Devis Peintre ${nom} – 3 Artisans Qualifiés`,
       description: `Comparez jusqu'à 3 devis de peintres à ${nom}. Réponse sous 24h.`,
-      url: `https://www.premiumartisan.fr/devis-peintre/${ville}`,
+      url: `https://premiumartisan.fr/devis-peintre/${ville}`,
       type: 'website', locale: 'fr_FR', siteName: 'PremiumArtisan',
     },
   };
@@ -118,8 +118,8 @@ export default async function DevisPeintreVille(
       {
         "@type": "LocalBusiness",
         "name": `PremiumArtisan — Peintre à ${nom}`,
-        "image": "https://www.premiumartisan.fr/og-image.jpg",
-        "url": `https://www.premiumartisan.fr/devis-peintre/${ville}`,
+        "image": "https://premiumartisan.fr/og-image.jpg",
+        "url": `https://premiumartisan.fr/devis-peintre/${ville}`,
         "telephone": "+33XXXXXXXXX",
         "priceRange": "€€",
         "description": `Mise en relation avec des artisans peintres qualifiés à ${nom}, ${dept}. Devis gratuit sous 24h.`,
