@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Phone, PhoneOutgoing, MapPin, Clock, Bell, AlertTriangle, Menu, X, Bot, User, Users, Heart, Home, Briefcase, Plus, Trash2, Zap, LogOut, ChevronDown } from "lucide-react"
+import { Phone, PhoneOutgoing, MapPin, Clock, Bell, AlertTriangle, X, User, Users, Heart, Home, Briefcase, Plus, Trash2, Zap, LogOut } from "lucide-react"
 
-// ─── Types ───────────────────────────────────────────────────────────
 type CallStatus = "nouveau" | "vu" | "rappele" | "devis" | "termine" | "urgent"
 type TabKey = "clients" | "employes" | "famille"
 type ContactType = "employe" | "famille"
@@ -37,7 +36,6 @@ interface Subscription {
   minutes_total: number
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────
 function fmtTimeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
   const m = Math.floor(diff / 60000)
@@ -102,7 +100,6 @@ function getStatusConfig(call: Call) {
   return { label: "Vu", bg: "#F9FAFB", color: "#6B7280", border: "#E5E7EB" }
 }
 
-// ─── Main Component ───────────────────────────────────────────────────
 export default function VoiceDashboard() {
   const [calls, setCalls] = useState<Call[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
@@ -254,7 +251,6 @@ export default function VoiceDashboard() {
             </div>
           </div>
 
-          {/* Avatar */}
           <div style={{ position: "relative" }}>
             <button className="avatar-btn" onClick={() => setAvatarOpen(o => !o)}>
               {userEmail ? userEmail[0].toUpperCase() : "A"}
@@ -374,6 +370,17 @@ export default function VoiceDashboard() {
         {/* ── EMPLOYES / FAMILLE ── */}
         {(tab === "employes" || tab === "famille") && (
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+
+            {/* Info banner */}
+            <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 12, padding: "12px 14px" }}>
+              <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
+                {tab === "employes"
+                  ? "Marie identifie vos employés depuis leur numéro. Leurs appels sont transmis sans formulaire — aucune information collectée."
+                  : "Marie reconnaît votre famille et adapte son ton. Leurs messages vous sont transmis directement sans procédure formale."
+                }
+              </div>
+            </div>
+
             {(tab === "employes" ? employeList : familleList).map(c => (
               <div key={c.id} className="contact-card">
                 <div style={{ width: 44, height: 44, borderRadius: "50%", background: tab === "employes" ? "#EFF6FF" : "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: tab === "employes" ? "#1D4ED8" : "#C2410C", flexShrink: 0 }}>
@@ -395,6 +402,7 @@ export default function VoiceDashboard() {
                 </div>
               </div>
             ))}
+
             <button className="add-btn" onClick={() => { setAddContactType(tab === "employes" ? "employe" : "famille"); setAddContactOpen(true) }}>
               <Plus size={18} />
               Ajouter {tab === "employes" ? "un employé" : "un contact famille"}
@@ -407,7 +415,6 @@ export default function VoiceDashboard() {
           <>
             <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200 }} />
             <div style={{ position: "fixed", top: 0, left: 0, height: "100%", width: 300, background: "#111827", zIndex: 201, display: "flex", flexDirection: "column", animation: "slideLeft .25s ease" }}>
-              {/* Menu Header */}
               <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 40, height: 40, borderRadius: 12, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -423,7 +430,6 @@ export default function VoiceDashboard() {
                 </button>
               </div>
 
-              {/* Minutes */}
               <div style={{ padding: 16 }}>
                 <div style={{ background: "#1F2937", borderRadius: 16, padding: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -437,7 +443,6 @@ export default function VoiceDashboard() {
                       </div>
                     </div>
                   </div>
-                  {/* Progress bar */}
                   <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,0.1)", overflow: "hidden", marginBottom: 6 }}>
                     <div style={{ height: "100%", borderRadius: 3, background: "#3B82F6", width: `${minPct}%`, transition: "width .5s" }} />
                   </div>
@@ -447,19 +452,18 @@ export default function VoiceDashboard() {
                 </div>
               </div>
 
-              {/* Upgrade */}
               <a href="/artisan/receptionist/pricing" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 16px", padding: "13px 16px", borderRadius: 12, background: "#1F2937", textDecoration: "none" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <Zap size={18} color="#F59E0B" />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Passer à {planLabel === "Business" ? "Pro" : "Pro"}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Gérer mon forfait</span>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#3B82F6", color: "#fff" }}>Upgrade</span>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#3B82F6", color: "#fff" }}>
+                  {planLabel || "Activer"}
+                </span>
               </a>
 
-              {/* Spacer */}
               <div style={{ flex: 1 }} />
 
-              {/* Logout */}
               <button onClick={logout} style={{ margin: "16px", padding: "13px 16px", borderRadius: 12, border: "none", background: "rgba(239,68,68,0.1)", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" }}>
                 <LogOut size={18} color="#EF4444" />
                 <span style={{ fontSize: 14, fontWeight: 600, color: "#EF4444" }}>Déconnexion</span>
@@ -472,22 +476,19 @@ export default function VoiceDashboard() {
         {detailOpen && selectedCall && (
           <div onClick={() => setDetailOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
             <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 500, maxHeight: "85vh", overflowY: "auto", animation: "slideUp .3s ease" }}>
-
-              {/* Header */}
               <div style={{ padding: "20px 20px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "#fff", borderBottom: "1px solid #F3F4F6", zIndex: 1 }}>
                 <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111" }}>Détail de l&apos;appel</h2>
                 <button onClick={() => setDetailOpen(false)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "#F3F4F6", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
               </div>
 
               <div style={{ padding: "16px 20px" }}>
-                {/* 5 info cards */}
                 <div style={{ display: "grid", gap: 8, marginBottom: 20 }}>
                   {[
-                    { label: "Client",    val: selectedCall.name },
+                    { label: "Client", val: selectedCall.name },
                     { label: "Téléphone", val: selectedCall.phone ? fmtPhone(selectedCall.phone) : "Non renseigné" },
-                    { label: "Adresse",   val: selectedCall.address || "Non renseignée" },
-                    { label: "Problème",  val: selectedCall.problem || "Non renseigné" },
-                    { label: "Durée",     val: fmtDur(selectedCall.dur) },
+                    { label: "Adresse", val: selectedCall.address || "Non renseignée" },
+                    { label: "Problème", val: selectedCall.problem || "Non renseigné" },
+                    { label: "Durée", val: fmtDur(selectedCall.dur) },
                   ].map(item => (
                     <div key={item.label} style={{ padding: "12px 14px", background: "#F8F9FA", borderRadius: 12 }}>
                       <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 4 }}>{item.label}</div>
@@ -496,7 +497,6 @@ export default function VoiceDashboard() {
                   ))}
                 </div>
 
-                {/* Transcript */}
                 {selectedCall.transcript.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
@@ -517,12 +517,10 @@ export default function VoiceDashboard() {
                     </div>
                   </div>
                 )}
-
               </div>
 
-              {/* Sticky action buttons */}
               <div style={{ position: "sticky", bottom: 0, background: "#fff", borderTop: "1px solid #F3F4F6", padding: "12px 20px 20px" }}>
-                <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                <div style={{ display: "flex", gap: 10 }}>
                   <a href={selectedCall.phone ? "tel:" + selectedCall.phone.replace(/\s/g, "") : "#"}
                     style={{ flex: 1, padding: 14, borderRadius: 12, background: "#F3F4F6", color: "#374151", fontSize: 15, fontWeight: 600, textAlign: "center", textDecoration: "none", display: "block" }}>
                     Appeler
@@ -533,7 +531,7 @@ export default function VoiceDashboard() {
                   </button>
                   <button onClick={() => { if (confirm("Supprimer cet appel ?")) deleteCall(selectedCall.id) }}
                     style={{ width: 48, height: 48, borderRadius: 12, border: "1px solid #FEE2E2", background: "#FFF5F5", color: "#DC2626", fontSize: 20, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    ✕
+                    ×
                   </button>
                 </div>
               </div>
@@ -570,6 +568,7 @@ export default function VoiceDashboard() {
             </div>
           </div>
         )}
+
       </div>
     </>
   )
