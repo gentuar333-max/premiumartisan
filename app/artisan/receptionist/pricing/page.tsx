@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation"
 
 const plans = [
   { id: "trial",    name: "Trial",    price: "0",    unit: "€",      note: "15 min / 14 jours", isTrial: true,  isPopular: false, ctaLabel: "Essai gratuit" },
-  { id: "starter",  name: "Starter",  price: "99",   unit: "€/mois", note: "150 min / mois",    isTrial: false, isPopular: true,  ctaLabel: "Choisir" },
-  { id: "pro",      name: "Pro",      price: "199",  unit: "€/mois", note: "400 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
-  { id: "business", name: "Business", price: "349",  unit: "€/mois", note: "800 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
-  { id: "payg",     name: "Pay as you go", price: "0.65", unit: "€/min", note: "par minute",   isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+  { id: "starter",  name: "Starter",  price: "49",   unit: "€/mois", note: "190 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+  { id: "pro",      name: "Pro",      price: "79",   unit: "€/mois", note: "310 min / mois",    isTrial: false, isPopular: true,  ctaLabel: "Choisir" },
+  { id: "business", name: "Business", price: "139",  unit: "€/mois", note: "556 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
 ]
 
 const features = [
@@ -20,8 +19,6 @@ const features = [
   "Support par email",
 ]
 
-const PRICE_PER_MIN = 0.65
-
 interface Subscription {
   plan: string
   status: string
@@ -32,12 +29,8 @@ interface Subscription {
 export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
-  const [showPaygModal, setShowPaygModal] = useState(false)
-  const [minutes, setMinutes] = useState(30)
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [subLoading, setSubLoading] = useState(true)
-
-  const totalPrice = (minutes * PRICE_PER_MIN).toFixed(2)
 
   useEffect(() => {
     fetch("/api/marie/subscription")
@@ -63,19 +56,15 @@ export default function PricingPage() {
   }
 
   async function handlePlan(planId: string) {
-    console.log('handlePlan called:', planId, 'isCurrent:', isCurrentPlan(planId))
-    if (isCurrentPlan(planId)) { console.log('blocked by isCurrentPlan'); return }
-    if (planId === "payg") { setShowPaygModal(true); return }
+    if (isCurrentPlan(planId)) return
     setLoading(planId)
     try {
-      console.log('fetching checkout for:', planId)
       const res = await fetch("/api/marie/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId }),
       })
       const json = await res.json()
-      console.log('checkout response:', json)
       if (json.ok && json.redirect) router.push(json.redirect)
       else if (json.checkoutUrl) window.location.href = json.checkoutUrl
     } catch(err) {
@@ -83,27 +72,10 @@ export default function PricingPage() {
     } finally { setLoading(null) }
   }
 
-  async function handlePayg() {
-    setLoading("payg")
-    try {
-      const res = await fetch("/api/marie/topup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ minutes }),
-      })
-      const json = await res.json()
-      if (json.checkoutUrl) window.location.href = json.checkoutUrl
-    } finally { setLoading(null) }
-  }
-
   return (
     <>
-      <style>{`
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      `}</style>
-
       <div style={{ minHeight: "100dvh", background: "#fff", padding: "48px 16px 80px", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
           {/* Header */}
           <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -211,69 +183,6 @@ export default function PricingPage() {
           </p>
         </div>
       </div>
-
-      {/* Modal PAYG */}
-      {showPaygModal && (
-        <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "flex-end" }}
-          onClick={e => { if (e.target === e.currentTarget) setShowPaygModal(false) }}
-        >
-          <div style={{ background: "#fff", borderRadius: "20px 20px 0 0", padding: 24, width: "100%", animation: "slideUp .25s ease" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>Pay as you go</div>
-              <button onClick={() => setShowPaygModal(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#666" }}>×</button>
-            </div>
-            <p style={{ fontSize: 13, color: "#a3a3a3", marginBottom: 20 }}>
-              Sans abonnement · {PRICE_PER_MIN}€ / min · valable 6 mois
-            </p>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>Nombre de minutes</label>
-                <span style={{ fontSize: 22, fontWeight: 700, color: "#1a1a1a" }}>{minutes} min</span>
-              </div>
-              <input
-                type="range" min={10} max={300} step={5} value={minutes}
-                onChange={e => setMinutes(Number(e.target.value))}
-                style={{ width: "100%", accentColor: "#1a1a1a", cursor: "pointer" }}
-              />
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                <span style={{ fontSize: 11, color: "#a3a3a3" }}>10 min</span>
-                <span style={{ fontSize: 11, color: "#a3a3a3" }}>300 min</span>
-              </div>
-            </div>
-            <div style={{ background: "#f9f9f9", padding: "16px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontSize: 12, color: "#737373", marginBottom: 2 }}>Total à payer</div>
-                <div style={{ fontSize: 11, color: "#a3a3a3" }}>{minutes} min × {PRICE_PER_MIN}€</div>
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a" }}>{totalPrice}€</div>
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, color: "#737373", display: "block", marginBottom: 6 }}>Ou saisissez directement</label>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="number" min={10} max={300} value={minutes}
-                  onChange={e => setMinutes(Math.min(300, Math.max(10, Number(e.target.value))))}
-                  style={{ width: 80, padding: "8px 12px", border: "1.5px solid #e5e5e5", fontSize: 14, fontWeight: 600, outline: "none", fontFamily: "inherit", textAlign: "center" as const }}
-                />
-                <span style={{ fontSize: 13, color: "#737373" }}>minutes</span>
-              </div>
-            </div>
-            <button
-              onClick={handlePayg}
-              disabled={loading === "payg"}
-              style={{
-                width: "100%", padding: "12px", fontSize: 13, fontWeight: 600,
-                cursor: loading === "payg" ? "wait" : "pointer",
-                border: "none", background: "#1a1a1a", color: "#fff",
-                fontFamily: "inherit", opacity: loading === "payg" ? 0.7 : 1,
-              }}
-            >
-              {loading === "payg" ? "..." : `Acheter ${minutes} min — ${totalPrice}€`}
-            </button>
-          </div>
-        </div>
-      )}
     </>
   )
 }
