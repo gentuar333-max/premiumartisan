@@ -46,15 +46,6 @@ const PLANS = [
     ctaLabel: "Choisir",
   },
   {
-    id: "payg",
-    name: "Pay as you go",
-    price: "0.65",
-    unit: "€/min",
-    note: "par minute",
-    isTrial: false,
-    isPopular: false,
-    ctaLabel: "Choisir",
-  },
 ]
 
 const FEATURES = [
