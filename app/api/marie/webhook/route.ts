@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       if (session.subscription) {
         try {
           const s = await stripe.subscriptions.retrieve(session.subscription as string)
-          currentPeriodEnd = new Date(s.current_period_end * 1000).toISOString()
+          currentPeriodEnd = new Date((s as any).current_period_end * 1000).toISOString()
         } catch (_) { /* ignore */ }
       }
       await upsertSub(supabase, artisan_id, {
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
     if (stripeSubId) {
       try {
         const s = await stripe.subscriptions.retrieve(stripeSubId)
-        currentPeriodEnd = new Date(s.current_period_end * 1000).toISOString()
+        currentPeriodEnd = new Date((s as any).current_period_end * 1000).toISOString()
       } catch (_) { /* ignore */ }
     }
     await supabase
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
             status: "active",
             minutes_remaining: planMinutes,
             minutes_total: planMinutes,
-            current_period_end: new Date(stripeSub.current_period_end * 1000).toISOString(),
+            current_period_end: new Date((stripeSub as any).current_period_end * 1000).toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", stripeSub.id)
