@@ -102,7 +102,24 @@ export async function POST(req: Request) {
       sessionParams.customer_email = user.email
     }
 
-    const session = await stripe.checkout.sessions.create(sessionParams)
+    let session
+    try {
+      session = await stripe.checkout.sessions.create(sessionParams)
+    } catch (stripeErr: any) {
+      // Customer test mode ne live mode — fshi dhe riprovp pa customer
+      if (stripeErr?.code === "resource_missing" && stripeErr?.param === "customer") {
+        await admin.from("marie_subscriptions").update({
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          updated_at: new Date().toISOString(),
+        }).eq("artisan_id", user.id)
+        delete sessionParams.customer
+        sessionParams.customer_email = user.email
+        session = await stripe.checkout.sessions.create(sessionParams)
+      } else {
+        throw stripeErr
+      }
+    }
 
     return NextResponse.json({ ok: true, checkoutUrl: session.url })
   } catch (err) {
