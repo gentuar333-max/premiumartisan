@@ -9,63 +9,67 @@ const PLANS = [
     id: "trial",
     name: "Trial",
     price: "0",
-    period: "",
-    note: "15 min — 14 jours",
-    badge: "GRATUIT",
-    badgeGold: false,
+    unit: "€",
+    note: "15 min / 14 jours",
+    isTrial: true,
     isPopular: false,
-    ctaLabel: "Commencer gratuitement",
+    ctaLabel: "Essai gratuit",
   },
   {
     id: "starter",
     name: "Starter",
     price: "49",
-    period: "/mois",
+    unit: "€/mois",
     note: "190 min / mois",
-    badge: null,
-    badgeGold: false,
+    isTrial: false,
     isPopular: false,
-    ctaLabel: "Choisir Starter",
+    ctaLabel: "Choisir",
   },
   {
     id: "pro",
     name: "Pro",
     price: "79",
-    period: "/mois",
+    unit: "€/mois",
     note: "310 min / mois",
-    badge: "POPULAIRE",
-    badgeGold: true,
+    isTrial: false,
     isPopular: true,
-    ctaLabel: "Choisir Pro",
+    ctaLabel: "Choisir",
   },
   {
     id: "business",
     name: "Business",
     price: "139",
-    period: "/mois",
+    unit: "€/mois",
     note: "560 min / mois",
-    badge: null,
-    badgeGold: false,
+    isTrial: false,
     isPopular: false,
-    ctaLabel: "Choisir Business",
+    ctaLabel: "Choisir",
+  },
+  {
+    id: "payg",
+    name: "Pay as you go",
+    price: "0.65",
+    unit: "€/min",
+    note: "par minute",
+    isTrial: false,
+    isPopular: false,
+    ctaLabel: "Choisir",
   },
 ]
 
 const FEATURES = [
-  "Réceptionniste IA 24h/7j",
-  "SMS après chaque appel",
-  "Tableau de bord des appels",
-  "Contacts famille / employés",
-  "Transcription de chaque appel",
-  "Support par email",
+  "Marie 24/7",
+  "SMS",
+  "Dashboard",
+  "Contacts",
+  "Transcript",
+  "Support",
 ]
 
 interface Subscription {
   plan: string
   status: string
   minutes_remaining: number
-  minutes_total: number
-  trial_ends_at?: string
   current_period_end?: string
 }
 
@@ -78,9 +82,7 @@ export default function PricingPage() {
   useEffect(() => {
     fetch("/api/marie/subscription")
       .then(r => r.json())
-      .then(json => {
-        if (json.subscription) setSubscription(json.subscription)
-      })
+      .then(json => { if (json.subscription) setSubscription(json.subscription) })
       .catch(() => {})
   }, [])
 
@@ -88,26 +90,21 @@ export default function PricingPage() {
     return subscription?.status === "active" && subscription?.plan === planId
   }
 
-  function isTrialUsed() {
-    return subscription !== null
+  function isDisabled(planId: string) {
+    if (loading !== null) return true
+    if (isCurrentPlan(planId)) return true
+    if (planId === "trial" && subscription !== null) return true
+    return false
   }
 
   function getCtaLabel(plan: typeof PLANS[0]) {
     if (isCurrentPlan(plan.id)) return "Plan actuel"
-    if (plan.id === "trial" && isTrialUsed()) return "Trial utilisé"
+    if (plan.id === "trial" && subscription !== null) return "Trial utilisé"
     return plan.ctaLabel
   }
 
-  function isDisabled(plan: typeof PLANS[0]) {
-    if (loading !== null) return true
-    if (isCurrentPlan(plan.id)) return true
-    if (plan.id === "trial" && isTrialUsed()) return true
-    return false
-  }
-
   async function handlePlan(planId: string) {
-    const plan = PLANS.find(p => p.id === planId)!
-    if (isDisabled(plan)) return
+    if (isDisabled(planId)) return
     setError(null)
     setLoading(planId)
     try {
@@ -127,73 +124,47 @@ export default function PricingPage() {
     }
   }
 
-  const GOLD = "#D4A853"
-  const GOLD_DIM = "#8B7340"
-  const BG = "#09090B"
-  const CARD = "#111113"
-  const BORDER = "#27273A"
-  const TEXT = "#F0EDE6"
-  const MUTED = "#9C9AAF"
-  const CARD_POPULAR = "rgba(212,168,83,0.06)"
-
   return (
-    <div style={{ minHeight: "100dvh", background: BG, color: TEXT, fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div className="min-h-[100dvh] bg-white py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-      {/* Nav */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(9,9,11,0.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${BORDER}`, padding: "14px 20px", display: "flex", alignItems: "center", gap: 12 }}>
+        {/* Back */}
         <button
           onClick={() => router.back()}
-          style={{ background: "none", border: "none", cursor: "pointer", color: MUTED, fontSize: 13, padding: "4px 8px", borderRadius: 6, display: "flex", alignItems: "center", gap: 6 }}
+          className="mb-8 text-sm text-neutral-400 hover:text-neutral-700 transition-colors flex items-center gap-1"
         >
           ← Retour
         </button>
-        <span style={{ color: BORDER }}>|</span>
-        <span style={{ fontSize: 14, fontWeight: 600, color: TEXT, letterSpacing: "0.02em" }}>
-          Forfaits Marie IA
-        </span>
-      </nav>
 
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "40px 16px 80px" }}>
-
-        {/* Titre */}
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 999, border: `1px solid ${GOLD_DIM}`, background: "rgba(212,168,83,0.08)", marginBottom: 20 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: GOLD, display: "inline-block" }} />
-            <span style={{ fontSize: 11, letterSpacing: "0.12em", color: GOLD, textTransform: "uppercase" as const, fontWeight: 600 }}>
-              Réceptionniste IA 24h/7j
-            </span>
-          </div>
-          <h1 style={{ fontSize: "clamp(24px, 5vw, 36px)", fontWeight: 700, color: TEXT, margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
-            Choisissez votre forfait
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#1a1a1a] mb-3">
+            Nos forfaits
           </h1>
-          <p style={{ fontSize: 14, color: MUTED, margin: 0, lineHeight: 1.6 }}>
-            Paiement mensuel automatique — résiliable à tout moment
+          <p className="text-base text-neutral-500 max-w-lg mx-auto">
+            Tous nos forfaits incluent l&apos;ensemble des fonctionnalités. Choisissez celui qui correspond à vos besoins.
           </p>
         </div>
 
         {/* Banner plan actuel */}
         {subscription?.status === "active" && (
-          <div style={{
-            background: "rgba(212,168,83,0.08)", border: `1px solid ${GOLD_DIM}`,
-            borderRadius: 10, padding: "12px 16px", marginBottom: 20,
-            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
-          }}>
-            <div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>
+          <div className="mb-8 border border-[#6B2737] bg-[#fdf8f8] p-4 flex items-center justify-between gap-4 max-w-2xl mx-auto">
+            <div className="text-sm">
+              <span className="font-semibold text-[#6B2737]">
                 Plan actuel — {PLANS.find(p => p.id === subscription.plan)?.name ?? subscription.plan}
               </span>
-              <span style={{ fontSize: 12, color: MUTED, marginLeft: 10 }}>
+              <span className="text-neutral-500 ml-2">
                 {subscription.minutes_remaining} min restantes
               </span>
               {subscription.current_period_end && (
-                <span style={{ fontSize: 11, color: MUTED, marginLeft: 10 }}>
+                <span className="text-neutral-400 text-xs ml-2">
                   · Renouvellement le {new Date(subscription.current_period_end).toLocaleDateString("fr-FR")}
                 </span>
               )}
             </div>
             <button
               onClick={() => router.push("/artisan/receptionist")}
-              style={{ fontSize: 12, fontWeight: 600, color: GOLD, background: "none", border: `1px solid ${GOLD_DIM}`, borderRadius: 6, padding: "4px 10px", cursor: "pointer", whiteSpace: "nowrap" as const }}
+              className="text-xs font-semibold text-[#6B2737] border border-[#6B2737] px-3 py-1 hover:bg-[#6B2737] hover:text-white transition-colors whitespace-nowrap"
             >
               Dashboard →
             </button>
@@ -202,128 +173,111 @@ export default function PricingPage() {
 
         {/* Error */}
         {error && (
-          <div style={{ background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.3)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#f87171" }}>
+          <div className="mb-6 border border-red-200 bg-red-50 p-3 text-sm text-red-600 max-w-2xl mx-auto">
             {error}
           </div>
         )}
 
-        {/* Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           {PLANS.map(plan => {
             const isCurrent = isCurrentPlan(plan.id)
-            const disabled = isDisabled(plan)
+            const disabled = isDisabled(plan.id)
             const isLoading = loading === plan.id
-            const trialDisabled = plan.id === "trial" && isTrialUsed() && !isCurrent
 
             return (
               <div
                 key={plan.id}
-                style={{
-                  background: plan.isPopular ? CARD_POPULAR : CARD,
-                  border: isCurrent
-                    ? `1.5px solid ${GOLD}`
+                className={
+                  isCurrent
+                    ? "relative border-2 border-[#6B2737] bg-white p-5 md:p-6 flex flex-col"
                     : plan.isPopular
-                    ? `1.5px solid ${GOLD_DIM}`
-                    : `1px solid ${BORDER}`,
-                  borderRadius: 14,
-                  overflow: "hidden",
-                  opacity: trialDisabled ? 0.45 : 1,
-                }}
+                    ? "relative border border-[#6B2737] bg-white p-5 md:p-6 flex flex-col"
+                    : "relative border border-[#e5e5e5] bg-white p-5 md:p-6 flex flex-col"
+                }
+                style={{ opacity: plan.id === "trial" && subscription !== null && !isCurrent ? 0.45 : 1 }}
               >
-                <div style={{ padding: "20px 20px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    {/* Badge */}
-                    <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" as const }}>
-                      {isCurrent && (
-                        <span style={{ background: GOLD, color: "#09090B", fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 4, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
-                          Plan actuel
-                        </span>
-                      )}
-                      {plan.badge && !isCurrent && (
-                        <span style={{
-                          background: plan.badgeGold ? "rgba(212,168,83,0.15)" : "rgba(255,255,255,0.07)",
-                          color: plan.badgeGold ? GOLD : MUTED,
-                          border: `1px solid ${plan.badgeGold ? GOLD_DIM : BORDER}`,
-                          fontSize: 10, fontWeight: 700, padding: "2px 8px",
-                          borderRadius: 4, letterSpacing: "0.08em", textTransform: "uppercase" as const,
-                        }}>
-                          {plan.badge}
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "0 0 4px", letterSpacing: "-0.01em" }}>
-                      {plan.name}
-                    </h3>
-                    <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>{plan.note}</p>
+                {/* Plan actuel badge */}
+                {isCurrent && (
+                  <div className="mb-3">
+                    <span className="inline-block bg-[#6B2737] px-2 py-0.5 text-[11px] font-medium text-white uppercase tracking-wide">
+                      Plan actuel
+                    </span>
                   </div>
+                )}
 
-                  {/* Prix */}
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 1, justifyContent: "flex-end" }}>
-                      <span style={{ fontSize: 32, fontWeight: 800, color: plan.isPopular ? GOLD : TEXT, letterSpacing: "-0.03em", fontFamily: "monospace" }}>
-                        {plan.price}€
-                      </span>
-                    </div>
-                    <span style={{ fontSize: 12, color: MUTED }}>{plan.period || "gratuit"}</span>
+                {/* Popular badge */}
+                {plan.isPopular && !isCurrent && (
+                  <div className="mb-3">
+                    <span className="inline-block bg-[#6B2737] px-2 py-0.5 text-[11px] font-medium text-white uppercase tracking-wide">
+                      Le plus populaire
+                    </span>
                   </div>
+                )}
+
+                {/* Trial subtitle */}
+                {plan.isTrial && (
+                  <p className="text-[11px] text-neutral-400 mb-1 uppercase tracking-wide">
+                    14 jours d&apos;essai
+                  </p>
+                )}
+
+                {/* Plan Name */}
+                <h3 className="text-base font-semibold text-[#1a1a1a] mb-1">
+                  {plan.name}
+                </h3>
+
+                {/* Price */}
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-2xl font-bold text-[#1a1a1a]">{plan.price}</span>
+                  <span className="text-xs text-neutral-500">{plan.unit}</span>
                 </div>
 
-                <div style={{ padding: "16px 20px 20px" }}>
-                  <div style={{ borderTop: `1px solid ${BORDER}`, marginBottom: 14 }} />
+                {/* Note */}
+                <p className="text-xs text-neutral-400 mb-4">{plan.note}</p>
 
-                  {/* Features */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 10px", marginBottom: 18 }}>
-                    {FEATURES.map(f => (
-                      <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
-                        <Check size={12} color={GOLD} style={{ marginTop: 2, flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, color: MUTED, lineHeight: 1.4 }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
+                {/* Divider */}
+                <div className="border-t border-[#e5e5e5] mb-4" />
 
-                  <button
-                    onClick={() => handlePlan(plan.id)}
-                    disabled={disabled}
-                    style={{
-                      width: "100%",
-                      padding: "12px 16px",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      borderRadius: 8,
-                      border: plan.isPopular && !isCurrent && !disabled ? "none" : `1px solid ${BORDER}`,
-                      cursor: disabled ? "default" : "pointer",
-                      fontFamily: "inherit",
-                      letterSpacing: "0.02em",
-                      background: isCurrent
-                        ? "rgba(212,168,83,0.15)"
-                        : plan.isPopular && !trialDisabled
-                        ? `linear-gradient(135deg, ${GOLD}, #E8C878, #B87333)`
-                        : plan.id === "trial" && !isTrialUsed()
-                        ? "rgba(255,255,255,0.08)"
-                        : "rgba(255,255,255,0.04)",
-                      color: plan.isPopular && !isCurrent && !trialDisabled ? "#09090B" : isCurrent ? GOLD : TEXT,
-                      opacity: isLoading ? 0.6 : disabled && !isCurrent ? 0.35 : 1,
-                    }}
-                  >
-                    {isLoading ? "Chargement..." : getCtaLabel(plan)}
-                  </button>
-                </div>
+                {/* Features */}
+                <ul className="space-y-2.5 mb-5 flex-1">
+                  {FEATURES.map(feature => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <Check className="h-3.5 w-3.5 text-neutral-400 shrink-0" strokeWidth={2.5} />
+                      <span className="text-xs text-neutral-600">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA */}
+                <button
+                  onClick={() => handlePlan(plan.id)}
+                  disabled={disabled}
+                  className={
+                    isCurrent
+                      ? "w-full border-2 border-[#6B2737] bg-white px-3 py-2 text-xs font-medium text-[#6B2737] cursor-default"
+                      : plan.isPopular
+                      ? "w-full bg-[#6B2737] px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-[#5a2230] disabled:opacity-40 disabled:cursor-default"
+                      : "w-full border border-[#d4d4d4] bg-white px-3 py-2 text-xs font-medium text-[#1a1a1a] transition-colors hover:border-[#1a1a1a] disabled:opacity-40 disabled:cursor-default"
+                  }
+                >
+                  {isLoading ? "Chargement..." : getCtaLabel(plan)}
+                </button>
               </div>
             )
           })}
         </div>
 
-        {/* Note */}
-        <div style={{ marginTop: 24, padding: "14px 16px", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10 }}>
-          <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.7 }}>
-            <span style={{ color: TEXT, fontWeight: 600 }}>Renouvellement automatique.</span>{" "}
+        {/* Note renouvellement */}
+        <div className="mt-10 border border-[#e5e5e5] p-4 max-w-2xl mx-auto">
+          <p className="text-xs text-neutral-500 leading-relaxed">
+            <span className="font-semibold text-[#1a1a1a]">Renouvellement automatique.</span>{" "}
             Vos minutes sont remises à zéro chaque mois à la date de votre premier paiement.
             Résiliation possible à tout moment depuis votre tableau de bord.
           </p>
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 11, color: MUTED, marginTop: 20, letterSpacing: "0.03em" }}>
+        <p className="text-center text-[11px] text-neutral-400 mt-6 tracking-wide">
           Sans engagement · Résiliable à tout moment · Paiement sécurisé par Stripe
         </p>
       </div>
