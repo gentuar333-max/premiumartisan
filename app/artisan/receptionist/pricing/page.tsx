@@ -48,12 +48,12 @@ const PLANS = [
 ]
 
 const FEATURES = [
-  "Marie 24/7",
-  "SMS",
-  "Dashboard",
-  "Contacts",
-  "Transcript",
-  "Support",
+  "Répond à vos appels 24h/24, 7j/7",
+  "Rapport SMS chaque jour",
+  "Historique complet de vos appels",
+  "Reconnaît famille et employés",
+  "Transcription de chaque conversation",
+  "Support par email inclus",
 ]
 
 interface Subscription {
