@@ -2,15 +2,56 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { Check } from "lucide-react"
 
-const plans = [
-  { id: "trial",    name: "Trial",    price: "0",    unit: "€",      note: "15 min / 14 jours", isTrial: true,  isPopular: false, ctaLabel: "Essai gratuit" },
-  { id: "starter",  name: "Starter",  price: "49",   unit: "€/mois", note: "190 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
-  { id: "pro",      name: "Pro",      price: "79",   unit: "€/mois", note: "310 min / mois",    isTrial: false, isPopular: true,  ctaLabel: "Choisir" },
-  { id: "business", name: "Business", price: "139",  unit: "€/mois", note: "556 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+const PLANS = [
+  {
+    id: "trial",
+    name: "Trial",
+    price: "0",
+    period: "",
+    note: "15 min — 14 jours",
+    badge: "GRATUIT",
+    badgeGold: false,
+    isPopular: false,
+    ctaLabel: "Commencer gratuitement",
+  },
+  {
+    id: "starter",
+    name: "Starter",
+    price: "49",
+    period: "/mois",
+    note: "190 min / mois",
+    badge: null,
+    badgeGold: false,
+    isPopular: false,
+    ctaLabel: "Choisir Starter",
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "79",
+    period: "/mois",
+    note: "310 min / mois",
+    badge: "POPULAIRE",
+    badgeGold: true,
+    isPopular: true,
+    ctaLabel: "Choisir Pro",
+  },
+  {
+    id: "business",
+    name: "Business",
+    price: "139",
+    period: "/mois",
+    note: "560 min / mois",
+    badge: null,
+    badgeGold: false,
+    isPopular: false,
+    ctaLabel: "Choisir Business",
+  },
 ]
 
-const features = [
+const FEATURES = [
   "Réceptionniste IA 24h/7j",
   "SMS après chaque appel",
   "Tableau de bord des appels",
@@ -24,39 +65,50 @@ interface Subscription {
   status: string
   minutes_remaining: number
   minutes_total: number
+  trial_ends_at?: string
+  current_period_end?: string
 }
 
 export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [subscription, setSubscription] = useState<Subscription | null>(null)
-  const [subLoading, setSubLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/marie/subscription")
       .then(r => r.json())
       .then(json => {
-        if (json.error === "Non authentifié") {
-          router.replace("/artisan/login?redirect=/artisan/receptionist/pricing")
-          return
-        }
         if (json.subscription) setSubscription(json.subscription)
       })
       .catch(() => {})
-      .finally(() => setSubLoading(false))
-  }, [router])
+  }, [])
 
   function isCurrentPlan(planId: string) {
     return subscription?.status === "active" && subscription?.plan === planId
   }
 
-  function getCtaLabel(plan: typeof plans[0]) {
-    if (isCurrentPlan(plan.id)) return "Plan actuel ✓"
+  function isTrialUsed() {
+    return subscription !== null
+  }
+
+  function getCtaLabel(plan: typeof PLANS[0]) {
+    if (isCurrentPlan(plan.id)) return "Plan actuel"
+    if (plan.id === "trial" && isTrialUsed()) return "Trial utilisé"
     return plan.ctaLabel
   }
 
+  function isDisabled(plan: typeof PLANS[0]) {
+    if (loading !== null) return true
+    if (isCurrentPlan(plan.id)) return true
+    if (plan.id === "trial" && isTrialUsed()) return true
+    return false
+  }
+
   async function handlePlan(planId: string) {
-    if (isCurrentPlan(planId)) return
+    const plan = PLANS.find(p => p.id === planId)!
+    if (isDisabled(plan)) return
+    setError(null)
     setLoading(planId)
     try {
       const res = await fetch("/api/marie/checkout", {
@@ -65,124 +117,216 @@ export default function PricingPage() {
         body: JSON.stringify({ plan: planId }),
       })
       const json = await res.json()
-      if (json.ok && json.redirect) router.push(json.redirect)
+      if (!res.ok) { setError(json.error ?? "Erreur serveur"); return }
+      if (json.redirect) router.push(json.redirect)
       else if (json.checkoutUrl) window.location.href = json.checkoutUrl
-    } catch(err) {
-      console.error('checkout error:', err)
-    } finally { setLoading(null) }
+    } catch {
+      setError("Erreur réseau — réessayez")
+    } finally {
+      setLoading(null)
+    }
   }
 
+  const GOLD = "#D4A853"
+  const GOLD_DIM = "#8B7340"
+  const BG = "#09090B"
+  const CARD = "#111113"
+  const BORDER = "#27273A"
+  const TEXT = "#F0EDE6"
+  const MUTED = "#9C9AAF"
+  const CARD_POPULAR = "rgba(212,168,83,0.06)"
+
   return (
-    <>
-      <div style={{ minHeight: "100dvh", background: "#fff", padding: "48px 16px 80px", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ minHeight: "100dvh", background: BG, color: TEXT, fontFamily: "'Inter', -apple-system, sans-serif" }}>
 
-          {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <h1 style={{ fontSize: 32, fontWeight: 700, color: "#1a1a1a", marginBottom: 12, letterSpacing: "-0.02em" }}>
-              Nos forfaits
-            </h1>
-            <p style={{ fontSize: 15, color: "#737373", maxWidth: 480, margin: "0 auto", lineHeight: 1.6 }}>
-              Tous les forfaits incluent l&apos;ensemble des fonctionnalités. Choisissez celui qui correspond à vos besoins.
-            </p>
+      {/* Nav */}
+      <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(9,9,11,0.9)", backdropFilter: "blur(12px)", borderBottom: `1px solid ${BORDER}`, padding: "14px 20px", display: "flex", alignItems: "center", gap: 12 }}>
+        <button
+          onClick={() => router.back()}
+          style={{ background: "none", border: "none", cursor: "pointer", color: MUTED, fontSize: 13, padding: "4px 8px", borderRadius: 6, display: "flex", alignItems: "center", gap: 6 }}
+        >
+          ← Retour
+        </button>
+        <span style={{ color: BORDER }}>|</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: TEXT, letterSpacing: "0.02em" }}>
+          Forfaits Marie IA
+        </span>
+      </nav>
+
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "40px 16px 80px" }}>
+
+        {/* Titre */}
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 16px", borderRadius: 999, border: `1px solid ${GOLD_DIM}`, background: "rgba(212,168,83,0.08)", marginBottom: 20 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: GOLD, display: "inline-block" }} />
+            <span style={{ fontSize: 11, letterSpacing: "0.12em", color: GOLD, textTransform: "uppercase" as const, fontWeight: 600 }}>
+              Réceptionniste IA 24h/7j
+            </span>
           </div>
-
-          {/* Plan actuel banner */}
-          {!subLoading && subscription?.status === "active" && (
-            <div style={{ background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: 12, padding: "12px 20px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#166534" }}>
-                  Plan actuel — {plans.find(p => p.id === subscription.plan)?.name ?? subscription.plan}
-                </span>
-                {subscription.minutes_remaining > 0 && (
-                  <span style={{ fontSize: 12, color: "#16a34a", marginLeft: 12 }}>
-                    {subscription.minutes_remaining} min restantes
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => router.push("/artisan/receptionist")}
-                style={{ fontSize: 12, fontWeight: 600, color: "#166534", background: "none", border: "1px solid #86efac", borderRadius: 8, padding: "4px 12px", cursor: "pointer" }}
-              >
-                Dashboard →
-              </button>
-            </div>
-          )}
-
-          {/* Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-            {plans.map(plan => {
-              const isCurrent = isCurrentPlan(plan.id)
-              return (
-                <div
-                  key={plan.id}
-                  style={{
-                    border: isCurrent ? "1.5px solid #22c55e" : plan.isPopular ? "1.5px solid #6B2737" : "1.5px solid #e5e5e5",
-                    background: isCurrent ? "#f0fdf4" : "#fff",
-                    padding: "20px", display: "flex", flexDirection: "column",
-                  }}
-                >
-                  {isCurrent && (
-                    <div style={{ marginBottom: 10 }}>
-                      <span style={{ background: "#22c55e", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
-                        Plan actuel
-                      </span>
-                    </div>
-                  )}
-                  {plan.isPopular && !isCurrent && (
-                    <div style={{ marginBottom: 10 }}>
-                      <span style={{ background: "#6B2737", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
-                        Le plus populaire
-                      </span>
-                    </div>
-                  )}
-                  {plan.isTrial && !isCurrent && (
-                    <p style={{ fontSize: 10, color: "#a3a3a3", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
-                      14 jours d&apos;essai
-                    </p>
-                  )}
-                  <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{plan.name}</h3>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                    <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{plan.price}</span>
-                    <span style={{ fontSize: 12, color: "#737373" }}>{plan.unit}</span>
-                  </div>
-                  <p style={{ fontSize: 11, color: "#a3a3a3", marginBottom: 16 }}>{plan.note}</p>
-                  <div style={{ borderTop: "1px solid #e5e5e5", marginBottom: 16 }} />
-                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-                    {features.map(f => (
-                      <li key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                          <path d="M2 6.5L5 9.5L11 3.5" stroke={isCurrent ? "#22c55e" : "#a3a3a3"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        <span style={{ fontSize: 12, color: "#525252" }}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => handlePlan(plan.id)}
-                    disabled={loading === plan.id || isCurrent}
-                    style={{
-                      width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
-                      cursor: isCurrent ? "default" : loading === plan.id ? "wait" : "pointer",
-                      border: isCurrent ? "none" : plan.isPopular ? "none" : "1.5px solid #d4d4d4",
-                      background: isCurrent ? "#22c55e" : plan.isPopular ? "#6B2737" : "#fff",
-                      color: isCurrent || plan.isPopular ? "#fff" : "#1a1a1a",
-                      fontFamily: "inherit", transition: "all .15s",
-                      opacity: loading === plan.id ? 0.7 : 1,
-                    }}
-                  >
-                    {loading === plan.id ? "..." : getCtaLabel(plan)}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-
-          <p style={{ textAlign: "center", fontSize: 12, color: "#a3a3a3", marginTop: 32 }}>
-            Sans engagement — résiliable à tout moment
+          <h1 style={{ fontSize: "clamp(24px, 5vw, 36px)", fontWeight: 700, color: TEXT, margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+            Choisissez votre forfait
+          </h1>
+          <p style={{ fontSize: 14, color: MUTED, margin: 0, lineHeight: 1.6 }}>
+            Paiement mensuel automatique — résiliable à tout moment
           </p>
         </div>
+
+        {/* Banner plan actuel */}
+        {subscription?.status === "active" && (
+          <div style={{
+            background: "rgba(212,168,83,0.08)", border: `1px solid ${GOLD_DIM}`,
+            borderRadius: 10, padding: "12px 16px", marginBottom: 20,
+            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
+          }}>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: GOLD }}>
+                Plan actuel — {PLANS.find(p => p.id === subscription.plan)?.name ?? subscription.plan}
+              </span>
+              <span style={{ fontSize: 12, color: MUTED, marginLeft: 10 }}>
+                {subscription.minutes_remaining} min restantes
+              </span>
+              {subscription.current_period_end && (
+                <span style={{ fontSize: 11, color: MUTED, marginLeft: 10 }}>
+                  · Renouvellement le {new Date(subscription.current_period_end).toLocaleDateString("fr-FR")}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => router.push("/artisan/receptionist")}
+              style={{ fontSize: 12, fontWeight: 600, color: GOLD, background: "none", border: `1px solid ${GOLD_DIM}`, borderRadius: 6, padding: "4px 10px", cursor: "pointer", whiteSpace: "nowrap" as const }}
+            >
+              Dashboard →
+            </button>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div style={{ background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.3)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 13, color: "#f87171" }}>
+            {error}
+          </div>
+        )}
+
+        {/* Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
+          {PLANS.map(plan => {
+            const isCurrent = isCurrentPlan(plan.id)
+            const disabled = isDisabled(plan)
+            const isLoading = loading === plan.id
+            const trialDisabled = plan.id === "trial" && isTrialUsed() && !isCurrent
+
+            return (
+              <div
+                key={plan.id}
+                style={{
+                  background: plan.isPopular ? CARD_POPULAR : CARD,
+                  border: isCurrent
+                    ? `1.5px solid ${GOLD}`
+                    : plan.isPopular
+                    ? `1.5px solid ${GOLD_DIM}`
+                    : `1px solid ${BORDER}`,
+                  borderRadius: 14,
+                  overflow: "hidden",
+                  opacity: trialDisabled ? 0.45 : 1,
+                }}
+              >
+                <div style={{ padding: "20px 20px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                  <div style={{ flex: 1 }}>
+                    {/* Badge */}
+                    <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" as const }}>
+                      {isCurrent && (
+                        <span style={{ background: GOLD, color: "#09090B", fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 4, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
+                          Plan actuel
+                        </span>
+                      )}
+                      {plan.badge && !isCurrent && (
+                        <span style={{
+                          background: plan.badgeGold ? "rgba(212,168,83,0.15)" : "rgba(255,255,255,0.07)",
+                          color: plan.badgeGold ? GOLD : MUTED,
+                          border: `1px solid ${plan.badgeGold ? GOLD_DIM : BORDER}`,
+                          fontSize: 10, fontWeight: 700, padding: "2px 8px",
+                          borderRadius: 4, letterSpacing: "0.08em", textTransform: "uppercase" as const,
+                        }}>
+                          {plan.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "0 0 4px", letterSpacing: "-0.01em" }}>
+                      {plan.name}
+                    </h3>
+                    <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>{plan.note}</p>
+                  </div>
+
+                  {/* Prix */}
+                  <div style={{ textAlign: "right", flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 1, justifyContent: "flex-end" }}>
+                      <span style={{ fontSize: 32, fontWeight: 800, color: plan.isPopular ? GOLD : TEXT, letterSpacing: "-0.03em", fontFamily: "monospace" }}>
+                        {plan.price}€
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 12, color: MUTED }}>{plan.period || "gratuit"}</span>
+                  </div>
+                </div>
+
+                <div style={{ padding: "16px 20px 20px" }}>
+                  <div style={{ borderTop: `1px solid ${BORDER}`, marginBottom: 14 }} />
+
+                  {/* Features */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 10px", marginBottom: 18 }}>
+                    {FEATURES.map(f => (
+                      <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
+                        <Check size={12} color={GOLD} style={{ marginTop: 2, flexShrink: 0 }} />
+                        <span style={{ fontSize: 11, color: MUTED, lineHeight: 1.4 }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => handlePlan(plan.id)}
+                    disabled={disabled}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      borderRadius: 8,
+                      border: plan.isPopular && !isCurrent && !disabled ? "none" : `1px solid ${BORDER}`,
+                      cursor: disabled ? "default" : "pointer",
+                      fontFamily: "inherit",
+                      letterSpacing: "0.02em",
+                      background: isCurrent
+                        ? "rgba(212,168,83,0.15)"
+                        : plan.isPopular && !trialDisabled
+                        ? `linear-gradient(135deg, ${GOLD}, #E8C878, #B87333)`
+                        : plan.id === "trial" && !isTrialUsed()
+                        ? "rgba(255,255,255,0.08)"
+                        : "rgba(255,255,255,0.04)",
+                      color: plan.isPopular && !isCurrent && !trialDisabled ? "#09090B" : isCurrent ? GOLD : TEXT,
+                      opacity: isLoading ? 0.6 : disabled && !isCurrent ? 0.35 : 1,
+                    }}
+                  >
+                    {isLoading ? "Chargement..." : getCtaLabel(plan)}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Note */}
+        <div style={{ marginTop: 24, padding: "14px 16px", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10 }}>
+          <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.7 }}>
+            <span style={{ color: TEXT, fontWeight: 600 }}>Renouvellement automatique.</span>{" "}
+            Vos minutes sont remises à zéro chaque mois à la date de votre premier paiement.
+            Résiliation possible à tout moment depuis votre tableau de bord.
+          </p>
+        </div>
+
+        <p style={{ textAlign: "center", fontSize: 11, color: MUTED, marginTop: 20, letterSpacing: "0.03em" }}>
+          Sans engagement · Résiliable à tout moment · Paiement sécurisé par Stripe
+        </p>
       </div>
-    </>
+    </div>
   )
 }
