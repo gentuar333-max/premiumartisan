@@ -53,7 +53,6 @@ const FEATURES = [
   "Historique complet de vos appels",
   "Reconnaît famille et employés",
   "Transcription de chaque conversation",
-  "Support par email inclus",
 ]
 
 interface Subscription {
