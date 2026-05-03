@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true })
     }
     const customerId = invoice.customer as string
-    const stripeSubId = invoice.subscription as string
+    const stripeSubId = (invoice as any).subscription as string
     const { data: sub } = await supabase
       .from("marie_subscriptions")
       .select("plan, artisan_id")
