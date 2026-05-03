@@ -2,56 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Check } from "lucide-react"
 
-const PLANS = [
-  {
-    id: "trial",
-    name: "Trial",
-    price: "0",
-    unit: "€",
-    period: "",
-    note: "15 min — 14 jours",
-    isTrial: true,
-    isPopular: false,
-    ctaLabel: "Commencer gratuitement",
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    price: "49",
-    unit: "€",
-    period: "/mois",
-    note: "190 min / mois",
-    isTrial: false,
-    isPopular: false,
-    ctaLabel: "Choisir Starter",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "79",
-    unit: "€",
-    period: "/mois",
-    note: "310 min / mois",
-    isTrial: false,
-    isPopular: true,
-    ctaLabel: "Choisir Pro",
-  },
-  {
-    id: "business",
-    name: "Business",
-    price: "139",
-    unit: "€",
-    period: "/mois",
-    note: "560 min / mois",
-    isTrial: false,
-    isPopular: false,
-    ctaLabel: "Choisir Business",
-  },
+const plans = [
+  { id: "trial",    name: "Trial",    price: "0",    unit: "€",      note: "15 min / 14 jours", isTrial: true,  isPopular: false, ctaLabel: "Essai gratuit" },
+  { id: "starter",  name: "Starter",  price: "49",   unit: "€/mois", note: "190 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
+  { id: "pro",      name: "Pro",      price: "79",   unit: "€/mois", note: "310 min / mois",    isTrial: false, isPopular: true,  ctaLabel: "Choisir" },
+  { id: "business", name: "Business", price: "139",  unit: "€/mois", note: "556 min / mois",    isTrial: false, isPopular: false, ctaLabel: "Choisir" },
 ]
 
-const FEATURES = [
+const features = [
   "Réceptionniste IA 24h/7j",
   "SMS après chaque appel",
   "Tableau de bord des appels",
@@ -65,8 +24,6 @@ interface Subscription {
   status: string
   minutes_remaining: number
   minutes_total: number
-  trial_ends_at?: string
-  current_period_end?: string
 }
 
 export default function PricingPage() {
@@ -74,7 +31,6 @@ export default function PricingPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [subLoading, setSubLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/marie/subscription")
@@ -94,26 +50,13 @@ export default function PricingPage() {
     return subscription?.status === "active" && subscription?.plan === planId
   }
 
-  function isTrialUsed() {
-    return subscription?.plan === "trial" || (subscription?.plan !== undefined && subscription?.plan !== null)
-  }
-
-  function getCtaLabel(plan: typeof PLANS[0]) {
-    if (isCurrentPlan(plan.id)) return "Plan actuel"
-    if (plan.isTrial && isTrialUsed()) return "Trial utilisé"
+  function getCtaLabel(plan: typeof plans[0]) {
+    if (isCurrentPlan(plan.id)) return "Plan actuel ✓"
     return plan.ctaLabel
   }
 
-  function isDisabled(plan: typeof PLANS[0]) {
-    if (loading !== null) return true
-    if (isCurrentPlan(plan.id)) return true
-    if (plan.isTrial && isTrialUsed()) return true
-    return false
-  }
-
   async function handlePlan(planId: string) {
-    if (isDisabled(PLANS.find(p => p.id === planId)!)) return
-    setError(null)
+    if (isCurrentPlan(planId)) return
     setLoading(planId)
     try {
       const res = await fetch("/api/marie/checkout", {
@@ -122,264 +65,124 @@ export default function PricingPage() {
         body: JSON.stringify({ plan: planId }),
       })
       const json = await res.json()
-      if (!res.ok) {
-        setError(json.error ?? "Erreur serveur")
-        return
-      }
-      if (json.redirect) router.push(json.redirect)
+      if (json.ok && json.redirect) router.push(json.redirect)
       else if (json.checkoutUrl) window.location.href = json.checkoutUrl
-    } catch {
-      setError("Erreur réseau — réessayez")
-    } finally {
-      setLoading(null)
-    }
+    } catch(err) {
+      console.error('checkout error:', err)
+    } finally { setLoading(null) }
   }
 
-  // Couleurs PA
-  const crimson = "#6B2737"
-  const crimsonLight = "#8B3A4E"
-  const bg = "#fafafa"
-  const border = "#e5e5e5"
-  const textPrimary = "#1a1a1a"
-  const textSecondary = "#737373"
-  const textMuted = "#a3a3a3"
-  const green = "#16a34a"
-  const greenBg = "#f0fdf4"
-  const greenBorder = "#86efac"
-
   return (
-    <div style={{ minHeight: "100dvh", background: bg, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <>
+      <div style={{ minHeight: "100dvh", background: "#fff", padding: "48px 16px 80px", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
-      {/* Header */}
-      <div style={{ borderBottom: `1px solid ${border}`, background: "#fff", padding: "16px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-        <button
-          onClick={() => router.back()}
-          style={{ background: "none", border: "none", cursor: "pointer", color: textSecondary, fontSize: 14, padding: "4px 8px", borderRadius: 6, display: "flex", alignItems: "center", gap: 6 }}
-        >
-          ← Retour
-        </button>
-        <span style={{ color: border }}>|</span>
-        <span style={{ fontSize: 15, fontWeight: 600, color: textPrimary }}>Forfaits Réceptionniste IA</span>
-      </div>
-
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "32px 16px 80px" }}>
-
-        {/* Titre */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: textPrimary, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
-            Choisissez votre forfait
-          </h1>
-          <p style={{ fontSize: 14, color: textSecondary, margin: 0, lineHeight: 1.5 }}>
-            Tous les forfaits incluent l&apos;ensemble des fonctionnalités.
-            <br />Paiement mensuel automatique — résiliable à tout moment.
-          </p>
-        </div>
-
-        {/* Banner plan actuel */}
-        {!subLoading && subscription?.status === "active" && (
-          <div style={{
-            background: greenBg, border: `1.5px solid ${greenBorder}`,
-            borderRadius: 10, padding: "12px 16px", marginBottom: 20,
-            display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
-          }}>
-            <div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#166534" }}>
-                Plan actuel — {PLANS.find(p => p.id === subscription.plan)?.name ?? subscription.plan}
-              </span>
-              {subscription.minutes_remaining > 0 && (
-                <span style={{ fontSize: 12, color: green, marginLeft: 10 }}>
-                  {subscription.minutes_remaining} min restantes
-                </span>
-              )}
-              {subscription.current_period_end && (
-                <span style={{ fontSize: 11, color: textMuted, marginLeft: 10 }}>
-                  Renouvellement le {new Date(subscription.current_period_end).toLocaleDateString("fr-FR")}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={() => router.push("/artisan/receptionist")}
-              style={{
-                fontSize: 12, fontWeight: 600, color: "#166534",
-                background: "none", border: `1px solid ${greenBorder}`,
-                borderRadius: 6, padding: "4px 10px", cursor: "pointer", whiteSpace: "nowrap",
-              }}
-            >
-              Dashboard →
-            </button>
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <h1 style={{ fontSize: 32, fontWeight: 700, color: "#1a1a1a", marginBottom: 12, letterSpacing: "-0.02em" }}>
+              Nos forfaits
+            </h1>
+            <p style={{ fontSize: 15, color: "#737373", maxWidth: 480, margin: "0 auto", lineHeight: 1.6 }}>
+              Tous les forfaits incluent l&apos;ensemble des fonctionnalités. Choisissez celui qui correspond à vos besoins.
+            </p>
           </div>
-        )}
 
-        {/* Error */}
-        {error && (
-          <div style={{
-            background: "#fef2f2", border: "1px solid #fca5a5",
-            borderRadius: 8, padding: "10px 14px", marginBottom: 16,
-            fontSize: 13, color: "#dc2626",
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
-          {PLANS.map(plan => {
-            const isCurrent = isCurrentPlan(plan.id)
-            const disabled = isDisabled(plan)
-            const isLoading = loading === plan.id
-            const trialDisabled = plan.isTrial && isTrialUsed() && !isCurrent
-
-            return (
-              <div
-                key={plan.id}
-                style={{
-                  background: "#fff",
-                  border: isCurrent
-                    ? `2px solid ${green}`
-                    : plan.isPopular
-                    ? `2px solid ${crimson}`
-                    : `1.5px solid ${border}`,
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  opacity: trialDisabled ? 0.5 : 1,
-                }}
+          {/* Plan actuel banner */}
+          {!subLoading && subscription?.status === "active" && (
+            <div style={{ background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: 12, padding: "12px 20px", marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#166534" }}>
+                  Plan actuel — {plans.find(p => p.id === subscription.plan)?.name ?? subscription.plan}
+                </span>
+                {subscription.minutes_remaining > 0 && (
+                  <span style={{ fontSize: 12, color: "#16a34a", marginLeft: 12 }}>
+                    {subscription.minutes_remaining} min restantes
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => router.push("/artisan/receptionist")}
+                style={{ fontSize: 12, fontWeight: 600, color: "#166534", background: "none", border: "1px solid #86efac", borderRadius: 8, padding: "4px 12px", cursor: "pointer" }}
               >
-                {/* Top row */}
-                <div style={{ padding: "16px 16px 0", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    {/* Badges */}
-                    <div style={{ display: "flex", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
-                      {isCurrent && (
-                        <span style={{
-                          background: green, color: "#fff",
-                          fontSize: 10, fontWeight: 700, padding: "2px 8px",
-                          borderRadius: 4, textTransform: "uppercase", letterSpacing: "0.05em",
-                        }}>
-                          Plan actuel
-                        </span>
-                      )}
-                      {plan.isPopular && !isCurrent && (
-                        <span style={{
-                          background: crimson, color: "#fff",
-                          fontSize: 10, fontWeight: 700, padding: "2px 8px",
-                          borderRadius: 4, textTransform: "uppercase", letterSpacing: "0.05em",
-                        }}>
-                          Populaire
-                        </span>
-                      )}
-                      {plan.isTrial && (
-                        <span style={{
-                          background: "#f5f5f5", color: textSecondary,
-                          fontSize: 10, fontWeight: 600, padding: "2px 8px",
-                          borderRadius: 4, textTransform: "uppercase", letterSpacing: "0.05em",
-                        }}>
-                          14 jours d&apos;essai
-                        </span>
-                      )}
-                    </div>
+                Dashboard →
+              </button>
+            </div>
+          )}
 
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: textPrimary, margin: "0 0 4px" }}>
-                      {plan.name}
-                    </h3>
-                    <p style={{ fontSize: 12, color: textMuted, margin: 0 }}>{plan.note}</p>
-                  </div>
-
-                  {/* Prix */}
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 2, justifyContent: "flex-end" }}>
-                      <span style={{ fontSize: 28, fontWeight: 800, color: textPrimary, letterSpacing: "-0.03em" }}>
-                        {plan.price}€
+          {/* Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+            {plans.map(plan => {
+              const isCurrent = isCurrentPlan(plan.id)
+              return (
+                <div
+                  key={plan.id}
+                  style={{
+                    border: isCurrent ? "1.5px solid #22c55e" : plan.isPopular ? "1.5px solid #6B2737" : "1.5px solid #e5e5e5",
+                    background: isCurrent ? "#f0fdf4" : "#fff",
+                    padding: "20px", display: "flex", flexDirection: "column",
+                  }}
+                >
+                  {isCurrent && (
+                    <div style={{ marginBottom: 10 }}>
+                      <span style={{ background: "#22c55e", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
+                        Plan actuel
                       </span>
                     </div>
-                    <span style={{ fontSize: 12, color: textMuted }}>{plan.period || "gratuit"}</span>
+                  )}
+                  {plan.isPopular && !isCurrent && (
+                    <div style={{ marginBottom: 10 }}>
+                      <span style={{ background: "#6B2737", color: "#fff", fontSize: 10, fontWeight: 600, padding: "2px 8px", textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
+                        Le plus populaire
+                      </span>
+                    </div>
+                  )}
+                  {plan.isTrial && !isCurrent && (
+                    <p style={{ fontSize: 10, color: "#a3a3a3", marginBottom: 4, textTransform: "uppercase" as const, letterSpacing: "0.05em" }}>
+                      14 jours d&apos;essai
+                    </p>
+                  )}
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", marginBottom: 6 }}>{plan.name}</h3>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
+                    <span style={{ fontSize: 26, fontWeight: 700, color: "#1a1a1a" }}>{plan.price}</span>
+                    <span style={{ fontSize: 12, color: "#737373" }}>{plan.unit}</span>
                   </div>
-                </div>
-
-                {/* Features + CTA */}
-                <div style={{ padding: "14px 16px 16px" }}>
-                  <div style={{ borderTop: `1px solid ${border}`, marginBottom: 12 }} />
-
-                  {/* Features — 2 colonne su mobile */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 8px", marginBottom: 16 }}>
-                    {FEATURES.map(f => (
-                      <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-                        <Check size={12} color={isCurrent ? green : crimson} style={{ marginTop: 2, flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, color: "#525252", lineHeight: 1.4 }}>{f}</span>
-                      </div>
+                  <p style={{ fontSize: 11, color: "#a3a3a3", marginBottom: 16 }}>{plan.note}</p>
+                  <div style={{ borderTop: "1px solid #e5e5e5", marginBottom: 16 }} />
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+                    {features.map(f => (
+                      <li key={f} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                          <path d="M2 6.5L5 9.5L11 3.5" stroke={isCurrent ? "#22c55e" : "#a3a3a3"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span style={{ fontSize: 12, color: "#525252" }}>{f}</span>
+                      </li>
                     ))}
-                  </div>
-
+                  </ul>
                   <button
                     onClick={() => handlePlan(plan.id)}
-                    disabled={disabled}
+                    disabled={loading === plan.id || isCurrent}
                     style={{
-                      width: "100%",
-                      padding: "11px 16px",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      borderRadius: 8,
-                      border: "none",
-                      cursor: disabled ? "default" : "pointer",
-                      fontFamily: "inherit",
-                      transition: "opacity .15s, transform .1s",
-                      background: isCurrent
-                        ? green
-                        : plan.isPopular
-                        ? crimson
-                        : plan.isTrial && !isTrialUsed()
-                        ? "#1a1a1a"
-                        : "#f5f5f5",
-                      color: isCurrent || plan.isPopular || (plan.isTrial && !isTrialUsed())
-                        ? "#fff"
-                        : textSecondary,
-                      opacity: isLoading ? 0.7 : disabled && !isCurrent ? 0.4 : 1,
+                      width: "100%", padding: "9px 12px", fontSize: 12, fontWeight: 600,
+                      cursor: isCurrent ? "default" : loading === plan.id ? "wait" : "pointer",
+                      border: isCurrent ? "none" : plan.isPopular ? "none" : "1.5px solid #d4d4d4",
+                      background: isCurrent ? "#22c55e" : plan.isPopular ? "#6B2737" : "#fff",
+                      color: isCurrent || plan.isPopular ? "#fff" : "#1a1a1a",
+                      fontFamily: "inherit", transition: "all .15s",
+                      opacity: loading === plan.id ? 0.7 : 1,
                     }}
                   >
-                    {isLoading ? "Chargement..." : getCtaLabel(plan)}
+                    {loading === plan.id ? "..." : getCtaLabel(plan)}
                   </button>
                 </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
 
-        {/* Note renouvellement */}
-        <div style={{ marginTop: 24, padding: "14px 16px", background: "#fff", border: `1px solid ${border}`, borderRadius: 10 }}>
-          <p style={{ fontSize: 12, color: textSecondary, margin: 0, lineHeight: 1.6 }}>
-            <strong style={{ color: textPrimary }}>Paiement automatique mensuel.</strong>{" "}
-            Vos minutes sont renouvelées automatiquement chaque mois à la date de votre premier paiement.
-            Si votre solde atteint 0, Marie reste active mais vous recevrez une notification pour recharger.
-            Résiliation possible à tout moment depuis votre tableau de bord.
+          <p style={{ textAlign: "center", fontSize: 12, color: "#a3a3a3", marginTop: 32 }}>
+            Sans engagement — résiliable à tout moment
           </p>
         </div>
-
-        {/* Pay as you go */}
-        <div style={{ marginTop: 12, padding: "14px 16px", background: "#fff", border: `1px solid ${border}`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: textPrimary, margin: "0 0 2px" }}>
-              Besoin de minutes supplémentaires ?
-            </p>
-            <p style={{ fontSize: 12, color: textSecondary, margin: 0 }}>
-              Rechargez à tout moment — 0.65€/min, valables 6 mois.
-            </p>
-          </div>
-          <button
-            onClick={() => router.push("/artisan/receptionist")}
-            style={{
-              fontSize: 12, fontWeight: 600, color: crimson,
-              background: "none", border: `1.5px solid ${crimson}`,
-              borderRadius: 8, padding: "8px 14px", cursor: "pointer",
-              fontFamily: "inherit", whiteSpace: "nowrap",
-            }}
-          >
-            Recharger →
-          </button>
-        </div>
-
-        <p style={{ textAlign: "center", fontSize: 11, color: textMuted, marginTop: 20 }}>
-          Sans engagement · Résiliable à tout moment · Paiement sécurisé par Stripe
-        </p>
       </div>
-    </div>
+    </>
   )
 }
