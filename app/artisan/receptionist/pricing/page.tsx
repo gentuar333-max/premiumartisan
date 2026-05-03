@@ -45,7 +45,6 @@ const PLANS = [
     isPopular: false,
     ctaLabel: "Choisir",
   },
-  {
 ]
 
 const FEATURES = [
@@ -105,7 +104,10 @@ export default function PricingPage() {
         body: JSON.stringify({ plan: planId }),
       })
       const json = await res.json()
-      if (!res.ok) { setError(json.error ?? "Erreur serveur"); return }
+      if (!res.ok) {
+        setError(json.error ?? "Erreur serveur")
+        return
+      }
       if (json.redirect) router.push(json.redirect)
       else if (json.checkoutUrl) window.location.href = json.checkoutUrl
     } catch {
@@ -117,7 +119,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-[100dvh] bg-white py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
         {/* Back */}
         <button
@@ -170,7 +172,7 @@ export default function PricingPage() {
         )}
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {PLANS.map(plan => {
             const isCurrent = isCurrentPlan(plan.id)
             const disabled = isDisabled(plan.id)
