@@ -237,10 +237,8 @@ export default function VoiceDashboard() {
         {/* ── HEADER ── */}
         <header style={{ position: "sticky", top: 0, zIndex: 40, background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button onClick={() => setMenuOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", flexDirection: "column", gap: 4.5 }}>
-              <span style={{ display: "block", width: 20, height: 2, background: "#111", borderRadius: 2 }} />
-              <span style={{ display: "block", width: 14, height: 2, background: "#111", borderRadius: 2 }} />
-              <span style={{ display: "block", width: 20, height: 2, background: "#111", borderRadius: 2 }} />
+            <button onClick={() => setMenuOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Menu size={24} color="#111" />
             </button>
             <div>
               <h1 style={{ fontSize: 18, fontWeight: 700, color: "#111", lineHeight: 1.2 }}>Réceptionniste IA</h1>
