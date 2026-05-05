@@ -1,3 +1,4 @@
+"export async function POST(req: Request) { return Response.json({ message: 'Webhook route working' }); }" 
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
@@ -83,6 +84,19 @@ export async function POST(req: NextRequest) {
         current_period_end: currentPeriodEnd,
       })
       console.log(`[checkout.completed] ${plan} actif — ${planMinutes} min — ${artisan_id}`)
+
+      // Bler numer francez automatikisht
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.premiumartisan.fr"
+        await fetch(`${appUrl}/api/marie/provision-number`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ artisan_id }),
+        })
+        console.log(`[checkout.completed] provision-number triggered for ${artisan_id}`)
+      } catch (provErr) {
+        console.error("[checkout.completed] provision-number error:", provErr)
+      }
     }
 
     // Topup minutes à la carte
