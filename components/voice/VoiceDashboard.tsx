@@ -237,14 +237,16 @@ export default function VoiceDashboard() {
         {/* ── HEADER ── */}
         <header style={{ position: "sticky", top: 0, zIndex: 40, background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button onClick={() => setMenuOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Menu size={24} color="#111" />
+            <button onClick={() => setMenuOpen(true)} style={{ background: "#F3F4F6", border: "none", cursor: "pointer", padding: 8, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Menu size={22} color="#374151" />
             </button>
             <div>
               <h1 style={{ fontSize: 18, fontWeight: 700, color: "#111", lineHeight: 1.2 }}>Réceptionniste IA</h1>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E", display: "inline-block", animation: "pulse 2s infinite" }} />
-                <span style={{ fontSize: 12, color: "#6B7280" }}>IA en ligne</span>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: subscription?.status === "active" ? "#22C55E" : "#9CA3AF", display: "inline-block", animation: subscription?.status === "active" ? "pulse 2s infinite" : "none" }} />
+                <span style={{ fontSize: 12, color: subscription?.status === "active" ? "#16A34A" : "#9CA3AF" }}>
+                  {subscription?.status === "active" ? "IA en ligne" : "IA hors ligne"}
+                </span>
               </div>
             </div>
           </div>
