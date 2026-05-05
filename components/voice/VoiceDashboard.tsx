@@ -251,40 +251,7 @@ export default function VoiceDashboard() {
             </div>
           </div>
 
-          <div style={{ position: "relative" }}>
-            <button className="avatar-btn" onClick={() => setAvatarOpen(o => !o)}>
-              {userEmail ? userEmail[0].toUpperCase() : "A"}
-            </button>
-            {avatarOpen && (
-              <>
-                <div onClick={() => setAvatarOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 100 }} />
-                <div style={{ position: "absolute", top: 48, right: 0, width: 240, background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 101, overflow: "hidden" }}>
-                  <div style={{ padding: "12px 14px", borderBottom: "1px solid #F3F4F6" }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>Artisan</div>
-                  </div>
-                  <a href="/artisan/receptionist/setup" style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 14px", fontSize: 13, fontWeight: 500, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F3F4F6" }}>
-                    <User size={14} /> Mon profil
-                  </a>
-                  <div style={{ padding: "11px 14px", borderBottom: "1px solid #F3F4F6", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 500, color: "#374151" }}>
-                      <Clock size={14} /> Mes minutes
-                    </div>
-                    {subscription ? (
-                      <span style={{ fontSize: 13, fontWeight: 700, color: subscription.minutes_remaining > 20 ? "#16A34A" : "#DC2626" }}>
-                        {subscription.minutes_remaining} min
-                      </span>
-                    ) : (
-                      <a href="/artisan/receptionist/pricing" style={{ fontSize: 12, color: "#3B82F6", textDecoration: "none" }}>Activer →</a>
-                    )}
-                  </div>
-                  <button onClick={logout} style={{ width: "100%", padding: "11px 14px", fontSize: 13, fontWeight: 500, color: "#EF4444", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" }}>
-                    <LogOut size={14} /> Déconnexion
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          <div style={{ width: 8 }} />
         </header>
 
         {/* ── STATS ── */}
@@ -430,6 +397,19 @@ export default function VoiceDashboard() {
                 </button>
               </div>
 
+              {/* Avatar + email */}
+              <div style={{ padding: "12px 16px 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "#1F2937", borderRadius: 12, marginBottom: 8 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "#fff", flexShrink: 0 }}>
+                    {userEmail ? userEmail[0].toUpperCase() : "A"}
+                  </div>
+                  <div style={{ overflow: "hidden" }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
+                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 1 }}>Artisan</div>
+                  </div>
+                </div>
+              </div>
+
               <div style={{ padding: 16 }}>
                 <div style={{ background: "#1F2937", borderRadius: 16, padding: 16 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -463,6 +443,18 @@ export default function VoiceDashboard() {
               </a>
 
               <div style={{ flex: 1 }} />
+
+              {/* Links */}
+              <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
+                <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                  <User size={16} color="#9CA3AF" />
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "#E5E7EB" }}>Mon profil & Setup</span>
+                </a>
+                <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                  <Zap size={16} color="#9CA3AF" />
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "#E5E7EB" }}>Paramètres forfait</span>
+                </a>
+              </div>
 
               <button onClick={logout} style={{ margin: "16px", padding: "13px 16px", borderRadius: 12, border: "none", background: "rgba(239,68,68,0.1)", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" }}>
                 <LogOut size={18} color="#EF4444" />
