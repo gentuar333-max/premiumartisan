@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Phone, PhoneOutgoing, MapPin, Clock, Bell, AlertTriangle, X, User, Users, Heart, Home, Briefcase, Plus, Trash2, Zap, LogOut } from "lucide-react"
+import { Phone, PhoneOutgoing, MapPin, Clock, Bell, AlertTriangle, X, User, Users, Heart, Home, Briefcase, Plus, Trash2, Zap, LogOut, Menu } from "lucide-react"
 
 type CallStatus = "nouveau" | "vu" | "rappele" | "devis" | "termine" | "urgent"
 type TabKey = "clients" | "employes" | "famille"
