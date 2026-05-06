@@ -296,7 +296,19 @@ export default function VoiceDashboard() {
             ) : calls.map(call => {
               const sc = getStatusConfig(call)
               return (
-                <div key={call.id} className="call-card" onClick={() => { setSelectedCall(call); setDetailOpen(true) }}>
+                <div key={call.id} className="call-card" onClick={() => {
+                    setSelectedCall(call)
+                    setDetailOpen(true)
+                    // Shëno si të lexuar nëse është i ri
+                    if (call.isnew) {
+                      fetch("/api/artisan/calls/read", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ call_id: call.id }),
+                      }).catch(() => {})
+                      setCalls(prev => prev.map(c => c.id === call.id ? { ...c, isnew: false } : c))
+                    }
+                  }}>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
