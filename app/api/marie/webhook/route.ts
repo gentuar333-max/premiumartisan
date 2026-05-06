@@ -1,4 +1,3 @@
-"export async function POST(req: Request) { return Response.json({ message: 'Webhook route working' }); }" 
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@supabase/supabase-js"
@@ -90,7 +89,10 @@ export async function POST(req: NextRequest) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.premiumartisan.fr"
         await fetch(`${appUrl}/api/marie/provision-number`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-internal-secret": process.env.CRON_SECRET ?? "",
+          },
           body: JSON.stringify({ artisan_id }),
         })
         console.log(`[checkout.completed] provision-number triggered for ${artisan_id}`)
