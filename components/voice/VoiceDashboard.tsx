@@ -110,6 +110,16 @@ export default function VoiceDashboard() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedCall, setSelectedCall] = useState<Call | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
+
+  // Blloko butonin back te browser kur modal eshte hapur
+  useEffect(() => {
+    if (detailOpen) {
+      window.history.pushState(null, "", window.location.href)
+      const handlePop = () => setDetailOpen(false)
+      window.addEventListener("popstate", handlePop)
+      return () => window.removeEventListener("popstate", handlePop)
+    }
+  }, [detailOpen])
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState("")
   const [avatarOpen, setAvatarOpen] = useState(false)
