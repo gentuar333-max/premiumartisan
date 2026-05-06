@@ -10,7 +10,6 @@ const FRANCE_BUNDLE_SID   = process.env.TWILIO_FRANCE_BUNDLE_SID ?? ""
 const FRANCE_ADDRESS_SID  = process.env.TWILIO_FRANCE_ADDRESS_SID ?? ""
 const VAPI_API_KEY        = process.env.VAPI_PRIVATE_KEY!
 const VAPI_ASSISTANT_ID   = process.env.VAPI_ASSISTANT_ID!
-const CRON_SECRET         = process.env.CRON_SECRET!
 
 function getAdmin() {
   return createClient(
@@ -21,9 +20,18 @@ function getAdmin() {
 
 export async function POST(req: Request) {
   try {
-    // Auth — CRON_SECRET ose artisan_id (nga webhook internal)
-    const authHeader = req.headers.get("x-internal-secret")
-    if (authHeader !== CRON_SECRET) {
+    // Auth — vetëm nga brenda (same origin ose internal)
+    const origin = req.headers.get("origin") ?? ""
+    const referer = req.headers.get("referer") ?? ""
+    const host = req.headers.get("host") ?? ""
+    const isInternal = 
+      host.includes("premiumartisan") ||
+      host.includes("vercel.app") ||
+      origin.includes("premiumartisan") ||
+      referer.includes("premiumartisan") ||
+      origin === "" // server-to-server nuk ka origin
+
+    if (!isInternal) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
 
@@ -93,7 +101,7 @@ export async function POST(req: Request) {
       })
       const vapiData = await vapiRes.json()
       vapiPhoneNumberId = vapiData.id ?? null
-      console.log(`[provision] Vapi phone registered: ${vapiPhoneNumberId}`)
+      console.log(`[provision] Vapi registered: ${vapiPhoneNumberId}`)
     } catch (vapiErr) {
       console.error("[provision] Vapi error:", vapiErr)
     }

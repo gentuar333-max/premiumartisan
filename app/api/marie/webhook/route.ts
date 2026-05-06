@@ -91,7 +91,6 @@ export async function POST(req: NextRequest) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-internal-secret": process.env.CRON_SECRET ?? "",
           },
           body: JSON.stringify({ artisan_id }),
         })
