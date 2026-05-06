@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { createBrowserClient } from "@supabase/ssr"
 import { Phone, PhoneOutgoing, MapPin, Clock, Bell, AlertTriangle, X, User, Users, Heart, Home, Briefcase, Plus, Trash2, Zap, LogOut, Menu } from "lucide-react"
 
 type CallStatus = "nouveau" | "vu" | "rappele" | "devis" | "termine" | "urgent"
@@ -121,16 +122,21 @@ export default function VoiceDashboard() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [callsRes, contactsRes, subRes] = await Promise.all([
-        fetch("/api/artisan/calls"),
-        fetch("/api/artisan/contacts"),
-        fetch("/api/marie/subscription"),
+      const results = await Promise.allSettled([
+        fetch("/api/artisan/calls").then(r => r.json()),
+        fetch("/api/artisan/contacts").then(r => r.json()),
+        (async () => {
+          const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+          const { data: { session } } = await sb.auth.getSession()
+          const token = session?.access_token ?? ""
+          return fetch("/api/marie/subscription", {
+            headers: token ? { "Authorization": `Bearer ${token}` } : {}
+          }).then(r => r.json())
+        })(),
       ])
-      const [callsJson, contactsJson, subJson] = await Promise.all([
-        callsRes.json(),
-        contactsRes.json(),
-        subRes.json(),
-      ])
+      const callsJson    = results[0].status === "fulfilled" ? results[0].value : {}
+      const contactsJson = results[1].status === "fulfilled" ? results[1].value : {}
+      const subJson      = results[2].status === "fulfilled" ? results[2].value : {}
       if (callsJson.calls) setCalls(callsJson.calls.map(mapDbCall))
       if (contactsJson.contacts) setContacts(contactsJson.contacts)
       if (subJson.subscription) setSubscription(subJson.subscription)
