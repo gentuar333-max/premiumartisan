@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
+import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 
 export const runtime = "nodejs"
@@ -13,15 +14,23 @@ async function getSupabase() {
   )
 }
 
+function getAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
+
 export async function GET() {
   try {
     const supabase = await getSupabase()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 })
 
-    const { data: subscription } = await supabase
+    const admin = getAdmin()
+    const { data: subscription } = await admin
       .from("marie_subscriptions")
-      .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end")
+      .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end, twilio_number")
       .eq("artisan_id", user.id)
       .single()
 
