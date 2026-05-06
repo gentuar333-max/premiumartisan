@@ -1,4 +1,3 @@
- 
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -123,6 +122,21 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
             provider: "anthropic",
             model: "claude-3-5-haiku-20241022",
             systemPrompt,
+          },
+          analysisPlan: {
+            structuredDataSchema: {
+              type: "object",
+              properties: {
+                nom_client: { type: "string", description: "Prénom et nom du client" },
+                adresse: { type: "string", description: "Adresse complète du client" },
+                probleme: { type: "string", description: "Nature du problème ou travaux demandés" },
+                urgent: { type: "boolean", description: "Si la demande est urgente" },
+                disponibilite: { type: "string", description: "Disponibilités du client" },
+                type_travaux: { type: "string", description: "Type de travaux (peinture, plomberie, etc.)" },
+              },
+              required: ["nom_client", "probleme"],
+            },
+            structuredDataPrompt: "Extrais les informations collectées pendant l'appel : nom du client, adresse, problème ou travaux demandés, si c'est urgent, disponibilités et type de travaux.",
           },
         }),
       });
