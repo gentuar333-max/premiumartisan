@@ -410,55 +410,63 @@ export default function VoiceDashboard() {
                 </div>
               </div>
 
-              <div style={{ padding: 16 }}>
-                <div style={{ background: "#1F2937", borderRadius: 16, padding: 16 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(59,130,246,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Clock size={20} color="#3B82F6" />
-                    </div>
+              {/* Minutes card */}
+              <div style={{ padding: "12px 16px" }}>
+                <div style={{ background: "#1F2937", borderRadius: 14, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontSize: 12, color: "#9CA3AF" }}>Minutes restantes</div>
-                      <div style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1.1 }}>
+                      <div style={{ fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Minutes restantes</div>
+                      <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", lineHeight: 1 }}>
                         {subscription ? subscription.minutes_remaining : "—"}
+                        <span style={{ fontSize: 13, fontWeight: 400, color: "#6B7280", marginLeft: 4 }}>min</span>
                       </div>
                     </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Forfait</div>
+                      <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: subscription?.status === "active" ? "#3B82F6" : "#374151", color: "#fff" }}>
+                        {planLabel || "Inactif"}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,0.1)", overflow: "hidden", marginBottom: 6 }}>
-                    <div style={{ height: "100%", borderRadius: 3, background: "#3B82F6", width: `${minPct}%`, transition: "width .5s" }} />
+                  <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                    <div style={{ height: "100%", borderRadius: 3, background: minPct > 20 ? "#3B82F6" : "#EF4444", width: `${minPct}%`, transition: "width .5s" }} />
                   </div>
-                  <div style={{ fontSize: 11, color: "#6B7280" }}>
-                    {subscription ? `${subscription.minutes_total} minutes / mois` : "Aucun forfait actif"}
+                  <div style={{ fontSize: 11, color: "#4B5563", marginTop: 6 }}>
+                    {subscription ? `Sur ${subscription.minutes_total} min / mois` : "Aucun forfait actif"}
                   </div>
                 </div>
               </div>
 
-              <a href="/artisan/receptionist/pricing" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 16px", padding: "13px 16px", borderRadius: 12, background: "#1F2937", textDecoration: "none" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Zap size={18} color="#F59E0B" />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Gérer mon forfait</span>
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#3B82F6", color: "#fff" }}>
-                  {planLabel || "Activer"}
-                </span>
-              </a>
+              {/* Navigation links */}
+              <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+                <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <Zap size={16} color="#F59E0B" />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#E5E7EB" }}>Mon forfait</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
+                </a>
+                <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <User size={16} color="#9CA3AF" />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#E5E7EB" }}>Profil & Configuration</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
+                </a>
+                <a href="/artisan/dashboard" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <Home size={16} color="#9CA3AF" />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#E5E7EB" }}>Dashboard principal</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
+                </a>
+              </div>
 
               <div style={{ flex: 1 }} />
 
-              {/* Links */}
-              <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
-                <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
-                  <User size={16} color="#9CA3AF" />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#E5E7EB" }}>Mon profil & Setup</span>
-                </a>
-                <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
-                  <Zap size={16} color="#9CA3AF" />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#E5E7EB" }}>Paramètres forfait</span>
-                </a>
-              </div>
-
-              <button onClick={logout} style={{ margin: "16px", padding: "13px 16px", borderRadius: 12, border: "none", background: "rgba(239,68,68,0.1)", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" }}>
-                <LogOut size={18} color="#EF4444" />
-                <span style={{ fontSize: 14, fontWeight: 600, color: "#EF4444" }}>Déconnexion</span>
+              <button onClick={logout} style={{ margin: "16px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" }}>
+                <LogOut size={16} color="#EF4444" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#EF4444" }}>Se déconnecter</span>
               </button>
             </div>
           </>

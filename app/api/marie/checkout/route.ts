@@ -51,11 +51,11 @@ export async function POST(req: Request) {
         .eq("artisan_id", user.id)
         .single()
 
-      // Nëse ka pasur trial aktiv ose plan tjetër, refuzo
-      if (existing && existing.status === "active") {
+      // Refuzo vetëm nëse ka plan aktiv (jo trial inaktiv)
+      if (existing && existing.status === "active" && existing.plan !== "trial") {
         return NextResponse.json({ error: "Abonnement déjà actif" }, { status: 400 })
       }
-      if (existing && existing.plan === "trial") {
+      if (existing && existing.plan === "trial" && existing.status === "active") {
         return NextResponse.json({ error: "Trial déjà utilisé" }, { status: 400 })
       }
 
