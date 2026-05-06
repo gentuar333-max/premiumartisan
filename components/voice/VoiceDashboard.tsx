@@ -468,9 +468,21 @@ export default function VoiceDashboard() {
 
               <div style={{ flex: 1 }} />
 
-              <button onClick={logout} style={{ margin: "16px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit" }}>
+              <button onClick={logout} style={{ margin: "16px 16px 4px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 32px)" }}>
                 <LogOut size={16} color="#EF4444" />
                 <span style={{ fontSize: 13, fontWeight: 600, color: "#EF4444" }}>Se déconnecter</span>
+              </button>
+
+              <button onClick={() => {
+                if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
+                  fetch("/api/artisan/delete-account", { method: "DELETE" })
+                    .then(r => r.json())
+                    .then(() => window.location.href = "/")
+                    .catch(() => alert("Erreur lors de la suppression"))
+                }
+              }} style={{ margin: "0 16px 16px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.1)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 32px)" }}>
+                <Trash2 size={16} color="#6B7280" />
+                <span style={{ fontSize: 13, fontWeight: 500, color: "#6B7280" }}>Supprimer mon compte</span>
               </button>
             </div>
           </>
