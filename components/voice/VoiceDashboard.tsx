@@ -407,7 +407,7 @@ export default function VoiceDashboard() {
         {menuOpen && (
           <>
             <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200 }} />
-            <div style={{ position: "fixed", top: 0, left: 0, height: "100%", width: 300, background: "#111827", zIndex: 201, display: "flex", flexDirection: "column", animation: "slideLeft .25s ease" }}>
+            <div style={{ position: "fixed", top: 0, left: 0, height: "100%", width: 300, background: "#F9FAFB", borderRight: "0.5px solid #E5E7EB", zIndex: 201, display: "flex", flexDirection: "column", animation: "slideLeft .25s ease" }}>
               <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ width: 40, height: 40, borderRadius: 12, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -425,15 +425,7 @@ export default function VoiceDashboard() {
 
               {/* Avatar + email */}
               <div style={{ padding: "12px 16px 0" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "#1F2937", borderRadius: 12, marginBottom: 8 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "#fff", flexShrink: 0 }}>
-                    {userEmail ? userEmail[0].toUpperCase() : "A"}
-                  </div>
-                  <div style={{ overflow: "hidden" }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
-                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 1 }}>Artisan</div>
-                  </div>
-                </div>
+
               </div>
 
               {/* Minutes card */}
@@ -449,7 +441,7 @@ export default function VoiceDashboard() {
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Forfait</div>
-                      <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: subscription?.status === "active" ? "#3B82F6" : "#374151", color: "#fff" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: subscription?.status === "active" ? "#2563EB" : "#E5E7EB", color: subscription?.status === "active" ? "#fff" : "#6B7280" }}>
                         {planLabel || "Inactif"}
                       </span>
                     </div>
