@@ -260,7 +260,7 @@ export default function VoiceDashboard() {
               <h1 style={{ fontSize: 18, fontWeight: 700, color: "#111", lineHeight: 1.2 }}>Réceptionniste IA</h1>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E", display: "inline-block", animation: "pulse 2s infinite" }} />
-                <span style={{ fontSize: 12, color: "#16A34A" }}>IA en ligne</span>
+                <span style={{ fontSize: 12, color: "#16A34A" }}>IA active</span>
               </div>
             </div>
           </div>
