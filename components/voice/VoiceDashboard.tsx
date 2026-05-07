@@ -138,11 +138,14 @@ export default function VoiceDashboard() {
         (async () => {
           const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
           const { data: { session } } = await sb.auth.getSession()
+          console.log("[sub] session:", session ? "ok" : "null", session?.access_token?.slice(0,20))
           if (!session) return {}
           const res = await fetch("/api/marie/subscription", {
             headers: { "Authorization": `Bearer ${session.access_token}` }
           })
-          return res.ok ? res.json() : {}
+          const json = res.ok ? await res.json() : {}
+          console.log("[sub] response:", json)
+          return json
         })(),
       ])
       const callsJson    = results[0].status === "fulfilled" ? results[0].value : {}
