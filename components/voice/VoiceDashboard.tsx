@@ -132,14 +132,16 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
 
   const fetchAll = useCallback(async () => {
     try {
+      const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+      const { data: sessionData } = await sb.auth.getSession()
+      const token = sessionData.session?.access_token ?? ""
+
       const results = await Promise.allSettled([
         fetch("/api/artisan/calls").then(r => r.json()),
         fetch("/api/artisan/contacts").then(r => r.json()),
-        (async () => {
-          const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-          const res = await fetch("/api/marie/subscription-public?id=" + (artisanId ?? ""))
-          return res.ok ? res.json() : {}
-        })(),
+        fetch("/api/marie/subscription", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }).then(r => r.ok ? r.json() : {}),
       ])
       const callsJson    = results[0].status === "fulfilled" ? results[0].value : {}
       const contactsJson = results[1].status === "fulfilled" ? results[1].value : {}

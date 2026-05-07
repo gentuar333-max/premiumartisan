@@ -172,7 +172,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, settings: data ?? null });
+    return NextResponse.json({ ok: true, settings: data ?? null, artisan_id: user.id });
   } catch (err) {
     console.error("GET settings error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
