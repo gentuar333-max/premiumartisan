@@ -101,7 +101,7 @@ function getStatusConfig(call: Call) {
   return { label: "Vu", bg: "#F9FAFB", color: "#6B7280", border: "#E5E7EB" }
 }
 
-export default function VoiceDashboard() {
+export default function VoiceDashboard({ artisanId }: { artisanId?: string | null }) {
   const [calls, setCalls] = useState<Call[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
   const [subscription, setSubscription] = useState<Subscription | null>(null)
@@ -137,12 +137,12 @@ export default function VoiceDashboard() {
         fetch("/api/artisan/contacts").then(r => r.json()),
         (async () => {
           const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-          const { data: { user } } = await sb.auth.getUser()
-          if (!user) return {}
+          const uid = artisanId ?? (await sb.auth.getUser()).data.user?.id
+          if (!uid) return {}
           const { data } = await sb
             .from("marie_subscriptions")
             .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end, twilio_number")
-            .eq("artisan_id", user.id)
+            .eq("artisan_id", uid)
             .single()
           return { subscription: data ?? null }
         })(),
