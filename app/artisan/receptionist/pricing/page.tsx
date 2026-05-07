@@ -71,11 +71,10 @@ export default function PricingPage() {
   useEffect(() => {
     import("@/lib/supabaseBrowser").then(({ createSupabaseBrowserClient }) => {
       const sb = createSupabaseBrowserClient()
-      sb.auth.getSession().then(({ data }) => {
-        const token = data.session?.access_token ?? ""
-        fetch("/api/marie/subscription", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+      sb.auth.getUser().then(({ data }) => {
+        const uid = data.user?.id ?? ""
+        if (!uid) return
+        fetch("/api/marie/subscription?id=" + uid)
           .then(r => r.json())
           .then(json => { if (json.subscription) setSubscription(json.subscription) })
           .catch(() => {})
