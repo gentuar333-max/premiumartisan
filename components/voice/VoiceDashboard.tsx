@@ -137,14 +137,12 @@ export default function VoiceDashboard() {
         fetch("/api/artisan/contacts").then(r => r.json()),
         (async () => {
           const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-          const { data: { user } } = await sb.auth.getUser()
-          if (!user) return {}
-          const { data } = await sb
-            .from("marie_subscriptions")
-            .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end, twilio_number")
-            .eq("artisan_id", user.id)
-            .single()
-          return { subscription: data ?? null }
+          const { data: { session } } = await sb.auth.getSession()
+          if (!session) return {}
+          const res = await fetch("/api/marie/subscription", {
+            headers: { "Authorization": `Bearer ${session.access_token}` }
+          })
+          return res.ok ? res.json() : {}
         })(),
       ])
       const callsJson    = results[0].status === "fulfilled" ? results[0].value : {}
