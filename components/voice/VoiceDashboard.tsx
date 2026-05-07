@@ -280,7 +280,7 @@ export default function VoiceDashboard() {
                 {s.icon}
               </div>
               <div style={{ fontSize: 26, fontWeight: 700, color: "#111", lineHeight: 1 }}>{s.val}</div>
-              <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 4, textTransform: "uppercase", letterSpacing: ".03em" }}>{s.label}</div>
+              <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4, textTransform: "uppercase", letterSpacing: ".03em" }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -302,7 +302,7 @@ export default function VoiceDashboard() {
         {tab === "clients" && (
           <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
             {calls.length === 0 ? (
-              <div style={{ textAlign: "center", padding: 40, color: "#9CA3AF", fontSize: 14 }}>Aucun appel pour le moment</div>
+              <div style={{ textAlign: "center", padding: 40, color: "#6B7280", fontSize: 14 }}>Aucun appel pour le moment</div>
             ) : calls.map(call => {
               const sc = getStatusConfig(call)
               return (
@@ -325,7 +325,7 @@ export default function VoiceDashboard() {
                         <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
                           {sc.label}
                         </span>
-                        <span style={{ fontSize: 11, color: "#9CA3AF" }}>{fmtTimeAgo(call.dt)}</span>
+                        <span style={{ fontSize: 11, color: "#6B7280" }}>{fmtTimeAgo(call.dt)}</span>
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: "#111", marginBottom: 4 }}>{call.name}</div>
                       {call.address && (
@@ -386,7 +386,7 @@ export default function VoiceDashboard() {
                       {tab === "employes" ? <><Briefcase size={10} /> Employé</> : <><Heart size={10} /> Famille</>}
                     </span>
                   </div>
-                  <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>{fmtPhone(c.phone)}</div>
+                  <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>{fmtPhone(c.phone)}</div>
                   {c.notes && <div style={{ fontSize: 11, color: "#D1D5DB", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.notes}</div>}
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
@@ -438,11 +438,11 @@ export default function VoiceDashboard() {
 
               {/* Minutes card */}
               <div style={{ padding: "12px 16px" }}>
-                <div style={{ background: "#1F2937", borderRadius: 14, padding: "14px 16px" }}>
+                <div style={{ background: "#F3F4F6", border: "0.5px solid #E5E7EB", borderRadius: 10, padding: "14px 16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
                       <div style={{ fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Minutes restantes</div>
-                      <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", lineHeight: 1 }}>
+                      <div style={{ fontSize: 30, fontWeight: 800, color: "#111827", lineHeight: 1 }}>
                         {subscription ? subscription.minutes_remaining : "—"}
                         <span style={{ fontSize: 13, fontWeight: 400, color: "#6B7280", marginLeft: 4 }}>min</span>
                       </div>
@@ -454,10 +454,10 @@ export default function VoiceDashboard() {
                       </span>
                     </div>
                   </div>
-                  <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                  <div style={{ height: 5, borderRadius: 3, background: "#E5E7EB", overflow: "hidden" }}>
                     <div style={{ height: "100%", borderRadius: 3, background: minPct > 20 ? "#3B82F6" : "#EF4444", width: `${minPct}%`, transition: "width .5s" }} />
                   </div>
-                  <div style={{ fontSize: 11, color: "#4B5563", marginTop: 6 }}>
+                  <div style={{ fontSize: 11, color: "#374151", marginTop: 6 }}>
                     {subscription ? `Sur ${subscription.minutes_total} min / mois` : "Aucun forfait actif"}
                   </div>
                 </div>
@@ -465,30 +465,42 @@ export default function VoiceDashboard() {
 
               {/* Navigation links */}
               <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-                <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <Zap size={16} color="#F59E0B" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#E5E7EB" }}>Mon forfait</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Mon forfait</span>
                   </div>
                   <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
                 </a>
-                <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <User size={16} color="#9CA3AF" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#E5E7EB" }}>Profil & Configuration</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Profil & Configuration</span>
                   </div>
                   <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
                 </a>
-                <a href="/artisan/dashboard" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 10, background: "#1F2937", textDecoration: "none" }}>
+                <a href="/artisan/dashboard" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <Home size={16} color="#9CA3AF" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#E5E7EB" }}>Dashboard principal</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Dashboard principal</span>
                   </div>
                   <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
                 </a>
               </div>
 
               <div style={{ flex: 1 }} />
+
+              {/* Avatar ne fund */}
+              <div style={{ margin: "0 12px 8px", padding: "10px 12px", background: "#F3F4F6", border: "0.5px solid #E5E7EB", borderRadius: 8, display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#DBEAFE", color: "#1D4ED8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
+                  {userEmail ? userEmail[0].toUpperCase() : "A"}
+                </div>
+                <div style={{ overflow: "hidden" }}>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
+                  <div style={{ fontSize: 11, color: "#6B7280", marginTop: 1 }}>Artisan</div>
+                </div>
+              </div>
+              <div style={{ height: "0.5px", background: "#E5E7EB", margin: "0 12px 8px" }} />
 
               <button onClick={logout} style={{ margin: "16px 16px 4px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 32px)" }}>
                 <LogOut size={16} color="#EF4444" />
@@ -502,7 +514,7 @@ export default function VoiceDashboard() {
                     .then(() => window.location.href = "/")
                     .catch(() => alert("Erreur lors de la suppression"))
                 }
-              }} style={{ margin: "0 16px 16px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.1)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 32px)" }}>
+              }} style={{ margin: "0 12px 12px", padding: "10px 12px", borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 24px)" }}>
                 <Trash2 size={16} color="#6B7280" />
                 <span style={{ fontSize: 13, fontWeight: 500, color: "#6B7280" }}>Supprimer mon compte</span>
               </button>
@@ -529,7 +541,7 @@ export default function VoiceDashboard() {
                     { label: "Durée", val: fmtDur(selectedCall.dur) },
                   ].map(item => (
                     <div key={item.label} style={{ padding: "12px 14px", background: "#F8F9FA", borderRadius: 12 }}>
-                      <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 4 }}>{item.label}</div>
+                      <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 4 }}>{item.label}</div>
                       <div style={{ fontSize: 15, fontWeight: 600, color: "#111" }}>{item.val}</div>
                     </div>
                   ))}
@@ -537,7 +549,7 @@ export default function VoiceDashboard() {
 
                 {selectedCall.transcript.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
                       Transcription IA
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -548,7 +560,7 @@ export default function VoiceDashboard() {
                           </div>
                           <div style={{ maxWidth: "75%", background: msg.role === "ai" ? "#F0F4FF" : "#fff", border: msg.role === "ai" ? "1px solid #DBEAFE" : "1px solid #E5E7EB", borderRadius: msg.role === "ai" ? "16px 4px 16px 16px" : "4px 16px 16px 16px", padding: "10px 14px" }}>
                             <p style={{ fontSize: 13, color: "#111", lineHeight: 1.5, margin: 0 }}>{msg.text}</p>
-                            <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4, marginBottom: 0 }}>{msg.time}</p>
+                            <p style={{ fontSize: 10, color: "#6B7280", marginTop: 4, marginBottom: 0 }}>{msg.time}</p>
                           </div>
                         </div>
                       ))}
