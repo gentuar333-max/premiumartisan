@@ -28,7 +28,7 @@ export async function GET() {
       .from("marie_subscriptions")
       .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end, twilio_number")
       .eq("artisan_id", user.id)
-      .single()
+      .maybeSingle()
 
     console.log("[subscription] result:", subscription, "dbError:", dbError?.message)
 
