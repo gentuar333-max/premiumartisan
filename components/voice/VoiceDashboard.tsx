@@ -137,8 +137,13 @@ export default function VoiceDashboard() {
         fetch("/api/artisan/contacts").then(r => r.json()),
         (async () => {
           const sb = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-          const { data: { session } } = await sb.auth.getSession()
-          console.log("[sub] session:", session ? "ok" : "null", session?.access_token?.slice(0,20))
+          // Provo getSession, nese null provo refreshSession
+          let { data: { session } } = await sb.auth.getSession()
+          if (!session) {
+            const refreshed = await sb.auth.refreshSession()
+            session = refreshed.data.session
+          }
+          console.log("[sub] session:", session ? "ok" : "null")
           if (!session) return {}
           const res = await fetch("/api/marie/subscription", {
             headers: { "Authorization": `Bearer ${session.access_token}` }
