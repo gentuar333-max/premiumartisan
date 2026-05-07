@@ -1,28 +1,31 @@
 import { NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers"
 
 export const runtime = "nodejs"
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { get(name: string) { return cookieStore.get(name)?.value } } }
-    )
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    console.log("[subscription] user.id:", user?.id, "authError:", authError?.message)
-
-    if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 })
-
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
+
+    // Merr token nga Authorization header
+    const authHeader = req.headers.get("authorization") ?? ""
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null
+
+    console.log("[subscription] token exists:", !!token)
+
+    if (!token) {
+      return NextResponse.json({ error: "Non authentifie" }, { status: 401 })
+    }
+
+    const { data: { user }, error: authError } = await admin.auth.getUser(token)
+    console.log("[subscription] user.id:", user?.id, "authError:", authError?.message)
+
+    if (!user) {
+      return NextResponse.json({ error: "Non authentifie" }, { status: 401 })
+    }
 
     const { data: subscription, error: dbError } = await admin
       .from("marie_subscriptions")
@@ -30,7 +33,7 @@ export async function GET() {
       .eq("artisan_id", user.id)
       .maybeSingle()
 
-    console.log("[subscription] result:", subscription, "dbError:", dbError?.message)
+    console.log("[subscription] result:", JSON.stringify(subscription), "dbError:", dbError?.message)
 
     return NextResponse.json({ subscription: subscription ?? null })
   } catch (err) {

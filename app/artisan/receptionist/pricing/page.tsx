@@ -69,10 +69,18 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch("/api/marie/subscription")
-      .then(r => r.json())
-      .then(json => { if (json.subscription) setSubscription(json.subscription) })
-      .catch(() => {})
+    import("@/lib/supabaseBrowser").then(({ createSupabaseBrowserClient }) => {
+      const sb = createSupabaseBrowserClient()
+      sb.auth.getSession().then(({ data }) => {
+        const token = data.session?.access_token ?? ""
+        fetch("/api/marie/subscription", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(r => r.json())
+          .then(json => { if (json.subscription) setSubscription(json.subscription) })
+          .catch(() => {})
+      })
+    })
   }, [])
 
   function isCurrentPlan(planId: string) {
