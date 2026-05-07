@@ -141,7 +141,7 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
         fetch("/api/artisan/contacts").then(r => r.json()),
         fetch("/api/marie/subscription", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }).then(r => r.ok ? r.json() : {}),
+        }).then(r => r.ok ? r.json() : { subscription: null }),
       ])
       const callsJson    = results[0].status === "fulfilled" ? results[0].value : {}
       const contactsJson = results[1].status === "fulfilled" ? results[1].value : {}
