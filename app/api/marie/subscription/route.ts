@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers"
 
 export const runtime = "nodejs"
 
@@ -14,33 +12,23 @@ function getAdmin() {
 
 export async function GET(req: Request) {
   try {
-    // Metoda 1: nga cookies (SSR)
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { get(name: string) { return cookieStore.get(name)?.value } } }
-    )
+    const admin = getAdmin()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    // Merr token nga Authorization header
+    const authHeader = req.headers.get("authorization") ?? ""
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null
 
-    // Metoda 2: nga Authorization header nëse cookies nuk funksionojnë
-    let userId = user?.id
-    if (!userId) {
-      const authHeader = req.headers.get("authorization")
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.slice(7)
-        const admin = getAdmin()
-        const { data } = await admin.auth.getUser(token)
-        userId = data.user?.id
-      }
+    let userId: string | null = null
+
+    if (token) {
+      const { data } = await admin.auth.getUser(token)
+      userId = data.user?.id ?? null
     }
 
     if (!userId) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 })
     }
 
-    const admin = getAdmin()
     const { data: subscription } = await admin
       .from("marie_subscriptions")
       .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end, twilio_number")
