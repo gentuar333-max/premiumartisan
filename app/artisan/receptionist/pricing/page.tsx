@@ -69,11 +69,8 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    import("@supabase/ssr").then(({ createBrowserClient }) => {
-      const sb = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+    import("@/lib/supabaseBrowser").then(({ createSupabaseBrowserClient }) => {
+      const sb = createSupabaseBrowserClient()
       sb.auth.getSession().then(({ data }) => {
         const token = data.session?.access_token
         if (!token) return
