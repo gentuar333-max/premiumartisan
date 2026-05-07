@@ -1,38 +1,31 @@
 import { NextResponse } from "next/server"
+import { createServerClient } from "@supabase/ssr"
 import { createClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
 
 export const runtime = "nodejs"
 
-function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
-
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const admin = getAdmin()
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { get(name: string) { return cookieStore.get(name)?.value } } }
+    )
 
-    // Merr token nga Authorization header
-    const authHeader = req.headers.get("authorization") ?? ""
-    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 })
 
-    let userId: string | null = null
-
-    if (token) {
-      const { data } = await admin.auth.getUser(token)
-      userId = data.user?.id ?? null
-    }
-
-    if (!userId) {
-      return NextResponse.json({ error: "Non authentifié" }, { status: 401 })
-    }
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     const { data: subscription } = await admin
       .from("marie_subscriptions")
       .select("plan, status, minutes_remaining, minutes_total, trial_ends_at, current_period_end, twilio_number")
-      .eq("artisan_id", userId)
+      .eq("artisan_id", user.id)
       .single()
 
     return NextResponse.json({ subscription: subscription ?? null })

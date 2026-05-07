@@ -131,17 +131,10 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
 
   const fetchAll = useCallback(async () => {
     try {
-      const { createSupabaseBrowserClient } = await import("@/lib/supabaseBrowser")
-      const sb = createSupabaseBrowserClient()
-      const { data: sessionData } = await sb.auth.getSession()
-      const token = sessionData.session?.access_token ?? ""
-
       const results = await Promise.allSettled([
         fetch("/api/artisan/calls").then(r => r.json()),
         fetch("/api/artisan/contacts").then(r => r.json()),
-        fetch("/api/marie/subscription", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }).then(r => r.ok ? r.json() : { subscription: null }),
+        fetch("/api/marie/subscription").then(r => r.ok ? r.json() : { subscription: null }),
       ])
       const callsJson    = results[0].status === "fulfilled" ? results[0].value : {}
       const contactsJson = results[1].status === "fulfilled" ? results[1].value : {}
