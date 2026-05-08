@@ -64,8 +64,8 @@ export async function GET(req: Request) {
         .from("profiles")
         .update({
           role: "artisan",
-          prenom: artisanProfile.first_name,
-          nom: artisanProfile.last_name,
+          prenom: artisanProfile.prenom,
+          nom: artisanProfile.nom,
           phone: artisanProfile.phone,
           metier: artisanProfile.metier,
           postal_code: artisanProfile.postal_code,
