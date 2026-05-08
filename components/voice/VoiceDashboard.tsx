@@ -454,6 +454,19 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                 </div>
               </div>
 
+              {/* Twilio number card */}
+              {subscription?.twilio_number && (
+                <div style={{ padding: "0 16px 12px" }}>
+                  <div style={{ background: "#EFF6FF", border: "0.5px solid #BFDBFE", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 11, color: "#3B82F6", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Votre numero Marie</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: "#1D4ED8", letterSpacing: "0.02em" }}>{subscription.twilio_number}</div>
+                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 6, lineHeight: 1.5 }}>
+                      Redirigez vos appels vers ce numero — Marie repondra 24h/24 a votre place.
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Navigation links */}
               <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
                 <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
