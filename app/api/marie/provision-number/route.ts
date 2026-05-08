@@ -9,7 +9,7 @@ const TWILIO_AUTH_TOKEN   = process.env.TWILIO_AUTH_TOKEN!
 const FRANCE_BUNDLE_SID   = process.env.TWILIO_FRANCE_BUNDLE_SID ?? ""
 const FRANCE_ADDRESS_SID  = process.env.TWILIO_FRANCE_ADDRESS_SID ?? ""
 const VAPI_API_KEY        = process.env.VAPI_PRIVATE_KEY!
-const VAPI_ASSISTANT_ID   = process.env.VAPI_ASSISTANT_ID!
+const VAPI_ASSISTANT_ID_DEFAULT = process.env.VAPI_ASSISTANT_ID ?? ""
 
 function getAdmin() {
   return createClient(
@@ -42,6 +42,15 @@ export async function POST(req: Request) {
 
     const supabase = getAdmin()
     const client   = Twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+    // 0. Merr vapi_assistant_id te artizanit
+    const { data: artisanSettings } = await supabase
+      .from("artisan_settings")
+      .select("vapi_assistant_id")
+      .eq("artisan_id", artisan_id)
+      .maybeSingle()
+
+    const vapiAssistantId = artisanSettings?.vapi_assistant_id ?? VAPI_ASSISTANT_ID_DEFAULT
 
     // 1. Kontrollo nëse artizani ka tashmë numër
     const { data: existing } = await supabase
@@ -107,7 +116,7 @@ export async function POST(req: Request) {
           number: purchased.phoneNumber,
           twilioAccountSid: TWILIO_ACCOUNT_SID,
           twilioAuthToken: TWILIO_AUTH_TOKEN,
-          assistantId: VAPI_ASSISTANT_ID,
+          assistantId: vapiAssistantId,
           name: `Marie Artisan ${artisan_id.slice(0, 8)}`,
         }),
       })

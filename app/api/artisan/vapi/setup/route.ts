@@ -37,11 +37,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
-    // 2. Update Vapi Assistant
+    // 2. Krijo ose update Vapi Assistant per kete artisan
     const vapiKey = process.env.VAPI_PRIVATE_KEY;
-    const vapiAssistantId = process.env.VAPI_ASSISTANT_ID;
 
-    if (vapiKey && vapiAssistantId) {
+    // Merr vapi_assistant_id ekzistues per kete artisan
+    const { data: existingSettings } = await supabase
+      .from("artisan_settings")
+      .select("vapi_assistant_id")
+      .eq("artisan_id", user.id)
+      .maybeSingle()
+
+    const existingVapiId = existingSettings?.vapi_assistant_id ?? null
+
+    if (vapiKey) {
+      const vapiAssistantId = existingVapiId
       const metiersStr = Array.isArray(metier) ? metier.join(", ") : metier;
       const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h";
 
@@ -110,43 +119,95 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
 - Une seule question à la fois
 - Toujours confirmer avant de clôturer`;
 
-      const vapiRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${vapiKey}`,
+      const vapiPayload = {
+        name: `Marie - ${company_name}`,
+        firstMessage,
+        model: {
+          provider: "anthropic",
+          model: "claude-3-5-haiku-20241022",
+          temperature: 0.1,
+          systemPrompt,
         },
-        body: JSON.stringify({
-          firstMessage,
-          model: {
-            provider: "anthropic",
-            model: "claude-3-5-haiku-20241022",
-            systemPrompt,
-          },
-          analysisPlan: {
-            structuredDataSchema: {
-              type: "object",
-              properties: {
-                nom_client: { type: "string", description: "Prénom et nom du client" },
-                adresse: { type: "string", description: "Adresse complète du client" },
-                probleme: { type: "string", description: "Nature du problème ou travaux demandés" },
-                urgent: { type: "boolean", description: "Si la demande est urgente" },
-                disponibilite: { type: "string", description: "Disponibilités du client" },
-                type_travaux: { type: "string", description: "Type de travaux (peinture, plomberie, etc.)" },
-              },
-              required: ["nom_client", "probleme"],
+        transcriber: {
+          provider: "deepgram",
+          model: "nova-2",
+          language: "fr",
+        },
+        voice: {
+          provider: "11labs",
+          voiceId: "Yxrwjakoukulqd0g8k9y",
+        },
+        analysisPlan: {
+          structuredDataSchema: {
+            type: "object",
+            properties: {
+              nom_client: { type: "string", description: "Prénom et nom du client" },
+              adresse: { type: "string", description: "Adresse complète du client" },
+              probleme: { type: "string", description: "Nature du problème ou travaux demandés" },
+              urgent: { type: "boolean", description: "Si la demande est urgente" },
+              disponibilite: { type: "string", description: "Disponibilités du client" },
+              type_travaux: { type: "string", description: "Type de travaux (peinture, plomberie, etc.)" },
             },
-            structuredDataPrompt: "Extrais les informations collectées pendant l'appel : nom du client, adresse, problème ou travaux demandés, si c'est urgent, disponibilités et type de travaux.",
+            required: ["nom_client", "probleme"],
           },
-        }),
-      });
-
-      if (!vapiRes.ok) {
-        const vapiError = await vapiRes.text();
-        console.error("Vapi error:", vapiError);
-      } else {
-        console.log("Vapi assistant updated successfully");
+          structuredDataPrompt: "Extrais les informations collectées pendant l'appel : nom du client, adresse, probleme ou travaux demandes, si c'est urgent, disponibilites et type de travaux.",
+        },
       }
+
+      let newVapiAssistantId = vapiAssistantId
+
+      if (vapiAssistantId) {
+        // Update assistant ekzistues
+        const vapiRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
+          body: JSON.stringify(vapiPayload),
+        })
+        if (!vapiRes.ok) console.error("Vapi PATCH error:", await vapiRes.text())
+        else console.log("Vapi assistant updated:", vapiAssistantId)
+      } else {
+        // Krijo assistant te ri
+        const vapiRes = await fetch("https://api.vapi.ai/assistant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
+          body: JSON.stringify(vapiPayload),
+        })
+        if (vapiRes.ok) {
+          const vapiData = await vapiRes.json()
+          newVapiAssistantId = vapiData.id
+          console.log("Vapi assistant created:", newVapiAssistantId)
+          // Ruaj vapi_assistant_id ne Supabase
+          await supabase.from("artisan_settings").update({
+            vapi_assistant_id: newVapiAssistantId,
+            updated_at: new Date().toISOString(),
+          }).eq("artisan_id", user.id)
+        } else {
+          console.error("Vapi POST error:", await vapiRes.text())
+        }
+      }
+    }
+
+    // 3. Krijo marie_subscriptions nese nuk ekziston
+    const { createClient } = await import("@supabase/supabase-js")
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const { data: existingSub } = await admin
+      .from("marie_subscriptions")
+      .select("artisan_id")
+      .eq("artisan_id", user.id)
+      .maybeSingle()
+
+    if (!existingSub) {
+      await admin.from("marie_subscriptions").insert({
+        artisan_id: user.id,
+        plan: "starter",
+        status: "trial",
+        minutes_remaining: 30,
+        minutes_total: 30,
+        updated_at: new Date().toISOString(),
+      })
     }
 
     return NextResponse.json({ ok: true, artisan_id: user.id });
