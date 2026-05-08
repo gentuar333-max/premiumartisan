@@ -64,11 +64,15 @@ export default function ReceptionistSetupPage() {
         }),
       })
       if (res.ok) {
-        await fetch("/api/marie/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan: "trial" }),
-        }).catch(() => {})
+        const setupJson = await res.json()
+        const artisanId = setupJson.artisan_id
+        if (artisanId) {
+          await fetch("/api/marie/provision-number", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ artisan_id: artisanId }),
+          }).catch(() => {})
+        }
         router.push("/artisan/receptionist")
       }
     } catch { /* ignore */ }

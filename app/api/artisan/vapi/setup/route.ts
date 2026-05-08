@@ -149,7 +149,7 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
       }
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, artisan_id: user.id });
   } catch (err) {
     console.error("Setup error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
