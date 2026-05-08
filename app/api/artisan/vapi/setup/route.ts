@@ -133,10 +133,7 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
           model: "nova-2",
           language: "fr",
         },
-        voice: {
-          provider: "11labs",
-          voiceId: "Yxrwjakoukulqd0g8k9y",
-        },
+
         analysisPlan: {
           structuredDataSchema: {
             type: "object",
