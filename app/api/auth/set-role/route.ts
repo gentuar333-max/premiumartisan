@@ -35,8 +35,8 @@ export async function POST(req: Request) {
     const artisanProfile = {
       id: user.id,
       role: "artisan" as const,
-      first_name: first_name || null,
-      last_name: last_name || null,
+      prenom: first_name || null,
+      nom: last_name || null,
       phone: phone || null,
       metier: metier || null,
       postal_code: postal_code || null,
@@ -86,8 +86,8 @@ export async function POST(req: Request) {
       .from("profiles")
       .update({
         role: "artisan",
-        first_name: artisanProfile.first_name,
-        last_name: artisanProfile.last_name,
+        prenom: artisanProfile.first_name,
+        nom: artisanProfile.last_name,
         phone: artisanProfile.phone,
         metier: artisanProfile.metier,
         postal_code: artisanProfile.postal_code,

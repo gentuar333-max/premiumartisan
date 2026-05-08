@@ -50,8 +50,8 @@ export async function GET(req: Request) {
     const artisanProfile = {
       id: user.id,
       role: "artisan" as const,
-      first_name: (typeof m?.first_name === "string" ? m.first_name.trim() : null) || null,
-      last_name: (typeof m?.last_name === "string" ? m.last_name.trim() : null) || null,
+      prenom: (typeof m?.first_name === "string" ? m.first_name.trim() : null) || null,
+      nom: (typeof m?.last_name === "string" ? m.last_name.trim() : null) || null,
       phone: (typeof m?.phone === "string" ? m.phone.replace(/\D/g, "").slice(0, 20) : null) || null,
       metier: (typeof m?.metier === "string" ? m.metier.trim() : null) || null,
       postal_code: (typeof m?.postal_code === "string" ? m.postal_code.trim().slice(0, 10) : null) || null,
@@ -64,8 +64,8 @@ export async function GET(req: Request) {
         .from("profiles")
         .update({
           role: "artisan",
-          first_name: artisanProfile.first_name,
-          last_name: artisanProfile.last_name,
+          prenom: artisanProfile.first_name,
+          nom: artisanProfile.last_name,
           phone: artisanProfile.phone,
           metier: artisanProfile.metier,
           postal_code: artisanProfile.postal_code,
