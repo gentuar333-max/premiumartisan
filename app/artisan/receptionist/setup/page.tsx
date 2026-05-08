@@ -38,7 +38,6 @@ export default function ReceptionistSetupPage() {
           const m = json.settings.metier?.[0] ?? ""
           setMetier(m)
           setTel(json.settings.phone ?? "")
-          setTimeout(() => router.replace("/artisan/receptionist"), 100)
         }
       })
       .catch(() => {
