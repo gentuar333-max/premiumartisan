@@ -34,6 +34,9 @@ interface Subscription {
   status: string
   minutes_remaining: number
   minutes_total: number
+  twilio_number?: string | null
+  trial_ends_at?: string | null
+  current_period_end?: string | null
 }
 
 function fmtTimeAgo(iso: string) {
