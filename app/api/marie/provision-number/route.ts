@@ -54,16 +54,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, number: existing.twilio_number, already: true })
     }
 
-    // 2. Kërko numër francez disponibël
-    const available = await client.availablePhoneNumbers("FR")
-      .local
-      .list({ voiceEnabled: true, smsEnabled: true, limit: 5 })
+    // 2. Kërko numër francez disponibël — provo local pastaj national
+    let available: any[] = []
+    try {
+      available = await client.availablePhoneNumbers("FR")
+        .local
+        .list({ voiceEnabled: true, limit: 5 })
+    } catch (_) {}
 
     if (!available.length) {
-      return NextResponse.json({ error: "Aucun numéro FR disponible" }, { status: 503 })
+      try {
+        available = await client.availablePhoneNumbers("FR")
+          .national
+          .list({ voiceEnabled: true, limit: 5 })
+      } catch (_) {}
+    }
+
+    if (!available.length) {
+      return NextResponse.json({ error: "Aucun numero FR disponible" }, { status: 503 })
     }
 
     const chosenNumber = available[0].phoneNumber
+    console.log("[provision] numero choisi:", chosenNumber)
 
     // 3. Bli numrin
     const purchaseParams: any = {
