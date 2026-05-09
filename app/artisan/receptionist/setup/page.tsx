@@ -115,11 +115,11 @@ export default function ReceptionistSetupPage() {
   }
 
   const OPERATORS = [
-    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#", url: null },
-    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: null },
-    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: null },
+    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#", url: "https://login.orange.fr" },
+    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: "https://www.sfr.fr/cas/login" },
+    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: "https://www.bouyguestelecom.fr/mon-compte" },
     { id: "free",     label: "Free",     code: null, url: "https://mobile.free.fr/moncompte/index.php?page=options&action=renvoi" },
-    { id: "regle",    label: "Regle Mobile", code: null, url: "https://www.reglo-mobile.fr/espace-client/" },
+    { id: "regle",    label: "Regle Mobile", code: null, url: "https://www.reglomobile.fr/connexion?p=ec&ref=https:%2F%2Fmonespace.reglomobile.fr%2F" },
     { id: "autre",    label: "Autre",    code: null, url: null },
   ]
 
@@ -185,9 +185,12 @@ export default function ReceptionistSetupPage() {
               <div style={{ marginBottom: 20 }}>
                 <div style={{ padding: 14, background: "#F9FAFB", borderRadius: 12, border: "1px solid #E5E7EB", marginBottom: 10 }}>
                   <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, margin: 0 }}>
-                    {operator === "free" && "Allez dans Mon espace Free > Options > Renvoi d appel > Si pas de reponse > entrez :  " + twilio_number}
-                    {operator === "regle" && "Allez dans Reglo Mobile > Mon compte > Renvoi d appel > entrez : " + twilio_number}
-                    {operator === "autre" && "Contactez votre operateur pour activer le renvoi d appel vers : " + twilio_number}
+                    {operator === "free" && "Connectez-vous, allez dans Options puis Renvoi d appel. Choisissez Si pas de reponse et collez le numero copie."}
+                    {operator === "regle" && "Connectez-vous, allez dans Mon espace puis Renvoi d appel. Collez le numero copie dans le champ prevu."}
+                    {operator === "orange" && "Connectez-vous, recherchez Renvoi d appel dans les options de votre ligne. Collez le numero copie."}
+                    {operator === "sfr" && "Connectez-vous, allez dans Gerer ma ligne puis Renvoi d appel. Collez le numero copie."}
+                    {operator === "bouygues" && "Connectez-vous, allez dans Mon telephone puis Options et Renvoi d appel. Collez le numero copie."}
+                    {operator === "autre" && "Contactez votre operateur et demandez l activation du renvoi d appel si pas de reponse vers ce numero."}
                   </p>
                 </div>
                 {selected?.url && (
