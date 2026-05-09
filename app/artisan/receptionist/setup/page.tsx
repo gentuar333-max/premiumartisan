@@ -75,9 +75,16 @@ export default function ReceptionistSetupPage() {
             body: JSON.stringify({ artisan_id: artisanId }),
           }).catch(() => {})
         }
-        const subRes = await fetch("/api/marie/subscription?id=" + (setupJson.artisan_id ?? ""))
-        const subJson = await subRes.json()
-        setTwilioNumber(subJson.subscription?.twilio_number ?? "")
+        // Prit max 10 sekonda per numrin Twilio
+        let twilioNum = ""
+        for (let i = 0; i < 10; i++) {
+          await new Promise(r => setTimeout(r, 1000))
+          const subRes = await fetch("/api/marie/subscription?id=" + (setupJson.artisan_id ?? ""))
+          const subJson = await subRes.json()
+          twilioNum = subJson.subscription?.twilio_number ?? ""
+          if (twilioNum) break
+        }
+        setTwilioNumber(twilioNum)
         setStep("operator")
       }
     } catch { /* ignore */ }
