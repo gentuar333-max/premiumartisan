@@ -23,6 +23,9 @@ export default function ReceptionistSetupPage() {
   const [metier, setMetier]     = useState("")
   const [tel, setTel]           = useState("")
   const [loading, setLoading]   = useState(false)
+  const [step, setStep]         = useState<"form" | "operator">("form")
+  const [twilio_number, setTwilioNumber] = useState("")
+  const [operator, setOperator] = useState("")
 
   useEffect(() => {
     fetch("/api/artisan/vapi/setup")
@@ -72,7 +75,10 @@ export default function ReceptionistSetupPage() {
             body: JSON.stringify({ artisan_id: artisanId }),
           }).catch(() => {})
         }
-        router.push("/artisan/receptionist")
+        const subRes = await fetch("/api/marie/subscription?id=" + (setupJson.artisan_id ?? ""))
+        const subJson = await subRes.json()
+        setTwilioNumber(subJson.subscription?.twilio_number ?? "")
+        setStep("operator")
       }
     } catch { /* ignore */ }
     finally { setLoading(false) }
@@ -90,6 +96,65 @@ export default function ReceptionistSetupPage() {
     position: "absolute", left: 12, top: "50%",
     transform: "translateY(-50%)", color: "#9CA3AF",
     pointerEvents: "none",
+  }
+
+  const OPERATORS = [
+    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#" },
+    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#" },
+    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#" },
+    { id: "free",     label: "Free",     code: null },
+    { id: "regle",    label: "Regle Mobile", code: null },
+    { id: "autre",    label: "Autre",    code: null },
+  ]
+
+  if (step === "operator") {
+    const selected = OPERATORS.find(o => o.id === operator)
+    return (
+      <div style={{ minHeight: "100vh", background: "#F5F5F7", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", display: "flex", flexDirection: "column" }}>
+        <header style={{ padding: "40px 24px 24px", textAlign: "center" }}>
+          <div style={{ width: 64, height: 64, borderRadius: 20, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Phone size={28} color="#fff" />
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111", margin: 0 }}>Activez le renvoi d appel</h1>
+          <p style={{ fontSize: 14, color: "#6B7280", marginTop: 8 }}>Marie repondra a votre place en cas d absence</p>
+        </header>
+        <main style={{ flex: 1, padding: "0 16px 32px" }}>
+          <div style={{ background: "#fff", borderRadius: 20, padding: 24, maxWidth: 480, margin: "0 auto", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+            <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>Selectionnez votre operateur :</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+              {OPERATORS.map(o => (
+                <button key={o.id} onClick={() => setOperator(o.id)} style={{ padding: "12px", borderRadius: 12, border: operator === o.id ? "2px solid #3B82F6" : "1.5px solid #E5E7EB", background: operator === o.id ? "#EFF6FF" : "#F9FAFB", fontSize: 14, fontWeight: 600, color: operator === o.id ? "#1D4ED8" : "#374151", cursor: "pointer", fontFamily: "inherit" }}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+
+            {operator && selected?.code && (
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 13, color: "#374151", marginBottom: 12 }}>Appuyez sur ce bouton depuis votre telephone :</p>
+                <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
+                  Activer Marie
+                </a>
+              </div>
+            )}
+
+            {operator && !selected?.code && (
+              <div style={{ marginBottom: 20, padding: 14, background: "#F9FAFB", borderRadius: 12, border: "1px solid #E5E7EB" }}>
+                <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
+                  {operator === "free" && "Allez dans l application Free > Mon compte > Renvoi d appel > entrez le numero : " + twilio_number}
+                  {operator === "regle" && "Allez dans Regle Mobile > Mon compte > Renvoi d appel > entrez le numero : " + twilio_number}
+                  {operator === "autre" && "Contactez votre operateur pour activer le renvoi d appel vers : " + twilio_number}
+                </p>
+              </div>
+            )}
+
+            <button onClick={() => router.push("/artisan/receptionist")} style={{ width: "100%", padding: 14, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer", fontFamily: "inherit" }}>
+              Continuer sans activer
+            </button>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
