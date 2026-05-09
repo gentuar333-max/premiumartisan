@@ -161,6 +161,20 @@ export default function ReceptionistSetupPage() {
               <p style={{ fontSize: 12, color: "#9CA3AF", marginTop: 8, lineHeight: 1.5 }}>
                 Le renvoi s active une seule fois. Aucune modification n est necessaire par la suite.
               </p>
+              <div style={{ marginTop: 16, padding: "12px 14px", background: "#F9FAFB", borderRadius: 12, border: "1px solid #E5E7EB" }}>
+                <p style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 8 }}>Exemple avec Orange</p>
+                {[
+                  "Copiez votre numero Marie (bouton bleu)",
+                  "Appuyez sur Activer Marie via Orange",
+                  "Connectez-vous puis allez dans Renvoi d appel",
+                  "Collez le numero copie et validez",
+                ].map((step, i) => (
+                  <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: i === 3 ? "#3B82F6" : "#F3F4F6", color: i === 3 ? "#fff" : "#6B7280", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</div>
+                    <p style={{ fontSize: 12, color: "#374151", margin: 0, paddingTop: 2, lineHeight: 1.5 }}>{step}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
