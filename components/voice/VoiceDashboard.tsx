@@ -259,9 +259,9 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
             <div>
               <h1 style={{ fontSize: 18, fontWeight: 700, color: "#111", lineHeight: 1.2 }}>Réceptionniste IA</h1>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: subscription?.status === "active" ? "#22C55E" : "#D1D5DB", display: "inline-block", animation: subscription?.status === "active" ? "pulse 2s infinite" : "none" }} />
-                <span style={{ fontSize: 12, color: subscription?.status === "active" ? "#16A34A" : "#9CA3AF" }}>
-                  {subscription?.status === "active" ? "IA active" : "IA inactive"}
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: subscription?.status === "active" || subscription?.status === "trial" ? "#22C55E" : "#D1D5DB", display: "inline-block", animation: subscription?.status === "active" || subscription?.status === "trial" ? "pulse 2s infinite" : "none" }} />
+                <span style={{ fontSize: 12, color: subscription?.status === "active" || subscription?.status === "trial" ? "#16A34A" : "#9CA3AF" }}>
+                  {subscription?.status === "active" || subscription?.status === "trial" ? "IA active" : "IA inactive"}
                 </span>
               </div>
             </div>
@@ -443,7 +443,7 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Forfait</div>
-                      <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: subscription?.status === "active" ? "#2563EB" : "#E5E7EB", color: subscription?.status === "active" ? "#fff" : "#6B7280" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: subscription?.status === "active" || subscription?.status === "trial" ? "#2563EB" : "#E5E7EB", color: subscription?.status === "active" || subscription?.status === "trial" ? "#fff" : "#6B7280" }}>
                         {planLabel || "Inactif"}
                       </span>
                     </div>
