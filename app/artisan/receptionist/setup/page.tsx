@@ -126,7 +126,7 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
-  const USSD = encodeURIComponent("**61*" + twilio_number + "*11*15#")
+  const USSD = "**61*" + twilio_number + "*11*15%23"
   const OPERATORS = [
     { id: "orange",   label: "Orange",      code: USSD },
     { id: "sfr",      label: "SFR",         code: USSD },
@@ -205,18 +205,24 @@ export default function ReceptionistSetupPage() {
 
             {operator && selected?.code && (
               <div style={{ marginBottom: 20 }}>
-                <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}>
+                <a
+                  href={"tel:" + selected.code}
+                  style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}
+                >
                   Activer Marie
                 </a>
                 <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", lineHeight: 1.5, marginBottom: 10 }}>
-                  Votre telephone s ouvre avec le code pret. Appuyez sur Appel.
+                  Votre telephone s ouvre avec le code pret — appuyez sur Appel.
                 </p>
-                <button onClick={() => {
-                  const raw = "**61*" + twilio_number + "*11*15#"
-                  navigator.clipboard.writeText(raw).then(() => setCopied(true))
-                  setTimeout(() => setCopied(false), 2000)
-                }} style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #E5E7EB", background: copied ? "#F0FDF4" : "#F9FAFB", fontSize: 13, fontWeight: 600, color: copied ? "#15803D" : "#6B7280", cursor: "pointer", fontFamily: "inherit" }}>
-                  {copied ? "Code copie !" : "Copier le code manuellement"}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText("**61*" + twilio_number + "*11*15#")
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  }}
+                  style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #E5E7EB", background: copied ? "#F0FDF4" : "#F9FAFB", fontSize: 13, fontWeight: 600, color: copied ? "#15803D" : "#6B7280", cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  {copied ? "Code copie !" : "Copier le code"}
                 </button>
               </div>
             )}
