@@ -463,8 +463,20 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                   <div style={{ background: "#EFF6FF", border: "0.5px solid #BFDBFE", borderRadius: 10, padding: "14px 16px" }}>
                     <div style={{ fontSize: 11, color: "#3B82F6", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Votre numero Marie</div>
                     <div style={{ fontSize: 20, fontWeight: 800, color: "#1D4ED8", letterSpacing: "0.02em" }}>{subscription.twilio_number}</div>
-                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 6, lineHeight: 1.5 }}>
-                      Redirigez vos appels vers ce numero — Marie repondra 24h/24 a votre place.
+                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 8, lineHeight: 1.6 }}>
+                      Marie repond a votre place quand vous etes indisponible.
+                    </div>
+                    <div style={{ marginTop: 10, padding: "10px 12px", background: "#FFF7ED", border: "0.5px solid #FED7AA", borderRadius: 8 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#C2410C", marginBottom: 6 }}>COMMENT ACTIVER LE RENVOI D APPEL</div>
+                      <div style={{ fontSize: 11, color: "#7C2D12", lineHeight: 1.8 }}>
+                        <div>Orange : composez <strong>**61*{subscription.twilio_number}*11*20#</strong></div>
+                        <div>SFR : composez <strong>**61*{subscription.twilio_number}*11*20#</strong></div>
+                        <div>Bouygues : composez <strong>**61*{subscription.twilio_number}*11*20#</strong></div>
+                        <div>Free : application Free &gt; Mon compte &gt; Renvoi d appel</div>
+                      </div>
+                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6 }}>
+                        Le renvoi se declenche apres 20 secondes de sonnerie.
+                      </div>
                     </div>
                   </div>
                 </div>
