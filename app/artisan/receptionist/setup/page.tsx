@@ -128,7 +128,11 @@ export default function ReceptionistSetupPage() {
     return (
       <div style={{ minHeight: "100vh", background: "#F5F5F7", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", display: "flex", flexDirection: "column" }}>
         <header style={{ padding: "40px 24px 24px", textAlign: "center", position: "relative" }}>
-          <button onClick={() => setHelpOpen(true)} style={{ position: "absolute", right: 24, top: 40, width: 32, height: 32, borderRadius: "50%", border: "1.5px solid #E5E7EB", background: "#fff", fontSize: 15, fontWeight: 700, color: "#6B7280", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit" }}>?</button>
+          <div style={{ position: "absolute", right: 24, top: 40 }}>
+            <button onClick={() => setHelpOpen(true)} style={{ width: 32, height: 32, borderRadius: "50%", border: "1.5px solid #E5E7EB", background: "#fff", fontSize: 15, fontWeight: 700, color: "#6B7280", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit", position: "relative" }}>?
+              <span style={{ position: "absolute", top: -3, right: -3, width: 8, height: 8, borderRadius: "50%", background: "#EF4444" }} />
+            </button>
+          </div>
           <div style={{ width: 64, height: 64, borderRadius: 20, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <Phone size={28} color="#fff" />
           </div>
@@ -174,23 +178,12 @@ export default function ReceptionistSetupPage() {
 
             {operator && selected?.code && (
               <div style={{ marginBottom: 20 }}>
-                <p style={{ fontSize: 13, color: "#374151", marginBottom: 12 }}>Option 1 — Activation automatique :</p>
-                <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}>
-                  Activer Marie
+                <button onClick={copyNumber} style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #3B82F6", background: copied ? "#F0FDF4" : "#EFF6FF", fontSize: 13, fontWeight: 700, color: copied ? "#15803D" : "#1D4ED8", cursor: "pointer", fontFamily: "inherit", marginBottom: 10 }}>
+                  {copied ? "Numero copie !" : "Copier le numero : " + twilio_number}
+                </button>
+                <a href={selected.url ?? "#"} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
+                  Activer Marie via {selected.label}
                 </a>
-                {selected?.url && (
-                  <div>
-                    <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 8, textAlign: "center" }}>Option 2 — Via votre espace client :</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      <button onClick={copyNumber} style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #3B82F6", background: copied ? "#F0FDF4" : "#EFF6FF", fontSize: 13, fontWeight: 700, color: copied ? "#15803D" : "#1D4ED8", cursor: "pointer", fontFamily: "inherit" }}>
-                        {copied ? "Numero copie !" : "Copier le numero : " + twilio_number}
-                      </button>
-                      <a href={selected.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#F3F4F6", borderRadius: 12, padding: 12, fontSize: 13, fontWeight: 600, color: "#374151", textAlign: "center", textDecoration: "none" }}>
-                        Ouvrir {selected.label}
-                      </a>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
