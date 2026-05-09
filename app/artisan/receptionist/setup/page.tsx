@@ -126,7 +126,7 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
-  const USSD = "**61*" + twilio_number + "*11*15#"
+  const USSD = encodeURIComponent("**61*" + twilio_number + "*11*15#")
   const OPERATORS = [
     { id: "orange",   label: "Orange",      code: USSD },
     { id: "sfr",      label: "SFR",         code: USSD },
@@ -208,9 +208,16 @@ export default function ReceptionistSetupPage() {
                 <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}>
                   Activer Marie
                 </a>
-                <p style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", lineHeight: 1.5 }}>
-                  Votre telephone va s ouvrir avec un code prefait. Appuyez simplement sur Appel.
+                <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", lineHeight: 1.5, marginBottom: 10 }}>
+                  Votre telephone s ouvre avec le code pret. Appuyez sur Appel.
                 </p>
+                <button onClick={() => {
+                  const raw = "**61*" + twilio_number + "*11*15#"
+                  navigator.clipboard.writeText(raw).then(() => setCopied(true))
+                  setTimeout(() => setCopied(false), 2000)
+                }} style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #E5E7EB", background: copied ? "#F0FDF4" : "#F9FAFB", fontSize: 13, fontWeight: 600, color: copied ? "#15803D" : "#6B7280", cursor: "pointer", fontFamily: "inherit" }}>
+                  {copied ? "Code copie !" : "Copier le code manuellement"}
+                </button>
               </div>
             )}
 
