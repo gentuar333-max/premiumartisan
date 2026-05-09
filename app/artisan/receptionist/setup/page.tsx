@@ -126,14 +126,14 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
-  const num = encodeURIComponent(twilio_number)
+  const num = twilio_number
   const OPERATORS = [
-    { id: "orange",   label: "Orange",       ussd: "**61*" + num + "*11*15%23" },
-    { id: "sfr",      label: "SFR",          ussd: "**61*" + num + "*11*15%23" },
-    { id: "bouygues", label: "Bouygues",     ussd: "**61*" + num + "*11*15%23" },
-    { id: "free",     label: "Free",         ussd: "**61*" + num + "*11*15%23" },
-    { id: "regle",    label: "Regle Mobile", ussd: "*61*" + num + "%23" },
-    { id: "autre",    label: "Autre",        ussd: "**61*" + num + "*11*15%23" },
+    { id: "orange",   label: "Orange",       ussd: "**61*" + num + "#" },
+    { id: "sfr",      label: "SFR",          ussd: "**61*" + num + "#" },
+    { id: "bouygues", label: "Bouygues",     ussd: "**61*" + num + "#" },
+    { id: "free",     label: "Free",         ussd: "**61*" + num + "#" },
+    { id: "regle",    label: "Regle Mobile", ussd: "*61*" + num + "#" },
+    { id: "autre",    label: "Autre",        ussd: "**61*" + num + "#" },
   ]
 
   if (step === "operator") {
@@ -207,9 +207,14 @@ export default function ReceptionistSetupPage() {
               <div style={{ marginBottom: 20 }}>
                 <button
                   onClick={() => {
-                    const url = "tel:" + selected!.ussd
-                    console.log("[USSD] dialing:", url)
-                    window.location.href = url
+                    const code = selected?.ussd
+                    if (!code) return
+                    if (!/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+                      alert("Cette fonction est disponible uniquement sur mobile.")
+                      return
+                    }
+                    console.log("[USSD] dialing:", code)
+                    window.location.assign("tel:" + code)
                   }}
                   disabled={!twilio_number}
                   style={{ display: "block", width: "100%", background: twilio_number ? "#3B82F6" : "#9CA3AF", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", border: "none", cursor: twilio_number ? "pointer" : "not-allowed", fontFamily: "inherit", marginBottom: 10 }}
