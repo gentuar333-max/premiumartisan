@@ -471,9 +471,9 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                       <div style={{ fontSize: 12, color: "#166534", lineHeight: 1.6, marginBottom: 8 }}>
                         Composez ce code depuis votre telephone et appuyez sur appel :
                       </div>
-                      <div style={{ background: "#fff", border: "1px solid #BBF7D0", borderRadius: 8, padding: "10px 12px", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#15803D", letterSpacing: "0.05em", textAlign: "center" }}>
-                        **61*{subscription.twilio_number}*11*15#
-                      </div>
+                      <a href={"tel:**61*" + subscription.twilio_number + "*11*15#"} style={{ display: "block", background: "#15803D", border: "none", borderRadius: 8, padding: "12px", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#fff", letterSpacing: "0.05em", textAlign: "center", textDecoration: "none" }}>
+                        Appuyer pour activer
+                      </a>
                       <div style={{ fontSize: 10, color: "#6B7280", marginTop: 8, lineHeight: 1.5 }}>
                         Fonctionne sur Orange, SFR et Bouygues. Pour Free : Mon compte &gt; Renvoi d appel.
                       </div>
