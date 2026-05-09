@@ -206,8 +206,13 @@ export default function ReceptionistSetupPage() {
             {operator && selected?.ussd && (
               <div style={{ marginBottom: 20 }}>
                 <button
-                  onClick={() => { window.location.href = "tel:" + selected!.ussd }}
-                  style={{ display: "block", width: "100%", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", border: "none", cursor: "pointer", fontFamily: "inherit", marginBottom: 10 }}
+                  onClick={() => {
+                    const url = "tel:" + selected!.ussd
+                    console.log("[USSD] dialing:", url)
+                    window.location.href = url
+                  }}
+                  disabled={!twilio_number}
+                  style={{ display: "block", width: "100%", background: twilio_number ? "#3B82F6" : "#9CA3AF", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", border: "none", cursor: twilio_number ? "pointer" : "not-allowed", fontFamily: "inherit", marginBottom: 10 }}
                 >
                   Activer Marie
                 </button>

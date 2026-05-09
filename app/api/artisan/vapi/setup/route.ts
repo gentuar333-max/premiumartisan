@@ -161,11 +161,27 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
       let newVapiAssistantId = vapiAssistantId
 
       if (vapiAssistantId) {
-        // Update assistant ekzistues
+        // Merr konfigurimin ekzistues per te ruajtur voice/tools
+        let existingConfig: Record<string, unknown> = {}
+        try {
+          const getRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
+            headers: { "Authorization": `Bearer ${vapiKey}` }
+          })
+          if (getRes.ok) existingConfig = await getRes.json()
+        } catch (_) {}
+
+        // Merge — ruaj voice dhe transcriber ekzistues
+        const mergedPayload = {
+          ...vapiPayload,
+          voice: existingConfig.voice ?? vapiPayload.voice,
+          transcriber: existingConfig.transcriber ?? vapiPayload.transcriber,
+        }
+
+        console.log("[vapi] PATCH assistant:", vapiAssistantId)
         const vapiRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
-          body: JSON.stringify(vapiPayload),
+          body: JSON.stringify(mergedPayload),
         })
         if (!vapiRes.ok) console.error("Vapi PATCH error:", await vapiRes.text())
         else console.log("Vapi assistant updated:", vapiAssistantId)
