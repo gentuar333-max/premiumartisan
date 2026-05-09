@@ -26,6 +26,15 @@ export default function ReceptionistSetupPage() {
   const [step, setStep]         = useState<"form" | "operator">("form")
   const [twilio_number, setTwilioNumber] = useState("")
   const [operator, setOperator] = useState("")
+  const [copied, setCopied] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+
+  function copyNumber() {
+    navigator.clipboard.writeText(twilio_number).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   useEffect(() => {
     fetch("/api/artisan/vapi/setup")
@@ -110,7 +119,7 @@ export default function ReceptionistSetupPage() {
     { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: null },
     { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: null },
     { id: "free",     label: "Free",     code: null, url: "https://mobile.free.fr/moncompte/index.php?page=options&action=renvoi" },
-    { id: "regle",    label: "Regle Mobile", code: null, url: "https://www.reglo-mobile.fr/espace-client/renvoi-dappel" },
+    { id: "regle",    label: "Regle Mobile", code: null, url: "https://www.reglo-mobile.fr/espace-client/" },
     { id: "autre",    label: "Autre",    code: null, url: null },
   ]
 
@@ -118,16 +127,43 @@ export default function ReceptionistSetupPage() {
     const selected = OPERATORS.find(o => o.id === operator)
     return (
       <div style={{ minHeight: "100vh", background: "#F5F5F7", fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", display: "flex", flexDirection: "column" }}>
-        <header style={{ padding: "40px 24px 24px", textAlign: "center" }}>
+        <header style={{ padding: "40px 24px 24px", textAlign: "center", position: "relative" }}>
+          <button onClick={() => setHelpOpen(true)} style={{ position: "absolute", right: 24, top: 40, width: 32, height: 32, borderRadius: "50%", border: "1.5px solid #E5E7EB", background: "#fff", fontSize: 15, fontWeight: 700, color: "#6B7280", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit" }}>?</button>
           <div style={{ width: 64, height: 64, borderRadius: 20, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <Phone size={28} color="#fff" />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111", margin: 0 }}>Activez le renvoi d appel</h1>
           <p style={{ fontSize: 14, color: "#6B7280", marginTop: 8 }}>Marie repondra a votre place en cas d absence</p>
         </header>
+
+        {helpOpen && (
+          <div onClick={() => setHelpOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 300, display: "flex", alignItems: "flex-end" }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: "20px 20px 0 0", padding: 24, width: "100%" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#111" }}>Comment ca fonctionne</span>
+                <button onClick={() => setHelpOpen(false)} style={{ background: "#F3F4F6", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16 }}>x</button>
+              </div>
+              {[
+                { n: "1", t: "Votre client appelle votre numero personnel" },
+                { n: "2", t: "Si vous ne repondez pas, l operateur transfere automatiquement l appel" },
+                { n: "3", t: "Marie repond, collecte les informations et vous transmet un resume" },
+                { n: "4", t: "Vous rappelez votre client quand vous etes disponible" },
+              ].map(s => (
+                <div key={s.n} style={{ display: "flex", gap: 14, marginBottom: 16, alignItems: "flex-start" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#3B82F6", color: "#fff", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.n}</div>
+                  <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.5, margin: 0, paddingTop: 4 }}>{s.t}</p>
+                </div>
+              ))}
+              <p style={{ fontSize: 12, color: "#9CA3AF", marginTop: 8, lineHeight: 1.5 }}>
+                Le renvoi s active une seule fois. Aucune modification n est necessaire par la suite.
+              </p>
+            </div>
+          </div>
+        )}
         <main style={{ flex: 1, padding: "0 16px 32px" }}>
           <div style={{ background: "#fff", borderRadius: 20, padding: 24, maxWidth: 480, margin: "0 auto", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
-            <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>Selectionnez votre operateur :</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#111", marginBottom: 4 }}>Quelle est votre operateur mobile ?</p>
+            <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 16 }}>Selectionnez la marque de votre abonnement telephone actuel.</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
               {OPERATORS.map(o => (
                 <button key={o.id} onClick={() => setOperator(o.id)} style={{ padding: "12px", borderRadius: 12, border: operator === o.id ? "2px solid #3B82F6" : "1.5px solid #E5E7EB", background: operator === o.id ? "#EFF6FF" : "#F9FAFB", fontSize: 14, fontWeight: 600, color: operator === o.id ? "#1D4ED8" : "#374151", cursor: "pointer", fontFamily: "inherit" }}>
@@ -155,9 +191,14 @@ export default function ReceptionistSetupPage() {
                   </p>
                 </div>
                 {selected?.url && (
-                  <a href={selected.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
-                    Ouvrir {selected.label}
-                  </a>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <button onClick={copyNumber} style={{ width: "100%", padding: 14, borderRadius: 12, border: "1.5px solid #3B82F6", background: copied ? "#F0FDF4" : "#EFF6FF", fontSize: 14, fontWeight: 700, color: copied ? "#15803D" : "#1D4ED8", cursor: "pointer", fontFamily: "inherit" }}>
+                      {copied ? "Numero copie !" : "Copier le numero : " + twilio_number}
+                    </button>
+                    <a href={selected.url} target="_blank" rel="noopener noreferrer" onClick={copyNumber} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
+                      Ouvrir {selected.label}
+                    </a>
+                  </div>
                 )}
               </div>
             )}
