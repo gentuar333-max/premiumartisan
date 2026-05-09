@@ -114,13 +114,14 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
+  const USSD = "**61*" + twilio_number + "*11*15#"
   const OPERATORS = [
-    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#", url: "https://www.orange.fr" },
-    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: "https://www.sfr.fr" },
-    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: "https://www.bouyguestelecom.fr" },
-    { id: "free",     label: "Free",     code: null, url: "https://mobile.free.fr/moncompte/index.php?page=options&action=renvoi" },
-    { id: "regle",    label: "Regle Mobile", code: "**61*" + twilio_number + "*11*15#", url: null },
-    { id: "autre",    label: "Autre",    code: null, url: null },
+    { id: "orange",   label: "Orange",      code: USSD },
+    { id: "sfr",      label: "SFR",         code: USSD },
+    { id: "bouygues", label: "Bouygues",    code: USSD },
+    { id: "free",     label: "Free",        code: USSD },
+    { id: "regle",    label: "Regle Mobile", code: USSD },
+    { id: "autre",    label: "Autre",       code: USSD },
   ]
 
   if (step === "operator") {
@@ -192,45 +193,16 @@ export default function ReceptionistSetupPage() {
 
             {operator && selected?.code && (
               <div style={{ marginBottom: 20 }}>
-                <button onClick={copyNumber} style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #3B82F6", background: copied ? "#F0FDF4" : "#EFF6FF", fontSize: 13, fontWeight: 700, color: copied ? "#15803D" : "#1D4ED8", cursor: "pointer", fontFamily: "inherit", marginBottom: 10 }}>
-                  {copied ? "Numero copie !" : "Copier le numero : " + twilio_number}
-                </button>
-                {selected.code ? (
-                  <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
-                    Activer Marie via {selected.label}
-                  </a>
-                ) : selected.url ? (
-                  <a href={selected.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
-                    Ouvrir {selected.label}
-                  </a>
-                ) : null}
+                <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}>
+                  Activer Marie
+                </a>
+                <p style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", lineHeight: 1.5 }}>
+                  Votre telephone va s ouvrir avec un code prefait. Appuyez simplement sur Appel.
+                </p>
               </div>
             )}
 
-            {operator && !selected?.code && (
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ padding: 14, background: "#F9FAFB", borderRadius: 12, border: "1px solid #E5E7EB", marginBottom: 10 }}>
-                  <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, margin: 0 }}>
-                    {operator === "free" && "Connectez-vous, allez dans Options puis Renvoi d appel. Choisissez Si pas de reponse et collez le numero copie."}
-                    {operator === "regle" && "Connectez-vous, allez dans Mon espace puis Renvoi d appel. Collez le numero copie dans le champ prevu."}
-                    {operator === "orange" && "Connectez-vous, recherchez Renvoi d appel dans les options de votre ligne. Collez le numero copie."}
-                    {operator === "sfr" && "Connectez-vous, allez dans Gerer ma ligne puis Renvoi d appel. Collez le numero copie."}
-                    {operator === "bouygues" && "Connectez-vous, allez dans Mon telephone puis Options et Renvoi d appel. Collez le numero copie."}
-                    {operator === "autre" && "Contactez votre operateur et demandez l activation du renvoi d appel si pas de reponse vers ce numero."}
-                  </p>
-                </div>
-                {selected?.url && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <button onClick={copyNumber} style={{ width: "100%", padding: 14, borderRadius: 12, border: "1.5px solid #3B82F6", background: copied ? "#F0FDF4" : "#EFF6FF", fontSize: 14, fontWeight: 700, color: copied ? "#15803D" : "#1D4ED8", cursor: "pointer", fontFamily: "inherit" }}>
-                      {copied ? "Numero copie !" : "Copier le numero : " + twilio_number}
-                    </button>
-                    <a href={selected.url} target="_blank" rel="noopener noreferrer" onClick={copyNumber} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
-                      Ouvrir {selected.label}
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
+
 
             <button onClick={() => router.push("/artisan/receptionist")} style={{ width: "100%", padding: 14, borderRadius: 12, border: "1px solid #E5E7EB", background: "#fff", fontSize: 14, fontWeight: 600, color: "#6B7280", cursor: "pointer", fontFamily: "inherit" }}>
               Continuer sans activer
