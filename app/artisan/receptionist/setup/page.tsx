@@ -115,9 +115,9 @@ export default function ReceptionistSetupPage() {
   }
 
   const OPERATORS = [
-    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#", url: "https://login.orange.fr/?return_url=https%3A%2F%2Fwww.orange.fr%2Fportail" },
-    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: "https://www.sfr.fr/cas/login?service=https%3A%2F%2Fwww.sfr.fr%2Faccueil%2Fj_spring_cas_security_check" },
-    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: "https://www.bouyguestelecom.fr/mon-compte" },
+    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#", url: "https://www.orange.fr" },
+    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: "https://www.sfr.fr" },
+    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: "https://www.bouyguestelecom.fr" },
     { id: "free",     label: "Free",     code: null, url: "https://mobile.free.fr/moncompte/index.php?page=options&action=renvoi" },
     { id: "regle",    label: "Regle Mobile", code: null, url: "https://www.reglomobile.fr/connexion?p=ec&ref=https:%2F%2Fmonespace.reglomobile.fr%2F" },
     { id: "autre",    label: "Autre",    code: null, url: null },
