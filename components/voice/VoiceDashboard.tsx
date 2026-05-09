@@ -457,26 +457,19 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                 </div>
               </div>
 
-              {/* Twilio number card */}
+              {/* Activation Marie card */}
               {subscription?.twilio_number && (
                 <div style={{ padding: "0 16px 12px" }}>
-                  <div style={{ background: "#EFF6FF", border: "0.5px solid #BFDBFE", borderRadius: 10, padding: "14px 16px" }}>
-                    <div style={{ fontSize: 11, color: "#3B82F6", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Votre numero Marie</div>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: "#1D4ED8", letterSpacing: "0.02em" }}>{subscription.twilio_number}</div>
-                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 8, lineHeight: 1.6 }}>
-                      Marie repond a votre place quand vous etes indisponible.
+                  <div style={{ background: "#F0FDF4", border: "0.5px solid #BBF7D0", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 11, color: "#15803D", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Renvoi d appel</div>
+                    <div style={{ fontSize: 13, color: "#166534", lineHeight: 1.5, marginBottom: 12 }}>
+                      Activez Marie en 1 tap — elle repondra a votre place quand vous etes indisponible.
                     </div>
-                    <div style={{ marginTop: 10, padding: "12px", background: "#F0FDF4", border: "0.5px solid #BBF7D0", borderRadius: 8 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#15803D", marginBottom: 8 }}>ACTIVER LE RENVOI EN 1 ETAPE</div>
-                      <div style={{ fontSize: 12, color: "#166534", lineHeight: 1.6, marginBottom: 8 }}>
-                        Composez ce code depuis votre telephone et appuyez sur appel :
-                      </div>
-                      <a href={"tel:**61*" + subscription.twilio_number + "*11*15#"} style={{ display: "block", background: "#15803D", border: "none", borderRadius: 8, padding: "12px", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#fff", letterSpacing: "0.05em", textAlign: "center", textDecoration: "none" }}>
-                        Appuyer pour activer
-                      </a>
-                      <div style={{ fontSize: 10, color: "#6B7280", marginTop: 8, lineHeight: 1.5 }}>
-                        Fonctionne sur Orange, SFR et Bouygues. Pour Free : Mon compte &gt; Renvoi d appel.
-                      </div>
+                    <a href={"tel:**61*" + subscription.twilio_number + "*11*15#"} style={{ display: "block", background: "#16A34A", borderRadius: 10, padding: "13px", fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", letterSpacing: "0.01em" }}>
+                      Activer Marie
+                    </a>
+                    <div style={{ fontSize: 10, color: "#6B7280", marginTop: 8, textAlign: "center" }}>
+                      Orange, SFR, Bouygues. Free : application Free &gt; Renvoi d appel.
                     </div>
                   </div>
                 </div>
