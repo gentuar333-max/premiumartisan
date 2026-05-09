@@ -466,16 +466,16 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                     <div style={{ fontSize: 11, color: "#6B7280", marginTop: 8, lineHeight: 1.6 }}>
                       Marie repond a votre place quand vous etes indisponible.
                     </div>
-                    <div style={{ marginTop: 10, padding: "10px 12px", background: "#FFF7ED", border: "0.5px solid #FED7AA", borderRadius: 8 }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#C2410C", marginBottom: 6 }}>COMMENT ACTIVER LE RENVOI D APPEL</div>
-                      <div style={{ fontSize: 11, color: "#7C2D12", lineHeight: 1.8 }}>
-                        <div>Orange : composez <strong>**61*{subscription.twilio_number}*11*20#</strong></div>
-                        <div>SFR : composez <strong>**61*{subscription.twilio_number}*11*20#</strong></div>
-                        <div>Bouygues : composez <strong>**61*{subscription.twilio_number}*11*20#</strong></div>
-                        <div>Free : application Free &gt; Mon compte &gt; Renvoi d appel</div>
+                    <div style={{ marginTop: 10, padding: "12px", background: "#F0FDF4", border: "0.5px solid #BBF7D0", borderRadius: 8 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#15803D", marginBottom: 8 }}>ACTIVER LE RENVOI EN 1 ETAPE</div>
+                      <div style={{ fontSize: 12, color: "#166534", lineHeight: 1.6, marginBottom: 8 }}>
+                        Composez ce code depuis votre telephone et appuyez sur appel :
                       </div>
-                      <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 6 }}>
-                        Le renvoi se declenche apres 20 secondes de sonnerie.
+                      <div style={{ background: "#fff", border: "1px solid #BBF7D0", borderRadius: 8, padding: "10px 12px", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#15803D", letterSpacing: "0.05em", textAlign: "center" }}>
+                        **61*{subscription.twilio_number}*11*15#
+                      </div>
+                      <div style={{ fontSize: 10, color: "#6B7280", marginTop: 8, lineHeight: 1.5 }}>
+                        Fonctionne sur Orange, SFR et Bouygues. Pour Free : Mon compte &gt; Renvoi d appel.
                       </div>
                     </div>
                   </div>
@@ -487,21 +487,21 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                 <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <Zap size={16} color="#F59E0B" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Mon forfait</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Mon abonnement</span>
                   </div>
                   <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
                 </a>
                 <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <User size={16} color="#9CA3AF" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Profil & Configuration</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Mon profil</span>
                   </div>
                   <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
                 </a>
                 <a href="/artisan/dashboard" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <Home size={16} color="#9CA3AF" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Dashboard principal</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Tableau de bord</span>
                   </div>
                   <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
                 </a>
