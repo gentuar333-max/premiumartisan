@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     // 3. Bli numrin
     const purchaseParams: any = {
       phoneNumber: chosenNumber,
-      voiceUrl: "https://api.vapi.ai/twilio",
+      voiceUrl: "https://www.premiumartisan.fr/api/twilio/incoming",
       voiceMethod: "POST",
       smsUrl: "https://api.vapi.ai/twilio",
       smsMethod: "POST",
