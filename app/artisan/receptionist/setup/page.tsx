@@ -126,14 +126,14 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
-  const USSD = "**61*" + twilio_number + "*11*15%23"
+  const num = encodeURIComponent(twilio_number)
   const OPERATORS = [
-    { id: "orange",   label: "Orange",      code: USSD },
-    { id: "sfr",      label: "SFR",         code: USSD },
-    { id: "bouygues", label: "Bouygues",    code: USSD },
-    { id: "free",     label: "Free",        code: USSD },
-    { id: "regle",    label: "Regle Mobile", code: USSD },
-    { id: "autre",    label: "Autre",       code: USSD },
+    { id: "orange",   label: "Orange",       ussd: "**61*" + num + "*11*15%23" },
+    { id: "sfr",      label: "SFR",          ussd: "**61*" + num + "*11*15%23" },
+    { id: "bouygues", label: "Bouygues",     ussd: "**61*" + num + "*11*15%23" },
+    { id: "free",     label: "Free",         ussd: "**61*" + num + "*11*15%23" },
+    { id: "regle",    label: "Regle Mobile", ussd: "*61*" + num + "%23" },
+    { id: "autre",    label: "Autre",        ussd: "**61*" + num + "*11*15%23" },
   ]
 
   if (step === "operator") {
@@ -203,20 +203,21 @@ export default function ReceptionistSetupPage() {
               ))}
             </div>
 
-            {operator && selected?.code && (
+            {operator && selected?.ussd && (
               <div style={{ marginBottom: 20 }}>
-                <a
-                  href={"tel:" + selected.code}
-                  style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}
+                <button
+                  onClick={() => { window.location.href = "tel:" + selected!.ussd }}
+                  style={{ display: "block", width: "100%", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", border: "none", cursor: "pointer", fontFamily: "inherit", marginBottom: 10 }}
                 >
                   Activer Marie
-                </a>
+                </button>
                 <p style={{ fontSize: 11, color: "#6B7280", textAlign: "center", lineHeight: 1.5, marginBottom: 10 }}>
                   Votre telephone s ouvre avec le code pret — appuyez sur Appel.
                 </p>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText("**61*" + twilio_number + "*11*15#")
+                    const raw = operator === "regle" ? "*61*" + twilio_number + "#" : "**61*" + twilio_number + "*11*15#"
+                    navigator.clipboard.writeText(raw)
                     setCopied(true)
                     setTimeout(() => setCopied(false), 2000)
                   }}
