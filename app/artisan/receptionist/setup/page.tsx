@@ -170,7 +170,7 @@ export default function ReceptionistSetupPage() {
                   "Collez le numero copie et validez",
                 ].map((step, i) => (
                   <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: i === 3 ? "#3B82F6" : "#F3F4F6", color: i === 3 ? "#fff" : "#6B7280", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</div>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#3B82F6", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</div>
                     <p style={{ fontSize: 12, color: "#374151", margin: 0, paddingTop: 2, lineHeight: 1.5 }}>{step}</p>
                   </div>
                 ))}
