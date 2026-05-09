@@ -26,6 +26,18 @@ export default function ReceptionistSetupPage() {
   const [step, setStep]         = useState<"form" | "operator">("form")
   const [twilio_number, setTwilioNumber] = useState("")
   const [operator, setOperator] = useState("")
+
+  useEffect(() => {
+    import("@/lib/supabaseBrowser").then(({ createSupabaseBrowserClient }) => {
+      createSupabaseBrowserClient().auth.getUser().then(async ({ data }) => {
+        const uid = data.user?.id ?? ""
+        if (!uid) return
+        const res = await fetch("/api/marie/subscription?id=" + uid)
+        const json = await res.json()
+        if (json.subscription?.twilio_number) setTwilioNumber(json.subscription.twilio_number)
+      })
+    })
+  }, [])
   const [copied, setCopied] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
