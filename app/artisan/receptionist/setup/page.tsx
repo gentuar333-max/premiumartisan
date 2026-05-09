@@ -174,10 +174,23 @@ export default function ReceptionistSetupPage() {
 
             {operator && selected?.code && (
               <div style={{ marginBottom: 20 }}>
-                <p style={{ fontSize: 13, color: "#374151", marginBottom: 12 }}>Appuyez sur ce bouton depuis votre telephone :</p>
-                <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
+                <p style={{ fontSize: 13, color: "#374151", marginBottom: 12 }}>Option 1 — Activation automatique :</p>
+                <a href={"tel:" + selected.code} style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", marginBottom: 10 }}>
                   Activer Marie
                 </a>
+                {selected?.url && (
+                  <div>
+                    <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 8, textAlign: "center" }}>Option 2 — Via votre espace client :</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <button onClick={copyNumber} style={{ width: "100%", padding: 12, borderRadius: 12, border: "1.5px solid #3B82F6", background: copied ? "#F0FDF4" : "#EFF6FF", fontSize: 13, fontWeight: 700, color: copied ? "#15803D" : "#1D4ED8", cursor: "pointer", fontFamily: "inherit" }}>
+                        {copied ? "Numero copie !" : "Copier le numero : " + twilio_number}
+                      </button>
+                      <a href={selected.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#F3F4F6", borderRadius: 12, padding: 12, fontSize: 13, fontWeight: 600, color: "#374151", textAlign: "center", textDecoration: "none" }}>
+                        Ouvrir {selected.label}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
