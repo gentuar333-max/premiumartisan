@@ -106,12 +106,12 @@ export default function ReceptionistSetupPage() {
   }
 
   const OPERATORS = [
-    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#" },
-    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#" },
-    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#" },
-    { id: "free",     label: "Free",     code: null },
-    { id: "regle",    label: "Regle Mobile", code: null },
-    { id: "autre",    label: "Autre",    code: null },
+    { id: "orange",   label: "Orange",   code: "**61*" + twilio_number + "*11*15#", url: null },
+    { id: "sfr",      label: "SFR",      code: "**61*" + twilio_number + "*11*15#", url: null },
+    { id: "bouygues", label: "Bouygues", code: "**61*" + twilio_number + "*11*15#", url: null },
+    { id: "free",     label: "Free",     code: null, url: "https://mobile.free.fr/moncompte/index.php?page=options&action=renvoi" },
+    { id: "regle",    label: "Regle Mobile", code: null, url: "https://www.reglo-mobile.fr/espace-client/renvoi-dappel" },
+    { id: "autre",    label: "Autre",    code: null, url: null },
   ]
 
   if (step === "operator") {
@@ -146,12 +146,19 @@ export default function ReceptionistSetupPage() {
             )}
 
             {operator && !selected?.code && (
-              <div style={{ marginBottom: 20, padding: 14, background: "#F9FAFB", borderRadius: 12, border: "1px solid #E5E7EB" }}>
-                <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
-                  {operator === "free" && "Allez dans l application Free > Mon compte > Renvoi d appel > entrez le numero : " + twilio_number}
-                  {operator === "regle" && "Allez dans Regle Mobile > Mon compte > Renvoi d appel > entrez le numero : " + twilio_number}
-                  {operator === "autre" && "Contactez votre operateur pour activer le renvoi d appel vers : " + twilio_number}
-                </p>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ padding: 14, background: "#F9FAFB", borderRadius: 12, border: "1px solid #E5E7EB", marginBottom: 10 }}>
+                  <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, margin: 0 }}>
+                    {operator === "free" && "Allez dans Mon espace Free > Options > Renvoi d appel > Si pas de reponse > entrez :  " + twilio_number}
+                    {operator === "regle" && "Allez dans Reglo Mobile > Mon compte > Renvoi d appel > entrez : " + twilio_number}
+                    {operator === "autre" && "Contactez votre operateur pour activer le renvoi d appel vers : " + twilio_number}
+                  </p>
+                </div>
+                {selected?.url && (
+                  <a href={selected.url} target="_blank" rel="noopener noreferrer" style={{ display: "block", background: "#3B82F6", borderRadius: 12, padding: 14, fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none" }}>
+                    Ouvrir {selected.label}
+                  </a>
+                )}
               </div>
             )}
 
