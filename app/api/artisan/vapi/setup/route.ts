@@ -133,6 +133,13 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
           model: "nova-2",
           language: "fr",
         },
+        voice: {
+          provider: "11labs",
+          voiceId: "Yxrwjakoukulqd0g8k9y",
+          model: "eleven_flash_v2_5",
+          stability: 0.5,
+          similarityBoost: 0.75,
+        },
 
         analysisPlan: {
           structuredDataSchema: {
@@ -199,10 +206,10 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
     if (!existingSub) {
       await admin.from("marie_subscriptions").insert({
         artisan_id: user.id,
-        plan: "starter",
-        status: "trial",
-        minutes_remaining: 30,
-        minutes_total: 30,
+        plan: "trial",
+        status: "active",
+        minutes_remaining: 15,
+        minutes_total: 15,
         updated_at: new Date().toISOString(),
       })
     }
