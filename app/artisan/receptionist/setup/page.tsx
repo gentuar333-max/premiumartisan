@@ -126,7 +126,9 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
-  const num = twilio_number
+  const num = encodeURIComponent(
+  twilio_number.replace(/\+/g, "")
+)
   const OPERATORS = [
     { id: "orange",   label: "Orange",       ussd: "**61*" + num + "#" },
     { id: "sfr",      label: "SFR",          ussd: "**61*" + num + "#" },
@@ -214,7 +216,9 @@ export default function ReceptionistSetupPage() {
                       return
                     }
                     console.log("[USSD] dialing:", code)
-                    window.location.assign("tel:" + code)
+                    const link = document.createElement("a")
+link.href = `tel:${code}`
+link.click()
                   }}
                   disabled={!twilio_number}
                   style={{ display: "block", width: "100%", background: twilio_number ? "#3B82F6" : "#9CA3AF", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", border: "none", cursor: twilio_number ? "pointer" : "not-allowed", fontFamily: "inherit", marginBottom: 10 }}
