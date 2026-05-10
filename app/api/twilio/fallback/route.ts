@@ -46,14 +46,15 @@ async function handler(req: Request) {
 
     console.log("[twilio/fallback] routing to Vapi:", vapiAssistantId)
 
+    // Ridrejto te numri Vapi i regjistruar ne Twilio
+    // Vapi ka numrin +1 775 312 8993 si entry point
+    const vapiTwilioNumber = process.env.VAPI_TWILIO_NUMBER ?? "+17753128993"
+    
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Connect>
-    <Stream url="wss://api.vapi.ai/twilio">
-      <Parameter name="assistantId" value="${vapiAssistantId}" />
-      <Parameter name="authorization" value="Bearer ${vapiApiKey}" />
-    </Stream>
-  </Connect>
+  <Dial>
+    <Number>${vapiTwilioNumber}</Number>
+  </Dial>
 </Response>`
 
     return new NextResponse(twiml, {
