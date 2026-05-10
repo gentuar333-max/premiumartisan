@@ -346,15 +346,7 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                         <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{call.problem}</p>
                       )}
                     </div>
-                    {(call.isnew || call.urgent) && call.phone && (
-                      <button
-                        className={`btn-primary ${call.urgent ? "urgent" : ""}`}
-                        style={{ padding: "10px", borderRadius: 12, flexShrink: 0 }}
-                        onClick={e => { e.stopPropagation(); window.location.href = `tel:${call.phone.replace(/\s/g, "")}` }}
-                      >
-                        {call.urgent ? <PhoneOutgoing size={18} /> : <Phone size={18} />}
-                      </button>
-                    )}
+
                   </div>
                 </div>
               )
