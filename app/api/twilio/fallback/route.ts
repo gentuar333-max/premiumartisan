@@ -3,26 +3,33 @@ import { createClient } from "@supabase/supabase-js"
 
 export const runtime = "nodejs"
 
-export async function GET(req: Request) {
-  return POST(req)
-}
-
-export async function POST(req: Request) {
+async function handler(req: Request) {
   try {
-    const body = await req.text()
-    const params = new URLSearchParams(body)
+    const url = new URL(req.url)
+    
+    // Parametrat vijn si query string (GET) ose body (POST)
+    let params: URLSearchParams
+    if (req.method === "GET") {
+      params = url.searchParams
+    } else {
+      const body = await req.text()
+      params = new URLSearchParams(body)
+      // Shto edhe query params
+      url.searchParams.forEach((v, k) => params.set(k, v))
+    }
+
     const dialStatus = params.get("DialCallStatus") ?? ""
-    const toNumber   = params.get("To") ?? ""
+    const toNumber   = params.get("To") ?? params.get("Called") ?? ""
 
     console.log("[twilio/fallback] DialCallStatus:", dialStatus, "To:", toNumber)
 
-    // Nëse artizani u përgjigj — mbylli (biseda u bë)
+    // Nëse artizani u përgjigj — mbylli
     if (dialStatus === "completed") {
       const twiml = `<?xml version="1.0" encoding="UTF-8"?><Response><Hangup /></Response>`
       return new NextResponse(twiml, { headers: { "Content-Type": "text/xml" } })
     }
 
-    // Artizani nuk u përgjigj — merr assistant ID specifik per artizanin
+    // Artizani nuk u përgjigj — dërgo te Vapi
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -47,9 +54,8 @@ export async function POST(req: Request) {
 
     const vapiApiKey = process.env.VAPI_PRIVATE_KEY ?? ""
 
-    console.log("[twilio/fallback] routing to Vapi assistant:", vapiAssistantId)
+    console.log("[twilio/fallback] routing to Vapi:", vapiAssistantId)
 
-    // Kaloj te Vapi/Marie
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Connect>
@@ -70,3 +76,6 @@ export async function POST(req: Request) {
     return new NextResponse(twiml, { headers: { "Content-Type": "text/xml" } })
   }
 }
+
+export async function GET(req: Request) { return handler(req) }
+export async function POST(req: Request) { return handler(req) }
