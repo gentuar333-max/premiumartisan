@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
         .select("minutes_remaining")
         .eq("artisan_id", artisanId)
         .maybeSingle()
-
       if (sub) {
         const newMinutes = Math.max(0, (sub.minutes_remaining ?? 0) - durMinutes)
         await db
