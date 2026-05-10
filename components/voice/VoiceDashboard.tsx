@@ -457,19 +457,14 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
                 </div>
               </div>
 
-              {/* Activation Marie card */}
+              {/* Numero Twilio card */}
               {subscription?.twilio_number && (
                 <div style={{ padding: "0 16px 12px" }}>
-                  <div style={{ background: "#F0FDF4", border: "0.5px solid #BBF7D0", borderRadius: 10, padding: "14px 16px" }}>
-                    <div style={{ fontSize: 11, color: "#15803D", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Renvoi d appel</div>
-                    <div style={{ fontSize: 13, color: "#166534", lineHeight: 1.5, marginBottom: 12 }}>
-                      Activez Marie en 1 tap — elle repondra a votre place quand vous etes indisponible.
-                    </div>
-                    <a href={"tel:**61*" + subscription.twilio_number + "*11*15#"} style={{ display: "block", background: "#16A34A", borderRadius: 10, padding: "13px", fontSize: 14, fontWeight: 700, color: "#fff", textAlign: "center", textDecoration: "none", letterSpacing: "0.01em" }}>
-                      Activer Marie
-                    </a>
-                    <div style={{ fontSize: 10, color: "#6B7280", marginTop: 8, textAlign: "center" }}>
-                      Orange, SFR, Bouygues. Free : application Free &gt; Renvoi d appel.
+                  <div style={{ background: "#EFF6FF", border: "0.5px solid #BFDBFE", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 11, color: "#3B82F6", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Votre numero Marie</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: "#1D4ED8", letterSpacing: "0.03em", marginBottom: 6 }}>{subscription.twilio_number}</div>
+                    <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.5 }}>
+                      Partagez ce numero a vos clients. Marie repondra a votre place quand vous etes indisponible.
                     </div>
                   </div>
                 </div>
