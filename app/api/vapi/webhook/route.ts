@@ -39,26 +39,7 @@ export async function POST(req: NextRequest) {
 
     const msgType = body.message?.type;
     if (msgType !== "end-of-call-report" && msgType !== "call-ended") {
-      // Zbrit minutat e harxhuara
-    if (duration > 0 && artisanId) {
-      const durMinutes = Math.ceil(duration / 60)
-      const db = getSupabase()
-      const { data: sub } = await db
-        .from("marie_subscriptions")
-        .select("minutes_remaining")
-        .eq("artisan_id", artisanId)
-        .maybeSingle()
-      if (sub) {
-        const newMinutes = Math.max(0, (sub.minutes_remaining ?? 0) - durMinutes)
-        await db
-          .from("marie_subscriptions")
-          .update({ minutes_remaining: newMinutes, updated_at: new Date().toISOString() })
-          .eq("artisan_id", artisanId)
-        console.log(`[webhook] minutes: -${durMinutes} min, remaining: ${newMinutes}`)
-      }
-    }
-
-    return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true });
     }
 
     const supabase = getSupabase();
