@@ -48,12 +48,9 @@ async function handler(req: Request) {
 
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Connect>
-    <Stream url="wss://api.vapi.ai/twilio">
-      <Parameter name="assistantId" value="${vapiAssistantId}" />
-      <Parameter name="authorization" value="${vapiApiKey}" />
-    </Stream>
-  </Connect>
+  <Dial>
+    <Sip>sip:${vapiAssistantId}@sip.vapi.ai;transport=tls</Sip>
+  </Dial>
 </Response>`
 
     return new NextResponse(twiml, {
