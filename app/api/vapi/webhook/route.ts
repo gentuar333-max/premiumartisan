@@ -142,8 +142,8 @@ export async function POST(req: NextRequest) {
         `premiumartisan.fr/artisan/receptionist`,
       ].filter(Boolean).join("\n");
 
-      await sendSMS(artisanPhone, smsMessage);
-      console.log("SMS sent to:", artisanPhone);
+      // SMS per thirrje individual eshte hequr - raporti vine ne fund te dites
+      console.log("[webhook] SMS skipped - daily report active")
     }
 
     // Zbrit minutat e harxhuara
