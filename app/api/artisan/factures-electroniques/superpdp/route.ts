@@ -2,16 +2,14 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 // app/api/artisan/factures-electroniques/superpdp/route.ts
-// Super PDP — Plateforme Agréée certifiée DGFiP
 
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseServiceClient } from "@/lib/supabaseServer";
 
-const SANDBOX    = process.env.SUPERPDP_SANDBOX === "true";
-const API_BASE   = "https://api.superpdp.tech";
-const TOKEN_URL  = "https://api.superpdp.tech/oauth2/token";
+const API_BASE  = "https://api.superpdp.tech/v1.beta";
+const TOKEN_URL = "https://api.superpdp.tech/oauth2/token";
 
-// ── Get OAuth token ─────────────────────────────────────────────────────────
+// ── OAuth token ──────────────────────────────────────────────────────────────
 async function getToken(): Promise<string> {
   const res = await fetch(TOKEN_URL, {
     method: "POST",
@@ -22,154 +20,192 @@ async function getToken(): Promise<string> {
       client_secret: process.env.SUPERPDP_CLIENT_SECRET ?? "",
     }),
   });
-  if (!res.ok) throw new Error(`Token error: ${res.status}`);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Token error ${res.status}: ${err}`);
+  }
   const data = await res.json();
   return data.access_token;
 }
 
-// ── Build Factur-X JSON (EN16931) ───────────────────────────────────────────
-function buildFacturX(facture: Record<string, unknown>, artisan: Record<string, unknown>) {
+// ── Build EN16931 payload ────────────────────────────────────────────────────
+function buildPayload(
+  facture: Record<string, unknown>,
+  artisan: Record<string, unknown>
+) {
   const lignes = Array.isArray(facture.lignes) ? facture.lignes : [];
+  const artisanNom = `${artisan.prenom ?? ""} ${artisan.nom ?? ""}`.trim() || "Artisan";
+  const siret = String(artisan.siret ?? "").replace(/\s/g, "");
+  const clientSiret = String(facture.client_siret ?? "").replace(/\s/g, "");
 
   return {
-    // Identifiant facture
-    id:            facture.numero,
-    issue_date:    facture.date_emission,
-    due_date:      facture.date_echeance,
-    currency_code: "EUR",
-    type_code:     "380", // Facture commerciale standard
+    en_invoice: {
+      number:        facture.numero,
+      issue_date:    facture.date_emission,
+      payment_due_date: facture.date_echeance ?? undefined,
+      currency_code: "EUR",
+      type_code:     380,
 
-    // Vendeur (artisan)
-    seller: {
-      name:            `${artisan.prenom ?? ""} ${artisan.nom ?? ""}`.trim() || "Artisan",
-      tax_number:      artisan.siret ?? "",
-      address: {
-        street:      artisan.adresse ?? "",
-        city:        artisan.city    ?? "",
-        postal_code: artisan.postal_code ?? "",
-        country:     "FR",
+      seller: {
+        name: artisanNom,
+        legal_registration_identifier: siret ? { scheme: "0009", value: siret } : undefined,
+        postal_address: {
+          address_line1: String(artisan.adresse ?? ""),
+          city:          String(artisan.city    ?? ""),
+          post_code:     String(artisan.postal_code ?? ""),
+          country_code:  "FR",
+        },
       },
-    },
 
-    // Acheteur (client)
-    buyer: {
-      name:       facture.client_nom,
-      tax_number: facture.client_siret,
-      address: {
-        street:  facture.client_adresse ?? "",
-        country: "FR",
+      buyer: {
+        name: facture.client_nom,
+        legal_registration_identifier: clientSiret ? { scheme: "0009", value: clientSiret } : undefined,
+        postal_address: {
+          address_line1: String(facture.client_adresse ?? ""),
+          country_code:  "FR",
+        },
       },
+
+      lines: lignes.map((l: Record<string, unknown>, i: number) => {
+        const qty      = Number(l.quantity)  || 1;
+        const price    = Number(l.unitPrice) || 0;
+        const netAmt   = qty * price;
+        const vatRate  = Number(l.tvaRate)   || 0;
+        return {
+          identifier:        String(i + 1),
+          invoiced_quantity: String(qty),
+          invoiced_quantity_code: "C62",
+          net_amount: String(netAmt.toFixed(2)),
+          item_information: {
+            name: String(l.description ?? `Prestation ${i + 1}`),
+          },
+          price_details: {
+            item_net_price: String(price.toFixed(2)),
+          },
+          vat_information: {
+            invoiced_item_vat_category_code: vatRate === 0 ? "Z" : "S",
+            invoiced_item_vat_rate: String(vatRate),
+          },
+        };
+      }),
+
+      totals: {
+        sum_invoice_lines_amount: String(Number(facture.total_ht).toFixed(2)),
+        total_without_vat:        String(Number(facture.total_ht).toFixed(2)),
+        total_vat_amount: {
+          currency_code: "EUR",
+          value: String(Number(facture.total_tva).toFixed(2)),
+        },
+        total_with_vat:       String(Number(facture.total_ttc).toFixed(2)),
+        amount_due_for_payment: String(Number(facture.total_ttc).toFixed(2)),
+      },
+
+      vat_break_down: [
+        {
+          vat_category_code:      "S",
+          vat_category_rate:      "20",
+          vat_category_taxable_amount: String(Number(facture.total_ht).toFixed(2)),
+          vat_category_tax_amount:     String(Number(facture.total_tva).toFixed(2)),
+        },
+      ],
+
+      notes: facture.notes ? [{ note: String(facture.notes) }] : undefined,
     },
-
-    // Lignes
-    lines: lignes.map((l: Record<string, unknown>, i: number) => ({
-      id:          String(i + 1),
-      name:        l.description ?? `Prestation ${i + 1}`,
-      quantity:    Number(l.quantity)  || 1,
-      unit_price:  Number(l.unitPrice) || 0,
-      tax_rate:    Number(l.tvaRate)   || 0,
-      total_amount: (Number(l.quantity) || 1) * (Number(l.unitPrice) || 0),
-    })),
-
-    // Totaux
-    tax_total:   Number(facture.total_tva) || 0,
-    grand_total: Number(facture.total_ttc) || 0,
-
-    // Notes
-    note: facture.notes ?? "",
   };
 }
 
-// ── POST — Envoyer fature te Super PDP ─────────────────────────────────────
+// ── Auth helper ──────────────────────────────────────────────────────────────
+async function authUser(req: Request) {
+  const authHeader = req.headers.get("authorization") ?? "";
+  const token      = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const svc        = createSupabaseServiceClient();
+  if (token) {
+    const { data } = await svc.auth.getUser(token);
+    return { user: data.user, svc };
+  }
+  const serverSupabase = await createSupabaseServerClient();
+  const { data }       = await serverSupabase.auth.getUser();
+  return { user: data.user, svc };
+}
+
+// ── POST ─────────────────────────────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null);
     const { facture_id } = body ?? {};
-
     if (!facture_id) {
       return NextResponse.json({ ok: false, error: "facture_id manquant." }, { status: 400 });
     }
 
-    // Auth
-    const authHeader = req.headers.get("authorization") ?? "";
-    const token      = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-    const svc        = createSupabaseServiceClient();
-    let user: { id: string } | null = null;
-
-    if (token) {
-      const { data } = await svc.auth.getUser(token);
-      user = data.user;
-    } else {
-      const serverSupabase = await createSupabaseServerClient();
-      const { data }       = await serverSupabase.auth.getUser();
-      user = data.user;
-    }
-
+    const { user, svc } = await authUser(req);
     if (!user) return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
 
-    // Récupérer facture
-    const { data: facture, error: factureErr } = await svc
+    // Fetch facture
+    const { data: facture, error: fErr } = await svc
       .from("factures_electroniques")
       .select("*")
       .eq("id", facture_id)
       .eq("artisan_id", user.id)
       .single();
-
-    if (factureErr || !facture) {
+    if (fErr || !facture) {
       return NextResponse.json({ ok: false, error: "Facture introuvable." }, { status: 404 });
     }
 
-    // Récupérer profil artisan
+    // Fetch artisan profile
     const { data: artisan } = await svc
       .from("profiles")
       .select("nom, prenom, siret, adresse, city, postal_code")
       .eq("id", user.id)
       .single();
 
-    // Token Super PDP
+    // Get Super PDP token
     const pdpToken = await getToken();
 
-    // Build facture JSON
-    const factureJson = buildFacturX(facture, artisan ?? {});
+    // Build & send
+    const payload = buildPayload(facture, artisan ?? {});
+    console.log("[SuperPDP] sending invoice:", facture.numero);
 
-    // Envoyer à Super PDP
     const pdpRes = await fetch(`${API_BASE}/invoices`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${pdpToken}`,
         "Content-Type":  "application/json",
       },
-      body: JSON.stringify(factureJson),
+      body: JSON.stringify(payload),
     });
 
     const pdpData = await pdpRes.json();
 
     if (!pdpRes.ok) {
-      console.error("[SuperPDP] error:", pdpData);
-      return NextResponse.json({ ok: false, error: pdpData?.message ?? "Erreur Super PDP." }, { status: 500 });
+      console.error("[SuperPDP] error:", JSON.stringify(pdpData));
+      return NextResponse.json(
+        { ok: false, error: pdpData?.message ?? "Erreur Super PDP.", detail: pdpData },
+        { status: 500 }
+      );
     }
 
-    // Update statut en DB
+    console.log("[SuperPDP] success, id:", pdpData.id);
+
+    // Update DB
     await svc
       .from("factures_electroniques")
       .update({
         statut:          "en-attente",
         statut_efacture: "transmise",
-        pennylane_id:    pdpData.id ?? null,
+        pennylane_id:    String(pdpData.id ?? ""),
         updated_at:      new Date().toISOString(),
       })
       .eq("id", facture_id);
 
-    console.log("[SuperPDP] facture transmise:", pdpData.id);
     return NextResponse.json({ ok: true, pdp_id: pdpData.id });
 
   } catch (e) {
-    console.error("[SuperPDP POST]", e);
-    return NextResponse.json({ ok: false, error: "Erreur serveur." }, { status: 500 });
+    console.error("[SuperPDP POST] crash:", e);
+    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
   }
 }
 
-// ── GET — Statut d'une facture ──────────────────────────────────────────────
+// ── GET statut ───────────────────────────────────────────────────────────────
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -177,16 +213,14 @@ export async function GET(req: Request) {
     if (!pdp_id) return NextResponse.json({ ok: false, error: "pdp_id manquant." }, { status: 400 });
 
     const pdpToken = await getToken();
-
-    const res  = await fetch(`${API_BASE}/invoices/${pdp_id}`, {
+    const res      = await fetch(`${API_BASE}/invoices/${pdp_id}`, {
       headers: { "Authorization": `Bearer ${pdpToken}` },
     });
     const data = await res.json();
-
-    return NextResponse.json({ ok: true, statut: data.status ?? "inconnu", data });
+    return NextResponse.json({ ok: true, statut: data.events?.[0]?.status_code ?? "inconnu", data });
 
   } catch (e) {
     console.error("[SuperPDP GET]", e);
-    return NextResponse.json({ ok: false, error: "Erreur serveur." }, { status: 500 });
+    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
   }
 }
