@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.premiumartisan.fr"
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Dial timeout="15" action="${baseUrl}/api/twilio/fallback" method="POST">
+  <Dial timeout="5" action="${baseUrl}/api/twilio/fallback" method="POST">
     <Number>${artisanPhone}</Number>
   </Dial>
 </Response>`
