@@ -210,10 +210,18 @@ export async function POST(req: Request) {
     const pdpToken = await getToken();
 
     // Build & send
-    // Sandbox endpoint IDs from Super PDP (Burger Queen seller, Tricatel buyer)
-    const sellerEndpointId = process.env.SUPERPDP_SELLER_ENDPOINT ?? "315143296_5682";
-    const buyerEndpointId  = process.env.SUPERPDP_BUYER_ENDPOINT  ?? "315143296_5681";
-    const xmlBody = buildUBL(facture, artisan ?? {}, sellerEndpointId, buyerEndpointId);
+    // Sandbox: use Burger Queen (000000002) as seller
+    // Production: use real artisan SIRET
+    const isSandbox = process.env.SUPERPDP_SANDBOX === "true";
+    const sellerEndpointId = isSandbox ? "315143296_5682" : (process.env.SUPERPDP_SELLER_ENDPOINT ?? "");
+    const buyerEndpointId  = isSandbox ? "315143296_5681" : (process.env.SUPERPDP_BUYER_ENDPOINT  ?? "");
+    const sandboxArtisan = isSandbox ? {
+      ...artisan,
+      prenom: "Burger",
+      nom: "Queen",
+      siret: "000000002",
+    } : artisan ?? {};
+    const xmlBody = buildUBL(facture, sandboxArtisan, sellerEndpointId, buyerEndpointId);
     console.log("[SuperPDP] sending invoice:", facture.numero);
 
     const pdpRes = await fetch(`${API_BASE}/invoices`, {
