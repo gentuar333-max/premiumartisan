@@ -96,17 +96,7 @@ export default function ReceptionistSetupPage() {
             body: JSON.stringify({ artisan_id: artisanId }),
           }).catch(() => {})
         }
-        // Prit max 10 sekonda per numrin Twilio
-        let twilioNum = ""
-        for (let i = 0; i < 10; i++) {
-          await new Promise(r => setTimeout(r, 1000))
-          const subRes = await fetch("/api/marie/subscription?id=" + (setupJson.artisan_id ?? ""))
-          const subJson = await subRes.json()
-          twilioNum = subJson.subscription?.twilio_number ?? ""
-          if (twilioNum) break
-        }
-        setTwilioNumber(twilioNum)
-        setStep("operator")
+        router.push("/artisan/receptionist")
       }
     } catch { /* ignore */ }
     finally { setLoading(false) }
@@ -126,9 +116,7 @@ export default function ReceptionistSetupPage() {
     pointerEvents: "none",
   }
 
-  const num = encodeURIComponent(
-  twilio_number.replace(/\+/g, "")
-)
+  const num = twilio_number
   const OPERATORS = [
     { id: "orange",   label: "Orange",       ussd: "**61*" + num + "#" },
     { id: "sfr",      label: "SFR",          ussd: "**61*" + num + "#" },
@@ -216,9 +204,7 @@ export default function ReceptionistSetupPage() {
                       return
                     }
                     console.log("[USSD] dialing:", code)
-                    const link = document.createElement("a")
-link.href = `tel:${code}`
-link.click()
+                    window.location.assign("tel:" + code)
                   }}
                   disabled={!twilio_number}
                   style={{ display: "block", width: "100%", background: twilio_number ? "#3B82F6" : "#9CA3AF", borderRadius: 12, padding: 16, fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", border: "none", cursor: twilio_number ? "pointer" : "not-allowed", fontFamily: "inherit", marginBottom: 10 }}
