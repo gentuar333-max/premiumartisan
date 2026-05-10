@@ -1,10 +1,13 @@
- 
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
 export const runtime = "nodejs"
 
 // Twilio dërgon POST me form data
+export async function GET(req: Request) {
+  return POST(req)
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.text()
@@ -39,7 +42,9 @@ export async function POST(req: Request) {
       .eq("artisan_id", sub.artisan_id)
       .maybeSingle()
 
-    const artisanPhone = settings?.phone ?? ""
+    // Normalize phone: remove spaces, ensure +33 format
+    let artisanPhone = (settings?.phone ?? "").replace(/\s/g, "")
+    if (artisanPhone.startsWith("0")) artisanPhone = "+33" + artisanPhone.slice(1)
     const vapiAssistantId = settings?.vapi_assistant_id ?? process.env.VAPI_ASSISTANT_ID ?? ""
 
     console.log("[twilio/incoming] artisan phone:", artisanPhone, "vapi:", vapiAssistantId)
