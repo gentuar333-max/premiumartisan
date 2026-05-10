@@ -28,106 +28,137 @@ async function getToken(): Promise<string> {
   return data.access_token;
 }
 
-// ── Build UBL XML (format accepté par Super PDP) ────────────────────────────
+// ── Build UBL XML — format exact Super PDP ──────────────────────────────────
 function buildUBL(
   facture: Record<string, unknown>,
-  artisan: Record<string, unknown>
+  artisan: Record<string, unknown>,
+  sellerEndpointId: string,    // ID interne Super PDP du vendeur (ex: 315143296_5682)
+  buyerEndpointId: string      // ID interne Super PDP de l'acheteur (ex: 315143296_5681)
 ): string {
   const lignes = Array.isArray(facture.lignes) ? facture.lignes : [];
-  const artisanNom = `${artisan.prenom ?? ""} ${artisan.nom ?? ""}`.trim() || "Artisan";
-  const siret = String(artisan.siret ?? "").replace(/\s/g, "");
-  const clientSiret = String(facture.client_siret ?? "").replace(/\s/g, "");
+  const artisanNom    = `${artisan.prenom ?? ""} ${artisan.nom ?? ""}`.trim() || "Artisan";
+  const siret         = String(artisan.siret ?? "").replace(/\s/g, "");
+  const clientSiret   = String(facture.client_siret ?? "").replace(/\s/g, "");
   const ht  = Number(facture.total_ht  || 0).toFixed(2);
   const tva = Number(facture.total_tva || 0).toFixed(2);
   const ttc = Number(facture.total_ttc || 0).toFixed(2);
 
-  const lines = lignes.map((l: Record<string, unknown>, i: number) => {
+  const esc = (s: string) => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  // Group TVA by rate
+  const vatGroups: Record<string, {taxable: number, tax: number}> = {};
+  lignes.forEach((l: Record<string, unknown>) => {
+    const rate = String(Number(l.tvaRate || 0));
+    const taxable = (Number(l.quantity||1) * Number(l.unitPrice||0));
+    const tax = taxable * Number(l.tvaRate||0) / 100;
+    if (!vatGroups[rate]) vatGroups[rate] = { taxable: 0, tax: 0 };
+    vatGroups[rate].taxable += taxable;
+    vatGroups[rate].tax += tax;
+  });
+
+  const taxSubtotals = Object.entries(vatGroups).map(([rate, vals]) => `
+  <TaxSubtotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <TaxableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${vals.taxable.toFixed(2)}</TaxableAmount>
+    <TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${vals.tax.toFixed(2)}</TaxAmount>
+    <TaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">S</ID>
+      <Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${rate}</Percent>
+      <TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+      </TaxScheme>
+    </TaxCategory>
+  </TaxSubtotal>`).join("");
+
+  const invoiceLines = lignes.map((l: Record<string, unknown>, i: number) => {
     const qty   = Number(l.quantity  || 1);
     const price = Number(l.unitPrice || 0);
     const net   = (qty * price).toFixed(2);
     const vat   = Number(l.tvaRate || 0);
     return `
-  <cac:InvoiceLine>
-    <cbc:ID>${i + 1}</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="C62">${qty}</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">${net}</cbc:LineExtensionAmount>
-    <cac:TaxTotal>
-      <cbc:TaxAmount currencyID="EUR">${(qty * price * vat / 100).toFixed(2)}</cbc:TaxAmount>
-    </cac:TaxTotal>
-    <cac:Item>
-      <cbc:Description>${String(l.description || `Prestation ${i+1}`).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</cbc:Description>
-      <cbc:Name>${String(l.description || `Prestation ${i+1}`).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</cbc:Name>
-      <cac:ClassifiedTaxCategory>
-        <cbc:ID>${vat === 0 ? "Z" : "S"}</cbc:ID>
-        <cbc:Percent>${vat}</cbc:Percent>
-      </cac:ClassifiedTaxCategory>
-    </cac:Item>
-    <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">${price.toFixed(2)}</cbc:PriceAmount>
-    </cac:Price>
-  </cac:InvoiceLine>`;
+  <InvoiceLine xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${String(i+1).padStart(3,"0")}</ID>
+    <InvoicedQuantity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" unitCode="C62">${qty}</InvoicedQuantity>
+    <LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${net}</LineExtensionAmount>
+    <Item xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${esc(String(l.description||`Prestation ${i+1}`))}</Name>
+      <ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">S</ID>
+        <Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${vat}</Percent>
+        <TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+        </TaxScheme>
+      </ClassifiedTaxCategory>
+    </Item>
+    <Price xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <PriceAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${price.toFixed(2)}</PriceAmount>
+    </Price>
+  </InvoiceLine>`;
   }).join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-  xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-  xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
-  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
-  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
-  <cbc:ID>${facture.numero}</cbc:ID>
-  <cbc:IssueDate>${facture.date_emission}</cbc:IssueDate>
-  ${facture.date_echeance ? `<cbc:DueDate>${facture.date_echeance}</cbc:DueDate>` : ""}
-  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
-  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cac:AccountingSupplierParty>
-    <cac:Party>
-      <cac:PartyIdentification><cbc:ID schemeID="0009">${siret}</cbc:ID></cac:PartyIdentification>
-      <cac:PartyName><cbc:Name>${artisanNom.replace(/&/g,"&amp;")}</cbc:Name></cac:PartyName>
-      <cac:PostalAddress>
-        <cbc:StreetName>${String(artisan.adresse || "").replace(/&/g,"&amp;")}</cbc:StreetName>
-        <cbc:CityName>${String(artisan.city || "").replace(/&/g,"&amp;")}</cbc:CityName>
-        <cbc:PostalZone>${String(artisan.postal_code || "")}</cbc:PostalZone>
-        <cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country>
-      </cac:PostalAddress>
-      <cac:PartyLegalEntity>
-        <cbc:RegistrationName>${artisanNom.replace(/&/g,"&amp;")}</cbc:RegistrationName>
-        <cbc:CompanyID>${siret}</cbc:CompanyID>
-      </cac:PartyLegalEntity>
-    </cac:Party>
-  </cac:AccountingSupplierParty>
-  <cac:AccountingCustomerParty>
-    <cac:Party>
-      <cac:PartyIdentification><cbc:ID schemeID="0009">${clientSiret}</cbc:ID></cac:PartyIdentification>
-      <cac:PartyName><cbc:Name>${String(facture.client_nom || "").replace(/&/g,"&amp;")}</cbc:Name></cac:PartyName>
-      <cac:PostalAddress>
-        <cbc:StreetName>${String(facture.client_adresse || "").replace(/&/g,"&amp;")}</cbc:StreetName>
-        <cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country>
-      </cac:PostalAddress>
-      <cac:PartyLegalEntity>
-        <cbc:RegistrationName>${String(facture.client_nom || "").replace(/&/g,"&amp;")}</cbc:RegistrationName>
-        <cbc:CompanyID>${clientSiret}</cbc:CompanyID>
-      </cac:PartyLegalEntity>
-    </cac:Party>
-  </cac:AccountingCustomerParty>
-  <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="EUR">${tva}</cbc:TaxAmount>
-    <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="EUR">${ht}</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="EUR">${tva}</cbc:TaxAmount>
-      <cac:TaxCategory>
-        <cbc:ID>S</cbc:ID>
-        <cbc:Percent>20</cbc:Percent>
-        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
-      </cac:TaxCategory>
-    </cac:TaxSubtotal>
-  </cac:TaxTotal>
-  <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">${ht}</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">${ht}</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">${ttc}</cbc:TaxInclusiveAmount>
-    <cbc:PayableAmount currencyID="EUR">${ttc}</cbc:PayableAmount>
-  </cac:LegalMonetaryTotal>${lines}
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+  <CustomizationID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">urn:cen.eu:en16931:2017</CustomizationID>
+  <ProfileID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">M1</ProfileID>
+  <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${facture.numero}</ID>
+  <IssueDate xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${facture.date_emission}</IssueDate>
+  ${facture.date_echeance ? `<DueDate xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${facture.date_echeance}</DueDate>` : ""}
+  <InvoiceTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">380</InvoiceTypeCode>
+  <DocumentCurrencyCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">EUR</DocumentCurrencyCode>
+  <AccountingSupplierParty xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <Party xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <EndpointID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">${sellerEndpointId}</EndpointID>
+      <PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">${siret || "000000000"}</ID>
+      </PartyIdentification>
+      <PostalAddress xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <Country xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <IdentificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR</IdentificationCode>
+        </Country>
+      </PostalAddress>
+      <PartyTaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR00${siret.slice(0,9)}</CompanyID>
+        <TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+        </TaxScheme>
+      </PartyTaxScheme>
+      <PartyLegalEntity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <RegistrationName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${esc(artisanNom)}</RegistrationName>
+        <CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0002">${siret || "000000000"}</CompanyID>
+      </PartyLegalEntity>
+    </Party>
+  </AccountingSupplierParty>
+  <AccountingCustomerParty xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <Party xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <EndpointID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">${buyerEndpointId}</EndpointID>
+      <PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">${clientSiret || "000000000"}</ID>
+      </PartyIdentification>
+      <PostalAddress xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <Country xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <IdentificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR</IdentificationCode>
+        </Country>
+      </PostalAddress>
+      <PartyTaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR00${clientSiret.slice(0,9)}</CompanyID>
+        <TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+        </TaxScheme>
+      </PartyTaxScheme>
+      <PartyLegalEntity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <RegistrationName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">${esc(String(facture.client_nom||""))}</RegistrationName>
+        <CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0002">${clientSiret || "000000000"}</CompanyID>
+      </PartyLegalEntity>
+    </Party>
+  </AccountingCustomerParty>
+  <TaxTotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${tva}</TaxAmount>${taxSubtotals}
+  </TaxTotal>
+  <LegalMonetaryTotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${ht}</LineExtensionAmount>
+    <TaxExclusiveAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${ht}</TaxExclusiveAmount>
+    <TaxInclusiveAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${ttc}</TaxInclusiveAmount>
+    <PayableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">${ttc}</PayableAmount>
+  </LegalMonetaryTotal>${invoiceLines}
 </Invoice>`;
 }
 
@@ -179,7 +210,10 @@ export async function POST(req: Request) {
     const pdpToken = await getToken();
 
     // Build & send
-    const xmlBody = buildUBL(facture, artisan ?? {});
+    // Sandbox endpoint IDs from Super PDP (Burger Queen seller, Tricatel buyer)
+    const sellerEndpointId = process.env.SUPERPDP_SELLER_ENDPOINT ?? "315143296_5682";
+    const buyerEndpointId  = process.env.SUPERPDP_BUYER_ENDPOINT  ?? "315143296_5681";
+    const xmlBody = buildUBL(facture, artisan ?? {}, sellerEndpointId, buyerEndpointId);
     console.log("[SuperPDP] sending invoice:", facture.numero);
 
     const pdpRes = await fetch(`${API_BASE}/invoices`, {
