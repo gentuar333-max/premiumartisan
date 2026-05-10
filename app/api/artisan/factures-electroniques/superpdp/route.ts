@@ -28,90 +28,107 @@ async function getToken(): Promise<string> {
   return data.access_token;
 }
 
-// ── Build EN16931 payload ────────────────────────────────────────────────────
-function buildPayload(
+// ── Build UBL XML (format accepté par Super PDP) ────────────────────────────
+function buildUBL(
   facture: Record<string, unknown>,
   artisan: Record<string, unknown>
-) {
+): string {
   const lignes = Array.isArray(facture.lignes) ? facture.lignes : [];
   const artisanNom = `${artisan.prenom ?? ""} ${artisan.nom ?? ""}`.trim() || "Artisan";
   const siret = String(artisan.siret ?? "").replace(/\s/g, "");
   const clientSiret = String(facture.client_siret ?? "").replace(/\s/g, "");
+  const ht  = Number(facture.total_ht  || 0).toFixed(2);
+  const tva = Number(facture.total_tva || 0).toFixed(2);
+  const ttc = Number(facture.total_ttc || 0).toFixed(2);
 
-  return {
-    en_invoice: {
-      number:        facture.numero,
-      issue_date:    facture.date_emission,
-      payment_due_date: facture.date_echeance ?? undefined,
-      currency_code: "EUR",
-      type_code:     380,
+  const lines = lignes.map((l: Record<string, unknown>, i: number) => {
+    const qty   = Number(l.quantity  || 1);
+    const price = Number(l.unitPrice || 0);
+    const net   = (qty * price).toFixed(2);
+    const vat   = Number(l.tvaRate || 0);
+    return `
+  <cac:InvoiceLine>
+    <cbc:ID>${i + 1}</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">${qty}</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">${net}</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="EUR">${(qty * price * vat / 100).toFixed(2)}</cbc:TaxAmount>
+    </cac:TaxTotal>
+    <cac:Item>
+      <cbc:Description>${String(l.description || `Prestation ${i+1}`).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</cbc:Description>
+      <cbc:Name>${String(l.description || `Prestation ${i+1}`).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>${vat === 0 ? "Z" : "S"}</cbc:ID>
+        <cbc:Percent>${vat}</cbc:Percent>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">${price.toFixed(2)}</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>`;
+  }).join("");
 
-      seller: {
-        name: artisanNom,
-        legal_registration_identifier: siret ? { scheme: "0009", value: siret } : undefined,
-        postal_address: {
-          address_line1: String(artisan.adresse ?? ""),
-          city:          String(artisan.city    ?? ""),
-          post_code:     String(artisan.postal_code ?? ""),
-          country_code:  "FR",
-        },
-      },
-
-      buyer: {
-        name: facture.client_nom,
-        legal_registration_identifier: clientSiret ? { scheme: "0009", value: clientSiret } : undefined,
-        postal_address: {
-          address_line1: String(facture.client_adresse ?? ""),
-          country_code:  "FR",
-        },
-      },
-
-      lines: lignes.map((l: Record<string, unknown>, i: number) => {
-        const qty      = Number(l.quantity)  || 1;
-        const price    = Number(l.unitPrice) || 0;
-        const netAmt   = qty * price;
-        const vatRate  = Number(l.tvaRate)   || 0;
-        return {
-          identifier:        String(i + 1),
-          invoiced_quantity: String(qty),
-          invoiced_quantity_code: "C62",
-          net_amount: String(netAmt.toFixed(2)),
-          item_information: {
-            name: String(l.description ?? `Prestation ${i + 1}`),
-          },
-          price_details: {
-            item_net_price: String(price.toFixed(2)),
-          },
-          vat_information: {
-            invoiced_item_vat_category_code: vatRate === 0 ? "Z" : "S",
-            invoiced_item_vat_rate: String(vatRate),
-          },
-        };
-      }),
-
-      totals: {
-        sum_invoice_lines_amount: String(Number(facture.total_ht).toFixed(2)),
-        total_without_vat:        String(Number(facture.total_ht).toFixed(2)),
-        total_vat_amount: {
-          currency_code: "EUR",
-          value: String(Number(facture.total_tva).toFixed(2)),
-        },
-        total_with_vat:       String(Number(facture.total_ttc).toFixed(2)),
-        amount_due_for_payment: String(Number(facture.total_ttc).toFixed(2)),
-      },
-
-      vat_break_down: [
-        {
-          vat_category_code:      "S",
-          vat_category_rate:      "20",
-          vat_category_taxable_amount: String(Number(facture.total_ht).toFixed(2)),
-          vat_category_tax_amount:     String(Number(facture.total_tva).toFixed(2)),
-        },
-      ],
-
-      notes: facture.notes ? [{ note: String(facture.notes) }] : undefined,
-    },
-  };
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+  xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+  xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>${facture.numero}</cbc:ID>
+  <cbc:IssueDate>${facture.date_emission}</cbc:IssueDate>
+  ${facture.date_echeance ? `<cbc:DueDate>${facture.date_echeance}</cbc:DueDate>` : ""}
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyIdentification><cbc:ID schemeID="0009">${siret}</cbc:ID></cac:PartyIdentification>
+      <cac:PartyName><cbc:Name>${artisanNom.replace(/&/g,"&amp;")}</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>${String(artisan.adresse || "").replace(/&/g,"&amp;")}</cbc:StreetName>
+        <cbc:CityName>${String(artisan.city || "").replace(/&/g,"&amp;")}</cbc:CityName>
+        <cbc:PostalZone>${String(artisan.postal_code || "")}</cbc:PostalZone>
+        <cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>${artisanNom.replace(/&/g,"&amp;")}</cbc:RegistrationName>
+        <cbc:CompanyID>${siret}</cbc:CompanyID>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification><cbc:ID schemeID="0009">${clientSiret}</cbc:ID></cac:PartyIdentification>
+      <cac:PartyName><cbc:Name>${String(facture.client_nom || "").replace(/&/g,"&amp;")}</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>${String(facture.client_adresse || "").replace(/&/g,"&amp;")}</cbc:StreetName>
+        <cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>${String(facture.client_nom || "").replace(/&/g,"&amp;")}</cbc:RegistrationName>
+        <cbc:CompanyID>${clientSiret}</cbc:CompanyID>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">${tva}</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">${ht}</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">${tva}</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID>S</cbc:ID>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">${ht}</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">${ht}</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">${ttc}</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">${ttc}</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>${lines}
+</Invoice>`;
 }
 
 // ── Auth helper ──────────────────────────────────────────────────────────────
@@ -162,16 +179,16 @@ export async function POST(req: Request) {
     const pdpToken = await getToken();
 
     // Build & send
-    const payload = buildPayload(facture, artisan ?? {});
+    const xmlBody = buildUBL(facture, artisan ?? {});
     console.log("[SuperPDP] sending invoice:", facture.numero);
 
     const pdpRes = await fetch(`${API_BASE}/invoices`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${pdpToken}`,
-        "Content-Type":  "application/json",
+        "Content-Type":  "application/xml",
       },
-      body: JSON.stringify(payload),
+      body: xmlBody,
     });
 
     const pdpData = await pdpRes.json();
