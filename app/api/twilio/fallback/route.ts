@@ -6,18 +6,8 @@ export const runtime = "nodejs"
 async function handler(req: Request) {
   try {
     const url = new URL(req.url)
+    const params = url.searchParams
     
-    // Parametrat vijn si query string (GET) ose body (POST)
-    let params: URLSearchParams
-    if (req.method === "GET") {
-      params = url.searchParams
-    } else {
-      const body = await req.text()
-      params = new URLSearchParams(body)
-      // Shto edhe query params
-      url.searchParams.forEach((v, k) => params.set(k, v))
-    }
-
     const dialStatus = params.get("DialCallStatus") ?? ""
     const toNumber   = params.get("To") ?? params.get("Called") ?? ""
 
