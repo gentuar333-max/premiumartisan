@@ -46,12 +46,9 @@ async function handler(req: Request) {
 
     console.log("[twilio/fallback] routing to Vapi:", vapiAssistantId)
 
-    // Thirr numrin Twilio te artizanit qe Vapi e menaxhon
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Dial>
-    <Number>${toNumber}</Number>
-  </Dial>
+  <Redirect method="POST">https://api.vapi.ai/twilio/inbound_call</Redirect>
 </Response>`
 
     return new NextResponse(twiml, {
