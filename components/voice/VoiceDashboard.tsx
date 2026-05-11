@@ -432,8 +432,11 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
               {/* Numero Marie */}
               {subscription?.twilio_number && (
                 <div style={{ padding: "16px 20px", borderBottom: "1px solid #2A2A2A" }}>
-                  <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Numero Marie</div>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>{subscription.twilio_number}</div>
+                  <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Votre numero Marie</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: "#fff", marginBottom: 6 }}>{subscription.twilio_number}</div>
+                  <div style={{ fontSize: 11, color: "#555", lineHeight: 1.6 }}>
+                    Partagez ce numero a vos clients. Marie repond a votre place, collecte leurs informations et vous envoie un rapport de journee.
+                  </div>
                 </div>
               )}
 
