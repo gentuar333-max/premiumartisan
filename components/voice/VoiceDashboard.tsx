@@ -400,123 +400,88 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
         {/* ── SIDE MENU ── */}
         {menuOpen && (
           <>
-            <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200 }} />
-            <div style={{ position: "fixed", top: 0, left: 0, height: "100%", width: 300, background: "#F9FAFB", borderRight: "0.5px solid #E5E7EB", zIndex: 201, display: "flex", flexDirection: "column", animation: "slideLeft .25s ease" }}>
-              <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "#3B82F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Phone size={20} color="#fff" />
+            <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 200 }} />
+            <div style={{ position: "fixed", top: 0, left: 0, height: "100%", width: 280, background: "#1A1A1A", zIndex: 201, display: "flex", flexDirection: "column", animation: "slideLeft .2s ease" }}>
+
+              {/* Header */}
+              <div style={{ padding: "20px 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #2A2A2A" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "#2A2A2A", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Phone size={16} color="#fff" />
                   </div>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>Réceptionniste IA</div>
-                    <div style={{ fontSize: 11, color: "#6B7280" }}>PremiumArtisan</div>
-                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>PremiumArtisan</span>
                 </div>
-                <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 4 }}>
-                  <X size={20} />
+                <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#666", padding: 4, display: "flex" }}>
+                  <X size={18} />
                 </button>
               </div>
 
-              {/* Avatar + email */}
-              <div style={{ padding: "12px 16px 0" }}>
-
-              </div>
-
-              {/* Minutes card */}
-              <div style={{ padding: "12px 16px" }}>
-                <div style={{ background: "#F3F4F6", border: "0.5px solid #E5E7EB", borderRadius: 10, padding: "14px 16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div>
-                      <div style={{ fontSize: 11, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>Minutes restantes</div>
-                      <div style={{ fontSize: 30, fontWeight: 800, color: "#111827", lineHeight: 1 }}>
-                        {subscription ? subscription.minutes_remaining : "—"}
-                        <span style={{ fontSize: 13, fontWeight: 400, color: "#6B7280", marginLeft: 4 }}>min</span>
-                      </div>
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 4 }}>Forfait</div>
-                      <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: subscription?.status === "active" || subscription?.status === "trial" ? "#2563EB" : "#E5E7EB", color: subscription?.status === "active" || subscription?.status === "trial" ? "#fff" : "#6B7280" }}>
-                        {planLabel || "Inactif"}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ height: 5, borderRadius: 3, background: "#E5E7EB", overflow: "hidden" }}>
-                    <div style={{ height: "100%", borderRadius: 3, background: minPct > 20 ? "#3B82F6" : "#EF4444", width: `${minPct}%`, transition: "width .5s" }} />
-                  </div>
-                  <div style={{ fontSize: 11, color: "#374151", marginTop: 6 }}>
-                    {subscription ? `Sur ${subscription.minutes_total} min / mois` : "Aucun forfait actif"}
-                  </div>
+              {/* Minutes */}
+              <div style={{ padding: "16px 20px", borderBottom: "1px solid #2A2A2A" }}>
+                <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Forfait</div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: "#fff", lineHeight: 1 }}>{subscription ? subscription.minutes_remaining : "—"}</span>
+                  <span style={{ fontSize: 13, color: "#666" }}>min / {subscription ? subscription.minutes_total : "—"}</span>
+                  <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "#2A2A2A", color: "#aaa" }}>{planLabel || "Inactif"}</span>
+                </div>
+                <div style={{ height: 3, borderRadius: 2, background: "#2A2A2A", overflow: "hidden" }}>
+                  <div style={{ height: "100%", borderRadius: 2, background: minPct > 20 ? "#fff" : "#EF4444", width: `${minPct}%`, transition: "width .5s" }} />
                 </div>
               </div>
 
-              {/* Numero Twilio card */}
+              {/* Numero Marie */}
               {subscription?.twilio_number && (
-                <div style={{ padding: "0 16px 12px" }}>
-                  <div style={{ background: "#EFF6FF", border: "0.5px solid #BFDBFE", borderRadius: 10, padding: "14px 16px" }}>
-                    <div style={{ fontSize: 11, color: "#3B82F6", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Votre numero Marie</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: "#1D4ED8", letterSpacing: "0.03em", marginBottom: 6 }}>{subscription.twilio_number}</div>
-                    <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.5 }}>
-                      Partagez ce numero a vos clients. Marie repondra a votre place quand vous etes indisponible.
-                    </div>
-                  </div>
+                <div style={{ padding: "16px 20px", borderBottom: "1px solid #2A2A2A" }}>
+                  <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Numero Marie</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>{subscription.twilio_number}</div>
                 </div>
               )}
 
-              {/* Navigation links */}
-              <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-                <a href="/artisan/receptionist/pricing" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <Zap size={16} color="#F59E0B" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Mon abonnement</span>
-                  </div>
-                  <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
-                </a>
-                <a href="/artisan/receptionist/setup" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <User size={16} color="#9CA3AF" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Mon profil</span>
-                  </div>
-                  <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
-                </a>
-                <a href="/artisan/dashboard" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", borderRadius: 8, background: "#F3F4F6", border: "0.5px solid #E5E7EB", textDecoration: "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <Home size={16} color="#9CA3AF" />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Tableau de bord</span>
-                  </div>
-                  <span style={{ fontSize: 11, color: "#6B7280" }}>→</span>
-                </a>
+              {/* Navigation */}
+              <div style={{ padding: "8px 0", flex: 1 }}>
+                {[
+                  { href: "/artisan/receptionist/pricing", label: "Mon abonnement", icon: <Zap size={15} color="#666" /> },
+                  { href: "/artisan/receptionist/setup",   label: "Mon profil",      icon: <User size={15} color="#666" /> },
+                  { href: "/artisan/dashboard",            label: "Tableau de bord", icon: <Home size={15} color="#666" /> },
+                ].map(item => (
+                  <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 20px", textDecoration: "none" }}>
+                    {item.icon}
+                    <span style={{ fontSize: 14, color: "#ccc", fontWeight: 400 }}>{item.label}</span>
+                  </a>
+                ))}
               </div>
 
-              <div style={{ flex: 1 }} />
-
-              {/* Avatar ne fund */}
-              <div style={{ margin: "0 12px 8px", padding: "10px 12px", background: "#F3F4F6", border: "0.5px solid #E5E7EB", borderRadius: 8, display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#DBEAFE", color: "#1D4ED8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
-                  {userEmail ? userEmail[0].toUpperCase() : "A"}
+              {/* Footer */}
+              <div style={{ borderTop: "1px solid #2A2A2A" }}>
+                {/* User */}
+                <div style={{ padding: "12px 20px", display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#2A2A2A", color: "#aaa", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
+                    {userEmail ? userEmail[0].toUpperCase() : "A"}
+                  </div>
+                  <div style={{ overflow: "hidden" }}>
+                    <div style={{ fontSize: 12, color: "#ccc", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
+                    <div style={{ fontSize: 11, color: "#555" }}>Artisan</div>
+                  </div>
                 </div>
-                <div style={{ overflow: "hidden" }}>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userEmail}</div>
-                  <div style={{ fontSize: 11, color: "#6B7280", marginTop: 1 }}>Artisan</div>
-                </div>
+                {/* Logout */}
+                <button onClick={logout} style={{ width: "100%", padding: "11px 20px", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, fontFamily: "inherit" }}>
+                  <LogOut size={15} color="#666" />
+                  <span style={{ fontSize: 14, color: "#666" }}>Se deconnecter</span>
+                </button>
+                {/* Delete */}
+                <button onClick={() => {
+                  if (window.confirm("Supprimer votre compte ? Cette action est irreversible.")) {
+                    fetch("/api/artisan/delete-account", { method: "DELETE" })
+                      .then(r => r.json())
+                      .then(() => window.location.href = "/")
+                      .catch(() => alert("Erreur"))
+                  }
+                }} style={{ width: "100%", padding: "11px 20px", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, fontFamily: "inherit" }}>
+                  <Trash2 size={15} color="#555" />
+                  <span style={{ fontSize: 14, color: "#555" }}>Supprimer mon compte</span>
+                </button>
               </div>
-              <div style={{ height: "0.5px", background: "#E5E7EB", margin: "0 12px 8px" }} />
 
-              <button onClick={logout} style={{ margin: "16px 16px 4px", padding: "13px 16px", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 32px)" }}>
-                <LogOut size={16} color="#EF4444" />
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#EF4444" }}>Se déconnecter</span>
-              </button>
-
-              <button onClick={() => {
-                if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
-                  fetch("/api/artisan/delete-account", { method: "DELETE" })
-                    .then(r => r.json())
-                    .then(() => window.location.href = "/")
-                    .catch(() => alert("Erreur lors de la suppression"))
-                }
-              }} style={{ margin: "0 12px 12px", padding: "10px 12px", borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "inherit", width: "calc(100% - 24px)" }}>
-                <Trash2 size={16} color="#6B7280" />
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#6B7280" }}>Supprimer mon compte</span>
-              </button>
             </div>
           </>
         )}
