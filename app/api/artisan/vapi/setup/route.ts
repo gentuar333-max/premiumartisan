@@ -119,6 +119,8 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
 - Une seule question à la fois
 - Toujours confirmer avant de clôturer`;
 
+      // Backend dërgon firstMessage, systemPrompt, model dhe transcriber
+      // Voice konfigurohet manualisht në Vapi
       const vapiPayload = {
         name: `Marie - ${company_name}`,
         firstMessage,
@@ -133,58 +135,20 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
           model: "nova-2",
           language: "fr",
         },
-        voice: {
-          provider: "11labs",
-          voiceId: "Yxrwjakoukulqd0g8k9y",
-          model: "eleven_flash_v2_5",
-          stability: 0.5,
-          similarityBoost: 0.75,
-        },
-
-        analysisPlan: {
-          structuredDataSchema: {
-            type: "object",
-            properties: {
-              nom_client: { type: "string", description: "Prénom et nom du client" },
-              adresse: { type: "string", description: "Adresse complète du client" },
-              probleme: { type: "string", description: "Nature du problème ou travaux demandés" },
-              urgent: { type: "boolean", description: "Si la demande est urgente" },
-              disponibilite: { type: "string", description: "Disponibilités du client" },
-              type_travaux: { type: "string", description: "Type de travaux (peinture, plomberie, etc.)" },
-            },
-            required: ["nom_client", "probleme"],
-          },
-          structuredDataPrompt: "Extrais les informations collectées pendant l'appel : nom du client, adresse, probleme ou travaux demandes, si c'est urgent, disponibilites et type de travaux.",
-        },
       }
 
       let newVapiAssistantId = vapiAssistantId
 
       if (vapiAssistantId) {
-        // Merr konfigurimin ekzistues per te ruajtur voice/tools
-        let existingConfig: Record<string, unknown> = {}
-        try {
-          const getRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
-            headers: { "Authorization": `Bearer ${vapiKey}` }
-          })
-          if (getRes.ok) existingConfig = await getRes.json()
-        } catch (_) {}
-
-        // Merge — ruaj voice dhe transcriber ekzistues
-        const mergedPayload = {
-          ...vapiPayload,
-          voice: existingConfig.voice ?? vapiPayload.voice,
-          transcriber: existingConfig.transcriber ?? vapiPayload.transcriber,
-        }
-
+        // PATCH — vetëm firstMessage dhe systemPrompt, asgjë tjetër
         console.log("[vapi] PATCH assistant:", vapiAssistantId)
         const vapiRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
-          body: JSON.stringify(mergedPayload),
+          body: JSON.stringify(vapiPayload),
         })
         if (!vapiRes.ok) console.error("Vapi PATCH error:", await vapiRes.text())
-        else console.log("Vapi assistant updated:", vapiAssistantId)
+        else console.log("[vapi] PATCH OK — model/voice/transcriber untouched")
       } else {
         // Krijo assistant te ri
         const vapiRes = await fetch("https://api.vapi.ai/assistant", {
