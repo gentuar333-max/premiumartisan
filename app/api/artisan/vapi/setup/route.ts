@@ -119,14 +119,19 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
 - Une seule question à la fois
 - Toujours confirmer avant de clôturer`;
 
-      // Backend dërgon firstMessage, systemPrompt, model dhe transcriber
-      // Voice konfigurohet manualisht në Vapi
-      const vapiPayload = {
+      // PATCH payload — nuk prek model, voice, transcriber
+      const patchPayload = {
+        name: `Marie - ${company_name}`,
+        firstMessage,
+      }
+
+      // POST payload — per artizane te ri, me model minimal
+      const postPayload = {
         name: `Marie - ${company_name}`,
         firstMessage,
         model: {
-          provider: "anthropic",
-          model: "claude-3-5-haiku-20241022",
+          provider: "groq",
+          model: "meta-llama/llama-4-maverick-17b-128e-instruct",
           temperature: 0.1,
           systemPrompt,
         },
@@ -136,6 +141,7 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
           language: "fr",
         },
       }
+      const vapiPayload = patchPayload
 
       let newVapiAssistantId = vapiAssistantId
 
@@ -154,7 +160,7 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
         const vapiRes = await fetch("https://api.vapi.ai/assistant", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
-          body: JSON.stringify(vapiPayload),
+          body: JSON.stringify(postPayload),
         })
         if (vapiRes.ok) {
           const vapiData = await vapiRes.json()
