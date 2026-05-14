@@ -125,7 +125,7 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
         firstMessage,
       }
 
-      // POST payload — per artizane te ri, me model minimal
+      // POST payload — per artizane te ri
       const postPayload = {
         name: `Marie - ${company_name}`,
         firstMessage,
@@ -139,6 +139,14 @@ Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
           provider: "deepgram",
           model: "nova-2",
           language: "fr",
+        },
+        voice: {
+          provider: "11labs",
+          voiceId: "ohItIVrXTBI80RrUECOD",
+          model: "eleven_flash_v2_5",
+          stability: 0.5,
+          similarityBoost: 0.8,
+          speed: 0.9,
         },
       }
       const vapiPayload = patchPayload
