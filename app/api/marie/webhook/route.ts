@@ -12,7 +12,7 @@ const PLAN_MINUTES: Record<string, number> = {
   trial:    15,
   starter:  190,
   pro:      310,
-  business: 800,
+  business: 560,
 }
 
 const PRICE_TO_PLAN: Record<string, string> = {

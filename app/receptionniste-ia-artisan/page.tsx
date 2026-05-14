@@ -24,8 +24,8 @@ const plans = [
   },
   {
     name: "Starter",
-    price: "€99",
-    minutes: "150 min / mois",
+    price: "€49",
+    minutes: "190 min / mois",
     period: "",
     features: ["Réponse IA 24h/7j", "SMS après chaque appel", "Tableau de bord", "Contacts famille / employés", "Transcription", "Support email"],
     cta: "Choisir Starter",
@@ -33,8 +33,8 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "€199",
-    minutes: "400 min / mois",
+    price: "€79",
+    minutes: "310 min / mois",
     period: "",
     features: ["Réponse IA 24h/7j", "SMS après chaque appel", "Tableau de bord", "Contacts famille / employés", "Transcription", "Support email"],
     cta: "Choisir Pro",
@@ -43,8 +43,8 @@ const plans = [
   },
   {
     name: "Business",
-    price: "€349",
-    minutes: "800 min / mois",
+    price: "€139",
+    minutes: "560 min / mois",
     period: "",
     features: ["Réponse IA 24h/7j", "SMS après chaque appel", "Tableau de bord", "Contacts famille / employés", "Transcription", "Support email"],
     cta: "Choisir Business",
