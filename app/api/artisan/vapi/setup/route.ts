@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       const metiersStr = Array.isArray(metier) ? metier.join(", ") : metier;
       const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h";
 
-      const firstMessage = `Bonjour, vous êtes bien chez ${company_name}. Que puis-je faire pour vous ?`;
+      const firstMessage = `Bonjour, vous êtes bien chez ${company_name}. Comment puis-je vous aider ?`;
 
       const systemPrompt = `## Règles vocales absolues
 - Réponses TRÈS COURTES — maximum 2 phrases
