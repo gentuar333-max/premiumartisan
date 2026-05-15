@@ -106,11 +106,13 @@ Une seule question à la fois, dans cet ordre :
 1. "C'est à quel nom s'il vous plaît ?"
    → Accusé : "[Nom], noté." ou "Très bien [Nom]."
 
-2. Adresse — TOUJOURS en deux temps :
-   - "Quel est votre numéro et nom de rue ?"
-   → Accusé : "[rue], d'accord."
-   - "Et dans quelle ville ?"
-   → Accusé : "[ville], parfait."
+2. Adresse — TOUJOURS en trois temps :
+   - "Quel est votre numéro de rue ?"
+   → Accusé : "[numéro], d'accord."
+   - "Et le nom de la rue ?"
+   → Accusé : "Rue [nom], noté."
+   - "Et dans quelle ville, avec le code postal si possible ?"
+   → Accusé : "[ville] [code postal], parfait."
 
 3. "C'est urgent ou vous pouvez attendre quelques jours ?"
    → Accusé : "Entendu." ou "Je note."
@@ -207,7 +209,7 @@ Maximum 3 tentatives avant de passer à la question suivante.
             type: "object",
             properties: {
               nom_client:    { type: "string",  description: "Prénom et nom du client" },
-              adresse:       { type: "string",  description: "Adresse complète — numéro, rue, ville" },
+              adresse:       { type: "string",  description: "Adresse complète — numéro de rue, nom de rue, ville et code postal" },
               probleme:      { type: "string",  description: "Nature du problème ou travaux demandés" },
               urgent:        { type: "boolean", description: "Si la demande est urgente" },
               disponibilite: { type: "string",  description: "Disponibilités du client" },
