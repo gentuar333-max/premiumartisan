@@ -154,7 +154,7 @@ Maximum 3 tentatives avant de passer à la question suivante.
         serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
         model: {
           provider: "groq",
-          model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+          model: "llama-3.1-8b-instant",
           temperature: 0.1,
           systemPrompt,
         },
@@ -170,6 +170,20 @@ Maximum 3 tentatives avant de passer à la question suivante.
           stability: 0.5,
           similarityBoost: 0.8,
           speed: 0.9,
+        },
+        analysisPlan: {
+          structuredDataSchema: {
+            type: "object",
+            properties: {
+              nom_client:    { type: "string",  description: "Prénom et nom du client" },
+              adresse:       { type: "string",  description: "Adresse complète — numéro, rue, ville" },
+              probleme:      { type: "string",  description: "Nature du problème ou travaux demandés" },
+              urgent:        { type: "boolean", description: "Si la demande est urgente" },
+              disponibilite: { type: "string",  description: "Disponibilités du client" },
+            },
+            required: ["nom_client", "probleme"],
+          },
+          structuredDataPrompt: "Extrais les informations collectées pendant l'appel : nom du client, adresse complète, problème ou travaux demandés, si c'est urgent, disponibilités.",
         },
       }
       const vapiPayload = patchPayload
