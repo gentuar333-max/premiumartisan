@@ -144,12 +144,14 @@ Maximum 3 tentatives avant de passer à la question suivante.
       const patchPayload = {
         name: `Marie - ${company_name}`,
         firstMessage,
+        serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
       }
 
       // POST payload — per artizane te ri
       const postPayload = {
         name: `Marie - ${company_name}`,
         firstMessage,
+        serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
         model: {
           provider: "groq",
           model: "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -164,7 +166,7 @@ Maximum 3 tentatives avant de passer à la question suivante.
         voice: {
           provider: "11labs",
           voiceId: "ohItIVrXTBI80RrUECOD",
-          model: "eleven_flash_v2_5",
+          model: "eleven_turbo_v2_5",
           stability: 0.5,
           similarityBoost: 0.8,
           speed: 0.9,
