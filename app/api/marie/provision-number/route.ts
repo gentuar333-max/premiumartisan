@@ -63,19 +63,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, number: existing.twilio_number, already: true })
     }
 
-    // 2. Kërko numër francez disponibël — provo local pastaj national
+    // 2. Kërko numër francez disponibël — national me prioritet
     let available: any[] = []
     try {
       available = await client.availablePhoneNumbers("FR")
-        .local
-        .list({ voiceEnabled: true, limit: 5 })
+        .national
+        .list({ voiceEnabled: true, limit: 10 })
     } catch (_) {}
 
     if (!available.length) {
       try {
         available = await client.availablePhoneNumbers("FR")
-          .national
-          .list({ voiceEnabled: true, limit: 5 })
+          .local
+          .list({ voiceEnabled: true, limit: 10 })
       } catch (_) {}
     }
 
