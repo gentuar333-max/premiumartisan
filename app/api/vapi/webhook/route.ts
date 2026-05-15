@@ -147,16 +147,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Valido dhe korrigjo adresën me Nominatim (OpenStreetMap)
-    if (structured?.adresse) {
+    if (analysis?.adresse) {
       try {
-        const query = encodeURIComponent(structured.adresse + ", France")
+        const query = encodeURIComponent(analysis.adresse + ", France")
         const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=fr`, {
           headers: { "User-Agent": "PremiumArtisan/1.0 contact@premiumartisan.fr" }
         })
         const geoData = await geoRes.json()
         if (geoData?.[0]?.display_name) {
-          structured.adresse = geoData[0].display_name.split(",").slice(0, 4).join(",").trim()
-          console.log("[webhook] adresse corrigée:", structured.adresse)
+          analysis.adresse = geoData[0].display_name.split(",").slice(0, 4).join(",").trim()
+          console.log("[webhook] adresse corrigée:", analysis.adresse)
         }
       } catch (_) { /* ignore si Nominatim fail */ }
     }
