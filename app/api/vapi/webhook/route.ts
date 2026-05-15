@@ -146,6 +146,21 @@ export async function POST(req: NextRequest) {
       console.log("[webhook] SMS skipped - daily report active")
     }
 
+    // Valido dhe korrigjo adresën me Nominatim (OpenStreetMap)
+    if (structured?.adresse) {
+      try {
+        const query = encodeURIComponent(structured.adresse + ", France")
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=fr`, {
+          headers: { "User-Agent": "PremiumArtisan/1.0 contact@premiumartisan.fr" }
+        })
+        const geoData = await geoRes.json()
+        if (geoData?.[0]?.display_name) {
+          structured.adresse = geoData[0].display_name.split(",").slice(0, 4).join(",").trim()
+          console.log("[webhook] adresse corrigée:", structured.adresse)
+        }
+      } catch (_) { /* ignore si Nominatim fail */ }
+    }
+
     // Zbrit minutat e harxhuara
     if (duration > 0 && artisanId) {
       const durMinutes = Math.ceil(duration / 60)
