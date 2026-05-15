@@ -63,21 +63,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, number: existing.twilio_number, already: true })
     }
 
-    // 2. Kërko numër francez disponibël — national me prioritet
+    // 2. Kërko numër francez local — përputhje me Bundle approved
     let available: any[] = []
     try {
       available = await client.availablePhoneNumbers("FR")
-        .national
+        .local
         .list({ voiceEnabled: true, limit: 10 })
     } catch (_) {}
-
-    if (!available.length) {
-      try {
-        available = await client.availablePhoneNumbers("FR")
-          .local
-          .list({ voiceEnabled: true, limit: 10 })
-      } catch (_) {}
-    }
 
     if (!available.length) {
       return NextResponse.json({ error: "Aucun numero FR disponible" }, { status: 503 })
