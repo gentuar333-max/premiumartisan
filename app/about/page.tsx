@@ -4,7 +4,7 @@ import AboutPage from "./AboutPage";
 
 export const metadata: Metadata = {
   title: "À Propos de PremiumArtisan — Notre Histoire & Mission | Dijon",
-  description: "PremiumArtisan connecte particuliers et artisans qualifiés à Dijon et en Bourgogne. Découvrez notre histoire, notre mission et comment nous vérifions chaque artisan.",
+  description: "PremiumArtisan connecte particuliers et artisans qualifiés à Dijon et en Bourgogne. Notre histoire, notre mission et comment nous vérifions chaque artisan.",
   alternates: { 
     canonical: "https://premiumartisan.fr/about" 
   },

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Comment ça marche — PremiumArtisan",
-  description: "Découvrez comment PremiumArtisan connecte particuliers et peintres à Dijon en 3 étapes simples.",
+  description: "Publiez votre projet, recevez jusqu'à 3 devis d'artisans vérifiés à Dijon. Gratuit, sans engagement. Découvrez les 3 étapes simples de PremiumArtisan.",
 };
 
 export default function CommentCaMarchePage() {

@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -15,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PremiumArtisan — Artisans Vérifiés Dijon & Côte-d'Or",
-  description: "Marie répond à vos appels 24h/24 — voix naturelle, indiscernable d'un humain. Collecte les infos et rapport quotidien. Ne manquez plus jamais un appel. Essai gratuit.",
+  description: "Trouvez un artisan fiable à Dijon et en Côte-d'Or. Jusqu'à 3 devis gratuits d'artisans vérifiés. Sans engagement, réponse sous 24h.",
   metadataBase: new URL("https://premiumartisan.fr"),
   manifest: "/manifest.json",
   appleWebApp: {

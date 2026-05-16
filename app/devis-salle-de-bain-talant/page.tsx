@@ -3,7 +3,7 @@ import DevisSalleDeBainTalant from "./DevisSalleDeBainTalant";
 
 export const metadata: Metadata = {
   title: "Rénovation Salle de Bain à Talant — Anti-Humidité & VMC 2026 | PremiumArtisan",
-  description: "94 projets analysés. Spécialistes moisissures altitude 350m. Diagnostic VMC inclus. 11 artisans vérifiés à Talant.",
+  description: "94 projets analysés à Talant. 11 artisans vérifiés, spécialistes anti-humidité altitude 350m. Diagnostic VMC inclus. Devis gratuit sous 24h.",
   alternates: {
     canonical: "/devis-salle-de-bain-talant",
   },

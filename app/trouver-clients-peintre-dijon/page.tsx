@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: 'Trouver Clients Peintre Dijon – Projets Particuliers Côte-d\'Or | PremiumArtisan',
-  description: 'Trouvez des clients pour vos travaux de peinture à Dijon. Accédez aux projets particuliers en Côte-d\'Or et développez votre activité. Devis & factures gratuits inclus.',
+  description: 'Trouvez des clients pour vos travaux de peinture à Dijon. Accédez aux projets particuliers en Côte-d\'Or et développez votre activité. Devis & factures gratuits.',
   alternates: { canonical: 'https://premiumartisan.fr/trouver-clients-peintre-dijon' },
   keywords: 'trouver clients peintre dijon, chantier peinture dijon, missions peintre côte-d\'or, projet peinture particulier dijon, artisan peintre cherche chantier bourgogne',
   openGraph: {

@@ -4,7 +4,7 @@ import DevisSalleDeBainFontaineLesDijon from "./DevisSalleDeBainFontaineLesDijon
 
 export const metadata: Metadata = {
   title: "Rénovation Salle de Bain Fontaine-lès-Dijon — Prix 2026 & Devis | PremiumArtisan",
-  description: "Artisans spécialisés maisons de caractère à Fontaine-lès-Dijon (21121). Budget moyen 10 200€. Pierre naturelle, baignoire îlot, travertin. Devis gratuits sous 4-7h.",
+  description: "Artisans salle de bain à Fontaine-lès-Dijon (21121). Budget moyen 10 200€. Pierre naturelle, baignoire îlot, travertin. Devis gratuits sous 4h.",
   alternates: { 
     canonical: "https://premiumartisan.fr/devis-salle-de-bain-fontaine-les-dijon" 
   },

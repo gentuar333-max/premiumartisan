@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Rénovation Cuisine à Chenôve — Artisans Vérifiés & Devis Gratuit 2026 | PremiumArtisan",
-  description: "14 cuisinistes vérifiés à Chenôve. 10–15% moins cher que Dijon. HLM, locatif, pose IKEA. Devis gratuit sous 24h.",
+  description: "14 cuisinistes vérifiés à Chenôve. 10–15% moins cher que Dijon. HLM, locatif, pose IKEA. Devis gratuit sous 24h, sans engagement.",
 };
 
 const jsonLd = {

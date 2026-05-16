@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Politique de confidentialité — PremiumArtisan",
-  description: "Politique de confidentialité et protection des données personnelles sur PremiumArtisan. RGPD, cookies, droits d'accès.",
+  description: "Politique de confidentialité de PremiumArtisan. Protection des données personnelles, RGPD, cookies, droits d'accès et de rectification.",
 };
 
 export default function PrivacyPage() {

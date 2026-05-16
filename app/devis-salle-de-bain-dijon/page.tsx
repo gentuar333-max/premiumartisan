@@ -3,7 +3,7 @@ import DevisSalleDeBainDijon from "./DevisSalleDeBainDijon";
 
 export const metadata: Metadata = {
   title: "Rénovation Salle de Bain à Dijon — Prix 2026 & Devis Gratuit | PremiumArtisan",
-  description: "186 projets analysés. Budget moyen 11 400€. Douche italienne, PMR, haut de gamme. 28 artisans vérifiés à Dijon.",
+  description: "186 projets analysés à Dijon. Budget moyen 11 400€. 28 artisans vérifiés pour douche italienne, PMR, rénovation haut de gamme. Devis gratuit sous 24h.",
   alternates: {
     canonical: "/devis-salle-de-bain-dijon",
   },

@@ -3,7 +3,7 @@ import DevisSalleDeBainLongvic from "./DevisSalleDeBainLongvic";
 
 export const metadata: Metadata = {
   title: "Rénovation Salle de Bain à Longvic — Locatif & TNSA 2026 | PremiumArtisan",
-  description: "29 projets documentés. ROI locatif +70€/mois. Aide TNSA aéroport 80%. 10 artisans vérifiés à Longvic.",
+  description: "Rénovation salle de bain à Longvic (21600). 10 artisans vérifiés, budget moyen 9 800€. Aide TNSA 80%, ROI locatif. Devis gratuit sous 24h.",
   alternates: {
     canonical: "/devis-salle-de-bain-longvic",
   },

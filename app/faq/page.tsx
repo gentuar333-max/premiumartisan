@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "FAQ PremiumArtisan — Questions Fréquentes Artisans & Particuliers Dijon",
-  description: "Toutes les réponses sur PremiumArtisan : coût du service, nombre d'artisans, zones couvertes, devis gratuit à Dijon et Côte-d'Or. Particuliers et artisans peintres.",
+  description: "Toutes les réponses sur PremiumArtisan : coût, nombre d'artisans, zones couvertes, devis gratuit à Dijon et Côte-d'Or. Pour particuliers et artisans peintres.",
   alternates: { canonical: "https://premiumartisan.fr/faq" },
   openGraph: {
     title: "FAQ PremiumArtisan — Questions Fréquentes",

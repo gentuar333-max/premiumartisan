@@ -4,7 +4,7 @@ import DevisPeintureLongvic from "./DevisPeintureLongvic";
 
 export const metadata: Metadata = {
   title: "Peintre Longvic — Prix 2026 & Devis Gratuit en 4h | PremiumArtisan",
-  description: "Trouvez un peintre à Longvic (21600). Prix constatés : 27–41€/m². 108 projets réalisés. Spécialistes traitement humidité. Devis gratuits sous 4h, sans engagement.",
+  description: "Trouvez un peintre à Longvic (21600). Prix constatés : 27–41€/m². 108 projets réalisés. Spécialistes humidité Saône. Devis gratuits sous 4h, sans engagement.",
   alternates: { 
     canonical: "https://premiumartisan.fr/devis-peinture-longvic" 
   },
