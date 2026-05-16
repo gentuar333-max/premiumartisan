@@ -6,6 +6,13 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").r
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
+  // ── Marie IA ─────────────────────────────────────────────────────────────
+  const seoMarie: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/receptionniste-ia-artisan`,  lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 },
+    { url: `${SITE_URL}/receptionniste-ia-plombier`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.85 },
+    { url: `${SITE_URL}/receptionniste-ia-peintre`,  lastModified: now, changeFrequency: "weekly" as const, priority: 0.85 },
+  ];
+
   // ── Core pages ──────────────────────────────────────────────────────────
   const corePages: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`,                  lastModified: now, changeFrequency: "weekly",  priority: 1 },
@@ -14,12 +21,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/faq`,               lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/contact`,           lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/comment-ca-marche`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-  ];
-
-  // ── Marie IA ─────────────────────────────────────────────────────────────
-  const seoMarie: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/receptionniste-ia-artisan`,   lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 },
-    { url: `${SITE_URL}/receptionniste-ia-plombier`,  lastModified: now, changeFrequency: "weekly" as const, priority: 0.85 },
   ];
 
   // ── SEO artisans ────────────────────────────────────────────────────────
