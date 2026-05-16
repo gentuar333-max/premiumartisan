@@ -1,43 +1,73 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Réceptionniste IA pour Artisans | Marie répond 24h/24 – PremiumArtisan",
-  description: "Marie répond à vos appels 24h/24, voix naturelle et professionnelle. Collecte les infos client, rapport quotidien. Ne manquez plus jamais un appel.",
-  keywords: ["réceptionniste IA artisan", "répondre appels artisan", "secrétaire virtuelle artisan", "IA téléphonique artisan", "ne plus manquer appel client", "rapport SMS artisan"],
+  title: "Réceptionniste IA pour Peintres | Ne ratez plus vos devis 24h/24 – PremiumArtisan",
+  description: "Marie répond à vos appels 24h/24 : demandes de devis, disponibilités, projets peinture. Collecte les infos client et envoie un rapport SMS quotidien.",
+  keywords: ["réceptionniste IA peintre", "secrétaire virtuelle peintre", "ne pas rater appel devis peinture", "IA téléphonique peintre artisan", "permanence téléphonique peintre"],
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://premiumartisan.fr/receptionniste-ia-peintre" },
   openGraph: {
     type: "website",
-    url: "https://premiumartisan.fr/receptionniste-ia-artisan",
-    title: "Réceptionniste IA pour Artisans | Marie répond 24h/24 – PremiumArtisan",
-    description: "Marie répond à vos appels 24h/24. Ne manquez plus jamais un appel. Essai gratuit 15 min.",
+    url: "https://premiumartisan.fr/receptionniste-ia-peintre",
+    title: "Réceptionniste IA pour Peintres | Ne ratez plus vos devis – PremiumArtisan",
+    description: "Marie répond à vos appels 24h/24 : demandes de devis, disponibilités, projets peinture. Rapport SMS quotidien.",
     locale: "fr_FR",
     siteName: "PremiumArtisan",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Réceptionniste IA pour Artisans | PremiumArtisan",
-    description: "Marie répond à vos appels 24h/24. Ne manquez plus jamais un appel. Essai gratuit 15 min.",
+    title: "Réceptionniste IA pour Peintres | PremiumArtisan",
+    description: "Marie répond à vos appels 24h/24. Ne ratez plus jamais une demande de devis.",
   },
-  alternates: { canonical: "https://premiumartisan.fr/receptionniste-ia-artisan" },
 }
 
 const CTA = "/artisan/login?redirect=/artisan/receptionist"
 
 const FEATURES = [
-  "Répond à vos appels 24h/24, 7j/7",
-  "Rapport SMS chaque jour",
-  "Historique complet de vos appels",
-  "Reconnaît famille et employés",
-  "Transcription de chaque conversation",
+  "Répond aux appels 24h/24, 7j/7",
+  "Collecte surface, type de peinture et budget",
+  "Rapport SMS chaque soir",
+  "Reconnaît famille et clients réguliers",
+  "Transcription de chaque appel",
 ]
 
-const schemaOrg = JSON.stringify({
+const schemaFAQ = JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "PremiumArtisan",
-  "url": "https://premiumartisan.fr",
-  "description": "Réceptionniste IA pour artisans. Marie répond à vos appels 24h/24 et envoie un rapport SMS quotidien.",
-  "contactPoint": { "@type": "ContactPoint", "contactType": "customer support", "availableLanguage": "French" },
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Comment Marie gère-t-elle les demandes de devis peinture ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Marie décroche en moins de 3 secondes, collecte la surface à peindre, le type de travaux (intérieur, extérieur, ravalement), le budget estimé et les coordonnées du client. Vous recevez un résumé structuré chaque soir.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Un client saura-t-il que c'est une IA ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non. Marie répond de manière naturelle et professionnelle, indiscernable d'une vraie réceptionniste.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Combien coûte le service pour un peintre ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "L'essai est gratuit pendant 14 jours. Les forfaits commencent à 49€/mois pour 190 minutes. Un devis récupéré de 2 000–5 000€ rembourse largement l'abonnement.",
+      },
+    },
+    {
+      "@type": "Question",
+      "name": "Quels types d'appels Marie gère-t-elle pour un peintre ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Demandes de devis, questions sur les disponibilités, projets de rénovation, peinture intérieure et extérieure, ravalement de façade — Marie collecte toutes les informations et vous les transmet structurées.",
+      },
+    },
+  ],
 })
 
 const schemaSoftware = JSON.stringify({
@@ -46,23 +76,12 @@ const schemaSoftware = JSON.stringify({
   "name": "Marie – Réceptionniste IA PremiumArtisan",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
-  "description": "Marie est une réceptionniste IA disponible 24h/24 qui répond aux appels des artisans, collecte les informations clients et envoie un rapport SMS quotidien.",
+  "description": "Réceptionniste IA spécialisée pour peintres. Répond aux demandes de devis 24h/24, collecte les informations et envoie un rapport SMS quotidien.",
   "offers": [
     { "@type": "Offer", "name": "Trial", "price": "0", "priceCurrency": "EUR" },
     { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "EUR" },
     { "@type": "Offer", "name": "Pro", "price": "79", "priceCurrency": "EUR" },
     { "@type": "Offer", "name": "Business", "price": "139", "priceCurrency": "EUR" },
-  ],
-})
-
-const schemaFAQ = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    { "@type": "Question", "name": "Comment fonctionne la réceptionniste IA Marie ?", "acceptedAnswer": { "@type": "Answer", "text": "Marie répond automatiquement à vos appels 24h/24. Elle collecte le nom, le motif et les coordonnées de chaque appelant, puis vous envoie un rapport SMS quotidien récapitulatif." } },
-    { "@type": "Question", "name": "Y a-t-il un essai gratuit ?", "acceptedAnswer": { "@type": "Answer", "text": "Oui. PremiumArtisan propose un essai gratuit de 14 jours avec 15 minutes d'appels, sans carte bancaire requise." } },
-    { "@type": "Question", "name": "Mes clients sauront-ils que c'est une IA ?", "acceptedAnswer": { "@type": "Answer", "text": "Non. Marie sonne de manière naturelle et professionnelle." } },
-    { "@type": "Question", "name": "Quels artisans peuvent utiliser ce service ?", "acceptedAnswer": { "@type": "Answer", "text": "Plombiers, électriciens, menuisiers, serruriers, peintres, maçons — tout artisan qui reçoit des appels téléphoniques peut bénéficier de Marie." } },
   ],
 })
 
@@ -78,7 +97,6 @@ a{color:inherit;text-decoration:none}
 @media(min-width:1024px){.container{padding:0 64px}}
 @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(212,168,83,.4)}50%{box-shadow:0 0 0 8px rgba(212,168,83,0)}}
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 12px rgba(212,168,83,.2)}50%{box-shadow:0 0 24px rgba(212,168,83,.4)}}
-@keyframes bgPulse{0%,100%{opacity:.02}50%{opacity:.04}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s var(--ease-expo),transform .8s var(--ease-expo)}
 .reveal.in{opacity:1;transform:translateY(0)}
@@ -110,7 +128,6 @@ a{color:inherit;text-decoration:none}
 #mob a{font-family:var(--font-display);font-weight:600;font-size:22px;color:var(--text-secondary);transition:color .2s}
 #mob a:hover{color:var(--gold)}
 #hero{position:relative;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-.hero-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 0%,#09090B 80%)}
 .hero-content{position:relative;z-index:10;max-width:900px;margin:0 auto;text-align:center;padding:160px 24px 80px}
 .hero-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 20px;border-radius:999px;border:1px solid var(--gold-dim);background:rgba(212,168,83,.08);margin-bottom:32px;animation:fadeUp .8s .5s var(--ease-expo) both}
 .badge-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulseDot 2s infinite}
@@ -133,16 +150,6 @@ h2{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,4vw,40px
 .sec-sub{font-family:var(--font-body);font-size:clamp(16px,2vw,20px);line-height:1.7;color:var(--text-secondary)}
 .sec-hdr{text-align:center;margin-bottom:64px}
 .sec-hdr .sec-sub{max-width:640px;margin:0 auto}
-.pain-grid{display:grid;grid-template-columns:1fr;gap:48px;align-items:center}
-@media(min-width:1024px){.pain-grid{grid-template-columns:60% 40%;gap:64px}}
-.pain-list{list-style:none;display:flex;flex-direction:column;gap:16px;margin-top:32px}
-.pain-item{display:flex;align-items:flex-start;gap:12px}
-.pain-item svg{flex-shrink:0;margin-top:2px;color:var(--text-muted)}
-.pain-item span{font-family:var(--font-body);font-size:15px;color:var(--text-secondary);line-height:1.6}
-.pain-ph{width:100%;min-height:280px;border-radius:16px;background:linear-gradient(135deg,var(--bg-secondary),var(--bg-tertiary));border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center}
-.float-card{position:absolute;bottom:-24px;right:16px;background:var(--bg-secondary);border:1px solid var(--gold-dim);border-radius:12px;padding:20px 24px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
-.float-n{font-family:var(--font-mono);font-weight:700;font-size:32px;color:var(--gold)}
-.float-l{font-family:var(--font-body);font-size:12px;color:var(--text-secondary)}
 .cards3{display:grid;grid-template-columns:1fr;gap:24px}
 @media(min-width:768px){.cards3{grid-template-columns:repeat(3,1fr)}}
 .card{background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:12px;padding:32px;transition:border-color .25s,transform .25s,box-shadow .25s}
@@ -152,6 +159,15 @@ h2{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,4vw,40px
 .card-icon svg{color:var(--gold)}
 .card-h3{font-family:var(--font-display);font-weight:600;font-size:clamp(20px,2.5vw,28px);line-height:1.3;color:var(--text-primary);margin-bottom:12px}
 .card-p{font-family:var(--font-body);font-size:clamp(14px,1.5vw,16px);line-height:1.7;color:var(--text-secondary)}
+.metiers{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:640px){.metiers{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.metiers{grid-template-columns:repeat(3,1fr)}}
+.metier-card{display:flex;align-items:center;gap:16px;padding:20px 24px;border-radius:12px;border:1px solid var(--border-subtle);background:var(--bg-secondary);transition:border-color .2s,transform .2s}
+.metier-card:hover{border-color:var(--gold-dim);transform:translateY(-2px)}
+.metier-card.active{border-color:var(--gold-dim);background:var(--bg-tertiary)}
+.metier-icon{font-size:28px;flex-shrink:0}
+.metier-label{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--text-primary)}
+.metier-sub{font-family:var(--font-body);font-size:13px;color:var(--text-muted);margin-top:2px}
 .plans{display:grid;grid-template-columns:1fr;gap:20px}
 @media(min-width:640px){.plans{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1280px){.plans{grid-template-columns:repeat(4,1fr)}}
@@ -176,10 +192,9 @@ h2{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,4vw,40px
 .pbtn-out{width:100%;font-family:var(--font-display);font-weight:600;font-size:14px;padding:13px;border-radius:10px;border:1px solid var(--border-subtle);color:var(--text-primary);background:transparent;cursor:pointer;transition:border-color .2s,color .2s,background .2s;display:block;text-align:center}
 .pbtn-out:hover{border-color:var(--gold-dim);color:var(--gold);background:rgba(212,168,83,.05)}
 #cta{position:relative;padding:128px 0;background:var(--bg-primary);text-align:center;overflow:hidden}
-.cta-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(212,168,83,.03) 0%,transparent 60%);animation:bgPulse 4s ease-in-out infinite}
+.cta-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(212,168,83,.03) 0%,transparent 60%)}
 .cta-h2{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1.2;letter-spacing:-.01em;color:var(--text-primary);margin-bottom:16px}
 .cta-sub{font-family:var(--font-body);font-size:clamp(17px,2vw,20px);line-height:1.7;color:var(--text-secondary);max-width:540px;margin:0 auto 40px}
-.cta-note{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px;font-family:var(--font-display);font-weight:500;font-size:12px;letter-spacing:.06em;color:var(--text-muted)}
 footer{background:var(--bg-secondary);border-top:1px solid var(--border-subtle)}
 .foot-grid{display:grid;grid-template-columns:1fr;gap:48px;padding-top:64px;padding-bottom:32px}
 @media(min-width:768px){.foot-grid{grid-template-columns:repeat(2,1fr)}}
@@ -194,9 +209,6 @@ footer{background:var(--bg-secondary);border-top:1px solid var(--border-subtle)}
 .foot-bot{border-top:1px solid var(--border-subtle);padding:32px 0;display:flex;flex-direction:column;align-items:center;gap:16px}
 @media(min-width:768px){.foot-bot{flex-direction:row;justify-content:space-between}}
 .foot-copy{font-family:var(--font-display);font-size:12px;letter-spacing:.06em;color:var(--text-muted)}
-.foot-soc{display:flex;gap:24px}
-.foot-soc a{font-family:var(--font-display);font-size:12px;color:var(--text-muted);transition:color .2s}
-.foot-soc a:hover{color:var(--text-secondary)}
 `
 
 const js = `
@@ -230,18 +242,9 @@ function Chk() {
   )
 }
 
-function XIcon() {
-  return (
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-    </svg>
-  )
-}
-
-export default function ReceptionnisteIAPage() {
+export default function ReceptionnisteIAPeintrePage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaOrg }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaSoftware }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schemaFAQ }} />
       <style dangerouslySetInnerHTML={{ __html: css }} />
@@ -250,8 +253,8 @@ export default function ReceptionnisteIAPage() {
         <div className="container nav-inner">
           <a href="/" className="nav-logo" aria-label="PremiumArtisan — Accueil">PREMIUMARTISAN</a>
           <ul className="nav-links" role="list">
-            <li><a href="/receptionniste-ia-artisan#solution">Fonctionnalités</a></li>
-            <li><a href="/receptionniste-ia-artisan#tarifs">Tarifs</a></li>
+            <li><a href="/receptionniste-ia-peintre#solution">Fonctionnalités</a></li>
+            <li><a href="/receptionniste-ia-peintre#tarifs">Tarifs</a></li>
             <li><a href={CTA}>Démarrer</a></li>
           </ul>
           <a href={CTA} className="nav-btn">Démarrer</a>
@@ -262,59 +265,29 @@ export default function ReceptionnisteIAPage() {
       </nav>
 
       <div id="mob" role="dialog" aria-label="Menu" aria-modal="true">
-        <a href="/receptionniste-ia-artisan#solution">Fonctionnalités</a>
-        <a href="/receptionniste-ia-artisan#tarifs">Tarifs</a>
+        <a href="/receptionniste-ia-peintre#solution">Fonctionnalités</a>
+        <a href="/receptionniste-ia-peintre#tarifs">Tarifs</a>
         <a href={CTA} className="btn-gold" style={{marginTop:"16px"}}>Démarrer</a>
       </div>
 
       <main id="main">
 
         <section id="hero" aria-labelledby="h1">
-          <div className="hero-overlay" aria-hidden="true"></div>
           <div className="hero-content">
             <div className="hero-badge">
               <span className="badge-dot" aria-hidden="true"></span>
-              <span className="badge-txt">IA Réceptionniste pour Artisans</span>
+              <span className="badge-txt">Réceptionniste IA — Peintres</span>
             </div>
-            <h1 id="h1">Ne manquez plus<br /><span>jamais</span> un appel.</h1>
-            <p className="hero-sub">Marie, votre réceptionniste IA, répond aux appels que vous ne pouvez pas prendre. Elle collecte les informations et vous envoie un rapport SMS quotidien. Disponible 24h/24.</p>
+            <h1 id="h1">Ne ratez plus<br /><span>aucune demande</span> de devis.</h1>
+            <p className="hero-sub">En chantier, impossible de décrocher. Marie répond à votre place, collecte la surface, le type de travaux et le budget du client. Vous rentrez le soir avec une liste de prospects qualifiés.</p>
             <div className="hero-ctas">
               <a href={CTA} className="btn-gold">Démarrer mon essai gratuit</a>
-              <a href="/receptionniste-ia-artisan#tarifs" className="btn-outline">Voir les tarifs</a>
+              <a href="/receptionniste-ia-peintre#tarifs" className="btn-outline">Voir les tarifs</a>
             </div>
-            <div className="stats" aria-label="Chiffres clés PremiumArtisan">
+            <div className="stats" aria-label="Chiffres clés">
               <div className="stat"><span className="stat-n">24/7</span><span className="stat-l">Disponibilité</span></div>
-              <div className="stat"><span className="stat-n">98%</span><span className="stat-l">Taux de satisfaction</span></div>
-            </div>
-          </div>
-        </section>
-
-        <div className="divider"></div>
-
-        <section className="sec" aria-labelledby="pain-h2">
-          <div className="container">
-            <div className="pain-grid">
-              <div>
-                <span className="section-tag reveal">Le Problème</span>
-                <h2 id="pain-h2" className="reveal d1">Chaque appel manqué est un client perdu</h2>
-                <p className="sec-sub reveal d2">Les artisans perdent en moyenne 35% de leurs appels entrants. En plein chantier, en conduisant, ou simplement occupé — impossible de répondre à chaque fois.</p>
-                <ul className="pain-list">
-                  <li className="pain-item reveal d2"><XIcon /><span>35% des appels entrants ne sont jamais décrochés</span></li>
-                  <li className="pain-item reveal d3"><XIcon /><span>Un client sans réponse appelle 2,3 autres artisans en moyenne</span></li>
-                  <li className="pain-item reveal d4"><XIcon /><span>Le temps perdu à rappeler coûte 4h/semaine en moyenne</span></li>
-                </ul>
-              </div>
-              <div className="pain-visual reveal d2" style={{position:"relative"}}>
-                <div className="pain-ph" aria-hidden="true">
-                  <svg width="80" height="80" fill="none" stroke="var(--gold-dim)" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-                  </svg>
-                </div>
-                <div className="float-card">
-                  <div className="float-n">35%</div>
-                  <div className="float-l">d&apos;appels manqués</div>
-                </div>
-              </div>
+              <div className="stat"><span className="stat-n">3 sec</span><span className="stat-l">Temps de décrochage</span></div>
+              <div className="stat"><span className="stat-n">2 000€</span><span className="stat-l">Devis moyen récupéré</span></div>
             </div>
           </div>
         </section>
@@ -324,9 +297,9 @@ export default function ReceptionnisteIAPage() {
         <section className="sec-alt" id="solution" aria-labelledby="sol-h2">
           <div className="container">
             <div className="sec-hdr">
-              <span className="section-tag reveal">La Solution</span>
-              <h2 id="sol-h2" className="reveal d1">Votre IA réceptionniste travaille 24h/24</h2>
-              <p className="sec-sub reveal d2">Elle répond, collecte les informations, envoie un rapport SMS chaque jour. Vous récupérez chaque opportunité.</p>
+              <span className="section-tag reveal">Comment ça marche</span>
+              <h2 id="sol-h2" className="reveal d1">Marie qualifie vos prospects pendant que vous peignez</h2>
+              <p className="sec-sub reveal d2">Peinture intérieure, ravalement, rénovation — Marie collecte tout et vous transmet l&apos;essentiel chaque soir.</p>
             </div>
             <div className="cards3">
               <article className="card reveal d1">
@@ -335,8 +308,8 @@ export default function ReceptionnisteIAPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                   </svg>
                 </div>
-                <h3 className="card-h3">Répond aux appels</h3>
-                <p className="card-p">Votre IA décroche en moins de 3 secondes, 24h/24 et 7j/7. Plus jamais de tonalité d&apos;occupée ni de boîte vocale.</p>
+                <h3 className="card-h3">Décroche en 3 secondes</h3>
+                <p className="card-p">Le client ne tombe jamais sur un répondeur. Marie décroche immédiatement et engage la conversation de manière naturelle.</p>
               </article>
               <article className="card reveal d2">
                 <div className="card-icon" aria-hidden="true">
@@ -344,8 +317,8 @@ export default function ReceptionnisteIAPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                   </svg>
                 </div>
-                <h3 className="card-h3">Collecte les informations</h3>
-                <p className="card-p">Elle pose les bonnes questions : nom, numéro, type de travaux, urgence. Vous recevez un résumé structuré de chaque appel.</p>
+                <h3 className="card-h3">Qualifie le projet</h3>
+                <p className="card-p">Surface à peindre, type de travaux, budget estimé, délais souhaités — tout est structuré et prêt pour votre rappel.</p>
               </article>
               <article className="card reveal d3">
                 <div className="card-icon" aria-hidden="true">
@@ -353,10 +326,48 @@ export default function ReceptionnisteIAPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                   </svg>
                 </div>
-                <h3 className="card-h3">Rapport SMS chaque jour</h3>
-                <p className="card-p">Chaque soir, recevez un SMS récapitulatif : qui a appelé, pourquoi, et quoi faire ensuite. Zéro oubli.</p>
+                <h3 className="card-h3">Rapport SMS chaque soir</h3>
+                <p className="card-p">Chaque soir, recevez la liste de vos prospects du jour avec toutes les infos pour rappeler efficacement. Zéro oubli.</p>
               </article>
             </div>
+          </div>
+        </section>
+
+        <div className="divider"></div>
+
+        <section className="sec" aria-labelledby="metiers-h2">
+          <div className="container">
+            <div className="sec-hdr">
+              <span className="section-tag reveal">Par métier</span>
+              <h2 id="metiers-h2" className="reveal d1">Marie s&apos;adapte à chaque artisan</h2>
+              <p className="sec-sub reveal d2">Une réceptionniste IA pensée pour les spécificités de chaque métier.</p>
+            </div>
+            <div className="metiers">
+              <div className="metier-card active reveal d1">
+                <span className="metier-icon">🎨</span>
+                <div>
+                  <div className="metier-label">Peintre</div>
+                  <div className="metier-sub">Devis, disponibilités, projets</div>
+                </div>
+              </div>
+              <a href="/receptionniste-ia-plombier" className="metier-card reveal d2">
+                <span className="metier-icon">🔧</span>
+                <div>
+                  <div className="metier-label">Plombier</div>
+                  <div className="metier-sub">Urgences, fuites, chauffe-eau</div>
+                </div>
+              </a>
+              <a href="/receptionniste-ia-artisan" className="metier-card reveal d3">
+                <span className="metier-icon">🧱</span>
+                <div>
+                  <div className="metier-label">Autres métiers</div>
+                  <div className="metier-sub">Maçon, électricien, menuisier</div>
+                </div>
+              </a>
+            </div>
+            <p style={{textAlign:"center",marginTop:"32px",fontFamily:"var(--font-body)",fontSize:"14px",color:"var(--text-muted)"}}>
+              Voir tous les métiers sur <a href="/receptionniste-ia-artisan" style={{color:"var(--gold)"}}>la page principale Marie</a>
+            </p>
           </div>
         </section>
 
@@ -366,8 +377,8 @@ export default function ReceptionnisteIAPage() {
           <div className="container">
             <div className="sec-hdr">
               <span className="section-tag reveal">Tarifs</span>
-              <h2 id="price-h2" className="reveal d1">Un prix clair, sans surprise</h2>
-              <p className="sec-sub reveal d2">Commencez gratuitement. Évoluez selon votre volume d&apos;appels.</p>
+              <h2 id="price-h2" className="reveal d1">Un devis récupéré rembourse le mois</h2>
+              <p className="sec-sub reveal d2">Commencez gratuitement. Un projet de peinture de 2 000–5 000€ couvre largement l&apos;abonnement annuel.</p>
             </div>
             <div className="plans">
               <div className="plan reveal d1">
@@ -375,7 +386,7 @@ export default function ReceptionnisteIAPage() {
                 <div className="pname">Trial</div>
                 <div className="pprice"><span className="pamount">€0</span></div>
                 <div className="pmins">15 min / 14 jours</div>
-                <div className="pperiod">Essai sans carte bancaire</div>
+                <div className="pperiod">Sans carte bancaire</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
                 <a href={CTA} className="pbtn-out">Essai gratuit</a>
@@ -409,9 +420,30 @@ export default function ReceptionnisteIAPage() {
                 <a href={CTA} className="pbtn-out">Choisir</a>
               </div>
             </div>
-            <p style={{textAlign:"center",marginTop:"32px",fontFamily:"var(--font-body)",fontSize:"14px",color:"var(--text-muted)"}}>
-              Besoin d&apos;un volume supérieur ? <a href="mailto:contact@premiumartisan.fr" style={{color:"var(--gold)"}}>Contactez-nous</a> pour un plan sur mesure.
-            </p>
+          </div>
+        </section>
+
+        <div className="divider"></div>
+
+        <section className="sec" aria-labelledby="faq-h2">
+          <div className="container" style={{maxWidth:"720px"}}>
+            <div className="sec-hdr">
+              <span className="section-tag reveal">FAQ</span>
+              <h2 id="faq-h2" className="reveal d1">Questions fréquentes</h2>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:"24px"}}>
+              {[
+                { q: "Comment Marie gère-t-elle les demandes de devis peinture ?", a: "Marie décroche en moins de 3 secondes, collecte la surface, le type de travaux, le budget et les coordonnées. Vous recevez un résumé structuré chaque soir." },
+                { q: "Un client saura-t-il que c'est une IA ?", a: "Non. Marie répond de manière naturelle et professionnelle, indiscernable d'une vraie réceptionniste." },
+                { q: "Combien coûte le service pour un peintre ?", a: "L'essai est gratuit 14 jours. Les forfaits commencent à 49€/mois. Un projet de 2 000–5 000€ rembourse largement l'abonnement." },
+                { q: "Quels types d'appels Marie gère-t-elle ?", a: "Demandes de devis, disponibilités, peinture intérieure, ravalement de façade, rénovation — tout est collecté et transmis structuré." },
+              ].map(({ q, a }) => (
+                <div key={q} className="card reveal">
+                  <h3 className="card-h3" style={{fontSize:"18px",marginBottom:"8px"}}>{q}</h3>
+                  <p className="card-p">{a}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -420,13 +452,9 @@ export default function ReceptionnisteIAPage() {
         <section id="cta" aria-labelledby="cta-h2">
           <div className="cta-glow" aria-hidden="true"></div>
           <div className="container" style={{position:"relative",zIndex:1}}>
-            <h2 className="cta-h2 reveal" id="cta-h2">Prêt à ne plus manquer un appel ?</h2>
-            <p className="cta-sub reveal d1">Commencez gratuitement pendant 14 jours. Aucune carte bancaire requise.</p>
+            <h2 className="cta-h2 reveal" id="cta-h2">Prêt à ne plus rater une demande de devis ?</h2>
+            <p className="cta-sub reveal d1">14 jours gratuits. Aucune carte bancaire requise. Mise en place en 5 minutes.</p>
             <a href={CTA} className="btn-gold reveal d2">Démarrer mon essai gratuit</a>
-            <div className="cta-note reveal d3">
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Mise en place en 5 minutes
-            </div>
           </div>
         </section>
 
@@ -437,13 +465,13 @@ export default function ReceptionnisteIAPage() {
           <div className="foot-grid">
             <div>
               <a href="/" className="foot-logo">PREMIUMARTISAN</a>
-              <p className="foot-desc">Réceptionniste IA pour artisans. Marie répond à vos appels 24h/24, collecte les informations et envoie un rapport SMS quotidien. Ne manquez plus jamais un client.</p>
+              <p className="foot-desc">Réceptionniste IA pour peintres. Marie répond à vos demandes de devis 24h/24, qualifie les prospects et vous envoie un rapport SMS chaque soir.</p>
             </div>
             <nav aria-label="Navigation produit">
               <div className="foot-ttl">Produit</div>
               <ul className="foot-list">
-                <li><a href="/receptionniste-ia-artisan#solution">Fonctionnalités</a></li>
-                <li><a href="/receptionniste-ia-artisan#tarifs">Tarifs</a></li>
+                <li><a href="/receptionniste-ia-artisan">Tous les métiers</a></li>
+                <li><a href="/receptionniste-ia-peintre#tarifs">Tarifs</a></li>
                 <li><a href={CTA}>Démarrer</a></li>
               </ul>
             </nav>
@@ -464,9 +492,6 @@ export default function ReceptionnisteIAPage() {
           </div>
           <div className="foot-bot">
             <span className="foot-copy">&copy; 2026 PremiumArtisan.fr — Tous droits réservés</span>
-            <div className="foot-soc">
-              <a href="https://www.linkedin.com/company/premiumartisan" rel="noopener noreferrer" target="_blank">LinkedIn</a>
-            </div>
           </div>
         </div>
       </footer>
