@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Réceptionniste IA pour Artisans | Marie répond 24h/24 – PremiumArtisan",
-  description: "Marie répond à vos appels 24h/24. Ne manquez plus jamais un appel. IA collecte les infos clients et vous envoie un rapport quotidien. Essai gratuit 15 min.",
+  description: "Marie répond à vos appels 24h/24, voix naturelle et professionnelle. Collecte les infos client, rapport quotidien. Ne manquez plus jamais un appel.",
   keywords: ["réceptionniste IA artisan", "répondre appels artisan", "secrétaire virtuelle artisan", "IA téléphonique artisan", "ne plus manquer appel client", "rapport SMS artisan"],
   robots: { index: true, follow: true },
   openGraph: {
