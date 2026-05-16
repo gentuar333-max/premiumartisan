@@ -11,14 +11,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // ── www → non-www ──
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.premiumartisan.fr" }],
-        destination: "https://premiumartisan.fr/:path*",
-        permanent: true,
-      },
-
       // ── CUISINE statike → dynamic ──
       { source: "/devis-cuisine-chenove",             destination: "/devis-cuisine/chenove",            permanent: true },
       { source: "/devis-cuisine-dijon",               destination: "/devis-cuisine/dijon",              permanent: true },
