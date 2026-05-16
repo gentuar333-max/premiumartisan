@@ -16,15 +16,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/comment-ca-marche`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
   ];
 
-  // ── SEO artisans (vetëm URL që ekzistojnë) ─────────────────────────────
+  // ── Marie IA ─────────────────────────────────────────────────────────────
+  const seoMarie: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}/receptionniste-ia-artisan`,   lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 },
+    { url: `${SITE_URL}/receptionniste-ia-plombier`,  lastModified: now, changeFrequency: "weekly" as const, priority: 0.85 },
+  ];
+
+  // ── SEO artisans ────────────────────────────────────────────────────────
   const seoArtisan: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/trouver-clients-peintre-dijon`, lastModified: now, changeFrequency: "weekly",  priority: 0.85 },
     { url: `${SITE_URL}/devis-gratuit-peintre-dijon`,   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-    // ❌ HEQUR: /logiciel-devis-peintre-cote-dor (404)
-    // ❌ HEQUR: /creer-devis-peintre (404)
-    // ❌ HEQUR: /creer-facture-artisan (404)
-    // ❌ HEQUR: /devis-facture-gratuit-peintre-bourgogne (404)
-    // ❌ HEQUR: /application-devis-peintre (404)
   ];
 
   const VILLES = [
@@ -41,7 +42,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
   const TOP = ["dijon","paris","lyon","marseille","toulouse"];
 
-  // ── /devis-peintre/[ville] ──────────────────────────────────────────────
   const devisPeintreVille: MetadataRoute.Sitemap = VILLES.map((v) => ({
     url: `${SITE_URL}/devis-peintre/${v}`,
     lastModified: now,
@@ -49,7 +49,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: TOP.includes(v) ? 0.9 : 0.7,
   }));
 
-  // ── /devis-cuisine/[ville] (NEW) ────────────────────────────────────────
   const VILLES_CUISINE = [
     "dijon","chenove","longvic","talant","quetigny","fontaine-les-dijon",
     "marsannay-la-cote","beaune","lyon","paris","marseille","toulouse",
@@ -62,7 +61,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: TOP.includes(v) ? 0.85 : 0.7,
   }));
 
-  // ── /logiciel-devis-artisan/[ville] ────────────────────────────────────
   const logicielDevisVille: MetadataRoute.Sitemap = VILLES.map((v) => ({
     url: `${SITE_URL}/logiciel-devis-artisan/${v}`,
     lastModified: now,
@@ -71,6 +69,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   return [
+    ...seoMarie,
     ...corePages,
     ...seoArtisan,
     ...devisPeintreVille,
