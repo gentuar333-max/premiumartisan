@@ -251,9 +251,9 @@ export default function ReceptionnisteIAPage() {
           <ul className="nav-links" role="list">
             <li><a href="/receptionniste-ia-artisan#solution">Fonctionnalités</a></li>
             <li><a href="/receptionniste-ia-artisan#tarifs">Tarifs</a></li>
-            <li><a href="/artisan/register">Démarrer</a></li>
+            <li><a href="/artisan/login">Démarrer</a></li>
           </ul>
-          <a href="/artisan/register" className="nav-btn">Démarrer</a>
+          <a href="/artisan/login" className="nav-btn">Démarrer</a>
           <button className="ham" id="ham" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mob">
             <span></span><span></span><span></span>
           </button>
@@ -263,7 +263,7 @@ export default function ReceptionnisteIAPage() {
       <div id="mob" role="dialog" aria-label="Menu" aria-modal="true">
         <a href="/receptionniste-ia-artisan#solution">Fonctionnalités</a>
         <a href="/receptionniste-ia-artisan#tarifs">Tarifs</a>
-        <a href="/artisan/register" className="btn-gold" style={{marginTop:"16px"}}>Démarrer</a>
+        <a href="/artisan/login" className="btn-gold" style={{marginTop:"16px"}}>Démarrer</a>
       </div>
 
       <main id="main">
@@ -279,7 +279,7 @@ export default function ReceptionnisteIAPage() {
             <h1 id="h1">Ne manquez plus<br /><span>jamais</span> un appel.</h1>
             <p className="hero-sub">Marie, votre réceptionniste IA, répond aux appels que vous ne pouvez pas prendre. Elle collecte les informations et vous envoie un rapport SMS quotidien. Disponible 24h/24.</p>
             <div className="hero-ctas">
-              <a href="/artisan/register" className="btn-gold">Démarrer mon essai gratuit</a>
+              <a href="/artisan/login" className="btn-gold">Démarrer mon essai gratuit</a>
               <a href="/receptionniste-ia-artisan#tarifs" className="btn-outline">Voir les tarifs</a>
             </div>
             <div className="stats" aria-label="Chiffres clés PremiumArtisan">
@@ -387,7 +387,7 @@ export default function ReceptionnisteIAPage() {
                 <div className="pperiod">Essai sans carte bancaire</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-out">Essai gratuit</a>
+                <a href="/artisan/login" className="pbtn-out">Essai gratuit</a>
               </div>
               <div className="plan reveal d2">
                 <div className="pname">Starter</div>
@@ -396,7 +396,7 @@ export default function ReceptionnisteIAPage() {
                 <div className="pperiod">&nbsp;</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-gold">Choisir</a>
+                <a href="/artisan/login" className="pbtn-gold">Choisir</a>
               </div>
               <div className="plan hot reveal d3">
                 <span className="plan-badge gold">Le plus populaire</span>
@@ -406,7 +406,7 @@ export default function ReceptionnisteIAPage() {
                 <div className="pperiod">&nbsp;</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-gold">Choisir</a>
+                <a href="/artisan/login" className="pbtn-gold">Choisir</a>
               </div>
               <div className="plan reveal d4">
                 <div className="pname">Business</div>
@@ -415,7 +415,7 @@ export default function ReceptionnisteIAPage() {
                 <div className="pperiod">&nbsp;</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-out">Choisir</a>
+                <a href="/artisan/login" className="pbtn-out">Choisir</a>
               </div>
             </div>
             <p style={{textAlign:"center",marginTop:"32px",fontFamily:"var(--font-body)",fontSize:"14px",color:"var(--text-muted)"}}>
@@ -432,7 +432,7 @@ export default function ReceptionnisteIAPage() {
           <div className="container" style={{position:"relative",zIndex:1}}>
             <h2 className="cta-h2 reveal" id="cta-h2">Prêt à ne plus manquer un appel ?</h2>
             <p className="cta-sub reveal d1">Commencez gratuitement pendant 14 jours. Aucune carte bancaire requise.</p>
-            <a href="/artisan/register" className="btn-gold reveal d2">Démarrer mon essai gratuit</a>
+            <a href="/artisan/login" className="btn-gold reveal d2">Démarrer mon essai gratuit</a>
             <div className="cta-note reveal d3">
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               Mise en place en 5 minutes
@@ -454,7 +454,7 @@ export default function ReceptionnisteIAPage() {
               <ul className="foot-list">
                 <li><a href="/receptionniste-ia-artisan#solution">Fonctionnalités</a></li>
                 <li><a href="/receptionniste-ia-artisan#tarifs">Tarifs</a></li>
-                <li><a href="/artisan/register">Démarrer</a></li>
+                <li><a href="/artisan/login">Démarrer</a></li>
               </ul>
             </nav>
             <nav aria-label="Liens légaux">

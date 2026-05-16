@@ -253,9 +253,9 @@ export default function ReceptionnisteIAPlombierPage() {
           <ul className="nav-links" role="list">
             <li><a href="/receptionniste-ia-plombier#solution">Fonctionnalités</a></li>
             <li><a href="/receptionniste-ia-plombier#tarifs">Tarifs</a></li>
-            <li><a href="/artisan/register">Démarrer</a></li>
+            <li><a href="/artisan/login">Démarrer</a></li>
           </ul>
-          <a href="/artisan/register" className="nav-btn">Démarrer</a>
+          <a href="/artisan/login" className="nav-btn">Démarrer</a>
           <button className="ham" id="ham" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mob">
             <span></span><span></span><span></span>
           </button>
@@ -265,7 +265,7 @@ export default function ReceptionnisteIAPlombierPage() {
       <div id="mob" role="dialog" aria-label="Menu" aria-modal="true">
         <a href="/receptionniste-ia-plombier#solution">Fonctionnalités</a>
         <a href="/receptionniste-ia-plombier#tarifs">Tarifs</a>
-        <a href="/artisan/register" className="btn-gold" style={{marginTop:"16px"}}>Démarrer</a>
+        <a href="/artisan/login" className="btn-gold" style={{marginTop:"16px"}}>Démarrer</a>
       </div>
 
       <main id="main">
@@ -280,7 +280,7 @@ export default function ReceptionnisteIAPlombierPage() {
             <h1 id="h1">Ne ratez plus<br /><span>aucune urgence</span> plomberie.</h1>
             <p className="hero-sub">En plein chantier, impossible de décrocher. Marie répond à votre place, collecte l&apos;adresse et la nature du problème, et vous envoie un SMS. Le client est rassuré. Vous ne perdez plus rien.</p>
             <div className="hero-ctas">
-              <a href="/artisan/register" className="btn-gold">Démarrer mon essai gratuit</a>
+              <a href="/artisan/login" className="btn-gold">Démarrer mon essai gratuit</a>
               <a href="/receptionniste-ia-plombier#tarifs" className="btn-outline">Voir les tarifs</a>
             </div>
             <div className="stats" aria-label="Chiffres clés">
@@ -400,7 +400,7 @@ export default function ReceptionnisteIAPlombierPage() {
                 <div className="pperiod">Sans carte bancaire</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-out">Essai gratuit</a>
+                <a href="/artisan/login" className="pbtn-out">Essai gratuit</a>
               </div>
               <div className="plan reveal d2">
                 <div className="pname">Starter</div>
@@ -409,7 +409,7 @@ export default function ReceptionnisteIAPlombierPage() {
                 <div className="pperiod">&nbsp;</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-gold">Choisir</a>
+                <a href="/artisan/login" className="pbtn-gold">Choisir</a>
               </div>
               <div className="plan hot reveal d3">
                 <span className="plan-badge gold">Le plus populaire</span>
@@ -419,7 +419,7 @@ export default function ReceptionnisteIAPlombierPage() {
                 <div className="pperiod">&nbsp;</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-gold">Choisir</a>
+                <a href="/artisan/login" className="pbtn-gold">Choisir</a>
               </div>
               <div className="plan reveal d4">
                 <div className="pname">Business</div>
@@ -428,7 +428,7 @@ export default function ReceptionnisteIAPlombierPage() {
                 <div className="pperiod">&nbsp;</div>
                 <div className="pdiv"></div>
                 <ul className="pfeatures">{FEATURES.map(f => <li key={f} className="pfeat"><Chk />{f}</li>)}</ul>
-                <a href="/artisan/register" className="pbtn-out">Choisir</a>
+                <a href="/artisan/login" className="pbtn-out">Choisir</a>
               </div>
             </div>
           </div>
@@ -467,7 +467,7 @@ export default function ReceptionnisteIAPlombierPage() {
           <div className="container" style={{position:"relative",zIndex:1}}>
             <h2 className="cta-h2 reveal" id="cta-h2">Prêt à ne plus rater une urgence ?</h2>
             <p className="cta-sub reveal d1">14 jours gratuits. Aucune carte bancaire requise. Mise en place en 5 minutes.</p>
-            <a href="/artisan/register" className="btn-gold reveal d2">Démarrer mon essai gratuit</a>
+            <a href="/artisan/login" className="btn-gold reveal d2">Démarrer mon essai gratuit</a>
           </div>
         </section>
 
@@ -485,7 +485,7 @@ export default function ReceptionnisteIAPlombierPage() {
               <ul className="foot-list">
                 <li><a href="/receptionniste-ia-artisan">Tous les métiers</a></li>
                 <li><a href="/receptionniste-ia-plombier#tarifs">Tarifs</a></li>
-                <li><a href="/artisan/register">Démarrer</a></li>
+                <li><a href="/artisan/login">Démarrer</a></li>
               </ul>
             </nav>
             <nav aria-label="Liens légaux">
