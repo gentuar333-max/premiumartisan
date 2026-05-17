@@ -550,8 +550,13 @@ export default function VoiceDashboard({ artisanId }: { artisanId?: string | nul
 
                 {selectedCall.transcript.length > 0 && (
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 14 }}>
-                      Transcription IA
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        Transcription IA
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 3 }}>
+                        Transcription automatique — certains mots peuvent être mal retranscrits.
+                      </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {selectedCall.transcript.map((msg, i) => (
