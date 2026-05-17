@@ -18,6 +18,29 @@ function getAdmin() {
   )
 }
 
+// PATCH — fix voiceUrl per numrat ekzistues
+export async function PATCH(req: Request) {
+  try {
+    const client = require("twilio")(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_AUTH_TOKEN
+    )
+    const numbers = await client.incomingPhoneNumbers.list({ limit: 50 })
+    const results = []
+    for (const num of numbers) {
+      await client.incomingPhoneNumbers(num.sid).update({
+        voiceUrl: "https://www.premiumartisan.fr/api/twilio/incoming",
+        voiceMethod: "POST",
+      })
+      results.push(num.phoneNumber)
+      console.log("[provision] Updated voiceUrl for:", num.phoneNumber)
+    }
+    return Response.json({ ok: true, updated: results })
+  } catch (err: any) {
+    return Response.json({ error: err.message }, { status: 500 })
+  }
+}
+
 export async function POST(req: Request) {
   try {
     // Auth — vetëm nga brenda (same origin ose internal)
@@ -91,7 +114,15 @@ export async function POST(req: Request) {
     if (FRANCE_BUNDLE_SID)  purchaseParams.bundleSid  = FRANCE_BUNDLE_SID
     if (FRANCE_ADDRESS_SID) purchaseParams.addressSid = FRANCE_ADDRESS_SID
 
-    const purchased = await client.incomingPhoneNumbers.create(purchaseParams)
+    // Nese bundle nuk funksionon, provo pa bundle
+    let purchased: any
+    try {
+      purchased = await client.incomingPhoneNumbers.create(purchaseParams)
+    } catch (bundleErr: any) {
+      console.warn("[provision] Bundle error, retrying without bundle:", bundleErr.message)
+      const { bundleSid, addressSid, ...paramsWithoutBundle } = purchaseParams
+      purchased = await client.incomingPhoneNumbers.create(paramsWithoutBundle)
+    }
     console.log(`[provision] Numër blerë: ${purchased.phoneNumber} për ${artisan_id}`)
 
     // 4. Regjistro në Vapi
