@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       const metiersStr = Array.isArray(metier) ? metier.join(", ") : metier;
       const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h";
 
-      const firstMessage = `Bonjour, vous êtes bien chez ${company_name}. Comment puis-je vous aider ?`;
+      const firstMessage = `Bonjour, vous êtes chez ${company_name}. Comment puis-je vous aider ?`;
 
       const systemPrompt = `## Règles vocales absolues
 - Réponses TRÈS COURTES — maximum 2 phrases
@@ -173,10 +173,16 @@ Puis clôture :
 
 ## Situations spéciales
 
-### Urgent
-Si "urgent", "fuite", "panne", "coupure", "inondation", "gaz", "feu" →
-Ton direct et rapide : "Je comprends, je transmets immédiatement. Votre nom s'il vous plaît ?"
-Puis adresse en deux temps. Pas de bavardage — va à l'essentiel.
+### Urgent et situations dangereuses
+Si le client mentionne l'un de ces mots :
+"urgent", "fuite", "inondation", "gaz", "odeur de gaz", "feu", "incendie", "explosion",
+"coupure d'eau", "panne", "débordement", "dégât des eaux", "WC bouché", "chauffe-eau",
+"pas d'eau chaude", "plus d'eau", "robinet bloqué", "tuyau cassé", "sous-sol inondé"
+→ NE PAS attendre la fin de l'explication.
+→ Coupe poliment : "Je comprends, c'est urgent. Je transmets immédiatement."
+→ Passe directement à la collecte : "Votre nom s'il vous plaît ?"
+→ Puis adresse en trois temps. Pas de bavardage — va à l'essentiel.
+→ Termine par : "Je transmets votre demande urgente à ${artisan_name} maintenant. Il vous rappelle dès que possible."
 
 ### Ton selon la situation
 - Urgence → rapide, direct, rassurant
@@ -226,6 +232,9 @@ Ne reste JAMAIS silencieux — réponds toujours quelque chose, même si tu n'as
         name: `Marie - ${company_name}`,
         firstMessage,
         serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
+        waitSeconds: 0.3,
+        numWordsToInterruptAssistant: 1,
+        endCallMessage: "Au revoir et bonne journée !",
       }
 
       // POST payload — per artizane te ri
@@ -240,9 +249,11 @@ Ne reste JAMAIS silencieux — réponds toujours quelque chose, même si tu n'as
           systemPrompt,
         },
         transcriber: {
-          provider: "deepgram",
-          model: "nova-2",
+          provider: "speechmatics",
+          model: "enhanced",
           language: "fr",
+          smartEndpointing: true,
+          backgroundDenoising: true,
         },
         voice: {
           provider: "11labs",
@@ -250,7 +261,15 @@ Ne reste JAMAIS silencieux — réponds toujours quelque chose, même si tu n'as
           model: "eleven_turbo_v2_5",
           stability: 0.5,
           similarityBoost: 0.8,
-          speed: 0.9,
+          speed: 0.8,
+        },
+        waitSeconds: 0.3,
+        numWordsToInterruptAssistant: 1,
+        endCallMessage: "Au revoir et bonne journée !",
+        recordingPath: "mp3",
+        voicemailDetection: {
+          provider: "vapi",
+          enabled: true,
         },
         analysisPlan: {
           structuredDataSchema: {

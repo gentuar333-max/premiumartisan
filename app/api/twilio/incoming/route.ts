@@ -31,8 +31,13 @@ export async function POST(req: Request) {
 
     if (!sub) {
       console.error("[twilio/incoming] No artisan found for number:", toNumber)
-      // Dërgo direkt te Vapi nëse nuk gjejmë artizanin
       return vapiTwiml()
+    }
+
+    // Stop nëse zero minuta
+    if ((sub.minutes_remaining ?? 0) <= 0) {
+      const twiml = `<?xml version="1.0" encoding="UTF-8"?><Response><Say language="fr-FR">Bonjour, notre service de réception est temporairement indisponible. Veuillez rappeler directement l'artisan. Au revoir.</Say></Response>`
+      return new Response(twiml, { headers: { "Content-Type": "text/xml" } })
     }
 
     // Gjej numrin personal të artizanit
