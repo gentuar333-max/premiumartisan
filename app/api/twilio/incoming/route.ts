@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     // Gjej artizanin nga numri Twilio
     const { data: sub } = await admin
       .from("marie_subscriptions")
-      .select("artisan_id, twilio_number")
+      .select("artisan_id, twilio_number, minutes_remaining")
       .eq("twilio_number", toNumber)
       .maybeSingle()
 
