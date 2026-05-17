@@ -41,38 +41,17 @@ export async function POST(req: Request) {
       return new Response(twiml, { headers: { "Content-Type": "text/xml" } })
     }
 
-    // Gjej numrin personal të artizanit
+    // Gjej vapi_assistant_id per kete artisan
     const { data: settings } = await admin
       .from("artisan_settings")
-      .select("phone, vapi_assistant_id, company_name")
+      .select("vapi_assistant_id")
       .eq("artisan_id", sub.artisan_id)
       .maybeSingle()
 
-    // Normalize phone: remove spaces, ensure +33 format
-    let artisanPhone = (settings?.phone ?? "").replace(/\s/g, "")
-    if (artisanPhone.startsWith("0")) artisanPhone = "+33" + artisanPhone.slice(1)
     const vapiAssistantId = settings?.vapi_assistant_id ?? process.env.VAPI_ASSISTANT_ID ?? ""
+    console.log("[twilio/incoming] routing to Vapi:", vapiAssistantId)
 
-    console.log("[twilio/incoming] artisan phone:", artisanPhone, "vapi:", vapiAssistantId)
-
-    if (!artisanPhone) {
-      return vapiTwiml()
-    }
-
-    // Thirr artizanin - nëse nuk përgjigjet → Vapi
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.premiumartisan.fr"
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Dial timeout="5" action="${baseUrl}/api/twilio/fallback" method="POST">
-    <Number>${artisanPhone}</Number>
-  </Dial>
-</Response>`
-
-    console.log("[twilio/incoming] calling artisan:", artisanPhone)
-
-    return new NextResponse(twiml, {
-      headers: { "Content-Type": "text/xml" },
-    })
+    return vapiTwiml(vapiAssistantId)
 
   } catch (err) {
     console.error("[twilio/incoming] error:", err)
@@ -80,8 +59,8 @@ export async function POST(req: Request) {
   }
 }
 
-function vapiTwiml() {
-  const vapiAssistantId = process.env.VAPI_ASSISTANT_ID ?? ""
+function vapiTwiml(assistantId?: string) {
+  const vapiAssistantId = assistantId ?? process.env.VAPI_ASSISTANT_ID ?? ""
   const vapiApiKey = process.env.VAPI_PRIVATE_KEY ?? ""
   
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
