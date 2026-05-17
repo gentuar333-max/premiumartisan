@@ -6,10 +6,21 @@ export const runtime = "nodejs"
 async function handler(req: Request) {
   try {
     const url = new URL(req.url)
-    const params = url.searchParams
     
-    const dialStatus = params.get("DialCallStatus") ?? ""
-    const toNumber   = params.get("To") ?? params.get("Called") ?? ""
+    // Twilio dërgon si form data (POST) ose query params (GET)
+    let dialStatus = ""
+    let toNumber = ""
+    
+    if (req.method === "POST") {
+      const body = await req.text()
+      const params = new URLSearchParams(body)
+      dialStatus = params.get("DialCallStatus") ?? ""
+      toNumber = params.get("To") ?? params.get("Called") ?? ""
+    } else {
+      const params = url.searchParams
+      dialStatus = params.get("DialCallStatus") ?? ""
+      toNumber = params.get("To") ?? params.get("Called") ?? ""
+    }
 
     console.log("[twilio/fallback] DialCallStatus:", dialStatus, "To:", toNumber)
 
