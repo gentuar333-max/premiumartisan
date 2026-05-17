@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       .eq("twilio_number", toNumber)
       .maybeSingle()
 
+    console.log("[twilio/incoming] sub found:", JSON.stringify(sub))
     if (!sub) {
       console.error("[twilio/incoming] No artisan found for number:", toNumber)
       return vapiTwiml()
