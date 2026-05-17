@@ -60,17 +60,9 @@ export async function POST(req: Request) {
 }
 
 function vapiTwiml(assistantId?: string) {
-  const vapiAssistantId = assistantId ?? process.env.VAPI_ASSISTANT_ID ?? ""
-  const vapiApiKey = process.env.VAPI_PRIVATE_KEY ?? ""
-  
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Connect>
-    <Stream url="wss://api.vapi.ai/twilio">
-      <Parameter name="assistantId" value="${vapiAssistantId}" />
-      <Parameter name="authorization" value="${vapiApiKey}" />
-    </Stream>
-  </Connect>
+  <Redirect method="POST">https://api.vapi.ai/twilio/inbound_call</Redirect>
 </Response>`
 
   return new NextResponse(twiml, {
