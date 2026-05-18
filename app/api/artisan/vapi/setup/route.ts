@@ -160,6 +160,7 @@ France : Paris, Lyon, Marseille, Toulouse, Bordeaux, Strasbourg, Lille, Rennes, 
         waitSeconds: 0.3,
         numWordsToInterruptAssistant: 3,
         endCallMessage: "Au revoir et bonne journée !",
+        maxDurationSeconds: 600,
       }
 
       // POST payload — per artizane te ri
@@ -189,6 +190,7 @@ France : Paris, Lyon, Marseille, Toulouse, Bordeaux, Strasbourg, Lille, Rennes, 
         waitSeconds: 0.3,
         numWordsToInterruptAssistant: 3,
         endCallMessage: "Au revoir et bonne journée !",
+        maxDurationSeconds: 600,
         recordingPath: "mp3",
         voicemailDetection: {
           provider: "vapi",
