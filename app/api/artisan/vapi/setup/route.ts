@@ -1,25 +1,153 @@
-import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { NextResponse } from "next/server"
+import { createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
 
 async function getSupabase() {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies()
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
-  );
+    { cookies: { get(name: string) { return cookieStore.get(name)?.value } } }
+  )
+}
+
+function buildPrompt(company: string, artisan: string, horaires: string): string {
+  return `Tu es l'assistante téléphonique de ${company}, une entreprise de plomberie.
+L'artisan s'appelle ${artisan}. Horaires : ${horaires}.
+Tu parles uniquement en français. Tu prends des messages, tu n'es pas un chatbot.
+
+RÈGLES STRICTES :
+- Maximum 1-2 phrases par réponse
+- Une seule question à la fois
+- Ne répète jamais deux fois le même accusé de réception
+- Réponds à la question du client AVANT de collecter une info
+- Ne dis jamais que tu es une IA sauf si le client insiste vraiment
+
+DÉROULEMENT — suis ces étapes dans l'ordre :
+
+ÉTAPE 1 — ÉCOUTE
+Laisse le client parler sans interrompre.
+Dis seulement : "Oui...", "Je vois...", "Tout à fait..."
+Quand il s'arrête : "D'accord. C'est tout ?"
+→ OUI : passe à l'étape 2
+→ NON : laisse-le continuer
+
+ÉTAPE 2 — NOM
+"C'est à quel nom ?"
+→ "[Nom], noté."
+
+ÉTAPE 3 — ADRESSE (3 questions séparées, toujours dans cet ordre)
+1. "Votre numéro de rue ?"
+   → Confirme : "[numéro] — c'est bien ça ?"
+2. "Et le nom de la rue ?"
+   → Confirme : "Rue [nom] — c'est correct ?"
+3. "Et votre ville ?"
+   → Confirme : "[ville] — c'est bien ça ?"
+Ne passe JAMAIS à la suite sans confirmation de chaque partie.
+Si le client donne tout d'un coup — confirme quand même en 3 parties.
+
+ÉTAPE 4 — URGENCE
+"C'est urgent ou ça peut attendre ?"
+
+ÉTAPE 5 — DISPONIBILITÉ
+"Vous êtes disponible quel moment ?"
+
+ÉTAPE 6 — CLÔTURE
+"Avez-vous autre chose à me communiquer ?"
+→ NON : "Parfait. J'ai noté : [nom], [adresse complète], pour [problème]. ${artisan} vous rappelle dès que possible. Bonne journée !"
+
+URGENCES — priorité absolue — interromps et agis immédiatement :
+Mots : fuite, fuit, ça coule, huit d'eau, fuit deau, eau partout, inondation, dégât des eaux, WC bouché, WC déborde, chauffe-eau en panne, pas d'eau chaude, odeur de gaz, gaz
+→ "Je comprends, c'est urgent. Votre nom s'il vous plaît ?"
+→ Collecte nom + adresse en 3 temps rapidement
+→ "Je transmets immédiatement à ${artisan}. Bonne journée !"
+
+RÉPONSES AUX QUESTIONS FRÉQUENTES :
+"Qui êtes-vous ?" → "Je suis l'assistante de ${company}."
+"Il est disponible ?" → "${artisan} est en intervention. Il vous rappelle dès que possible."
+"Vous êtes ouverts quand ?" → "${horaires}."
+"C'est combien ?" → "${artisan} vous fera un devis gratuit sur place."
+"Vous venez où ?" → "${artisan} intervient en Côte-d'Or et aux alentours."
+"Je rappelle" → "Votre nom s'il vous plaît ? Je note que vous avez rappelé."
+"Je voulais annuler" → "Votre nom s'il vous plaît ? Je transmets l'annulation à ${artisan}."
+
+GESTION DES ERREURS :
+Nom mal compris → "Je n'ai pas bien saisi. Pouvez-vous l'épeler ?"
+Après 2 tentatives → "Je note ce que j'ai compris. ${artisan} confirmera lors du rappel."
+Silence +4 secondes → "Vous êtes toujours là ?"
+Pas de réponse × 2 → "Je ne vous entends plus. N'hésitez pas à rappeler. Au revoir."
+Client en colère → "Je comprends. Je transmets votre demande immédiatement."
+Répondeur → "Bonjour, assistante de ${company}. Merci de rappeler. Au revoir."`
+}
+
+function buildVapiPayload(
+  company: string,
+  artisan: string,
+  horaires: string,
+  systemPrompt: string
+) {
+  return {
+    name: `Marie - ${company}`,
+    firstMessage: `Bonjour, ${company}, je vous écoute.`,
+    serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
+
+    model: {
+      provider: "openai",
+      model: "gpt-4o-mini",
+      temperature: 0.0,
+      systemPrompt,
+    },
+
+    transcriber: {
+      provider: "deepgram",
+      model: "nova-3",
+      language: "fr",
+      smartFormat: true,
+    },
+
+    voice: {
+      provider: "11labs",
+      voiceId: "ohItIVrXTBI80RrUECOD",
+      model: "eleven_turbo_v2_5",
+      stability: 0.5,
+      similarityBoost: 0.8,
+      speed: 0.85,
+    },
+
+    waitSeconds: 0.4,
+    numWordsToInterruptAssistant: 3,
+    maxDurationSeconds: 600,
+    endCallMessage: "Au revoir et bonne journée !",
+    recordingPath: "mp3",
+    voicemailDetection: { provider: "vapi", enabled: true },
+
+    analysisPlan: {
+      structuredDataSchema: {
+        type: "object",
+        properties: {
+          nom_client:    { type: "string",  description: "Prénom et nom du client" },
+          adresse:       { type: "string",  description: "Adresse complète : numéro, rue, ville" },
+          probleme:      { type: "string",  description: "Nature du problème ou travaux" },
+          urgent:        { type: "boolean", description: "Si la demande est urgente" },
+          disponibilite: { type: "string",  description: "Disponibilités du client" },
+        },
+        required: ["probleme"],
+      },
+      structuredDataPrompt:
+        "Extrais du transcript : nom du client, adresse complète, problème, si urgent, disponibilités.",
+    },
+  }
 }
 
 export async function POST(req: Request) {
   try {
-    const supabase = await getSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
+    const supabase = await getSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 })
 
-    const { company_name, artisan_name, metier, phone, horaires } = await req.json();
+    const { company_name, artisan_name, metier, phone, horaires } = await req.json()
 
-    // 1. Ruan ne Supabase
+    // 1. Supabase upsert
     const { error: dbError } = await supabase
       .from("artisan_settings")
       .upsert({
@@ -30,225 +158,67 @@ export async function POST(req: Request) {
         phone,
         horaires,
         updated_at: new Date().toISOString(),
-      }, { onConflict: "artisan_id" });
+      }, { onConflict: "artisan_id" })
 
     if (dbError) {
-      console.error("DB error:", dbError);
-      return NextResponse.json({ error: dbError.message }, { status: 500 });
+      console.error("[setup] DB error:", dbError)
+      return NextResponse.json({ error: dbError.message }, { status: 500 })
     }
 
-    // 2. Krijo ose update Vapi Assistant per kete artisan
-    const vapiKey = process.env.VAPI_PRIVATE_KEY;
-
-    // Merr vapi_assistant_id ekzistues per kete artisan
-    const { data: existingSettings } = await supabase
-      .from("artisan_settings")
-      .select("vapi_assistant_id")
-      .eq("artisan_id", user.id)
-      .maybeSingle()
-
-    const existingVapiId = existingSettings?.vapi_assistant_id ?? null
-
+    // 2. Vapi assistant
+    const vapiKey = process.env.VAPI_PRIVATE_KEY
     if (vapiKey) {
-      const vapiAssistantId = existingVapiId
-      const metiersStr = Array.isArray(metier) ? metier.join(", ") : metier;
-      const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h";
+      const { data: existing } = await supabase
+        .from("artisan_settings")
+        .select("vapi_assistant_id")
+        .eq("artisan_id", user.id)
+        .maybeSingle()
 
-      const firstMessage = `Bonjour, vous êtes chez ${company_name}. Comment puis-je vous aider ?`;
+      const vapiId = existing?.vapi_assistant_id ?? null
+      const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h"
+      const systemPrompt = buildPrompt(company_name, artisan_name, horairesStr)
+      const payload = buildVapiPayload(company_name, artisan_name, horairesStr, systemPrompt)
 
-      const systemPromptPlombier = `[Identity]
-Tu es l'assistante téléphonique de ${company_name}, entreprise de plomberie basée en Côte-d'Or. Tu es professionnelle, empathique et tu t'exprimes comme un vrai humain. Tu ne mentionnes JAMAIS que tu es un assistant virtuel ou une IA, sauf si le client insiste.
-L'artisan s'appelle ${artisan_name}. Horaires : ${horairesStr}.
-
-[Style]
-- Ton chaleureux, rassurant et efficace
-- Liaisons naturelles : "bien sûr", "pas de souci", "je vois", "je note"
-- Concis : 1 à 2 phrases maximum à la fois
-- Ajuste ton énergie au client : rassurant si stressé, dynamique si pressé
-- Varie les accusés : "Bien noté.", "D'accord.", "Entendu.", "Très bien.", "Je note."
-- Ne répète JAMAIS deux fois le même accusé consécutivement
-- Réponds TOUJOURS à la question du client AVANT de collecter une info
-- Jamais : "Bien sûr !", "Absolument !", "Avec plaisir !"
-
-[Vocabulaire plomberie]
-fuite, canalisation, robinet, chauffe-eau, WC bouché, siphon, joint, ballon eau chaude, détartrage, débouchage, dégât des eaux, inondation, robinetterie, douche, baignoire, lavabo, chaudière, tuyau, sous-évier, pression d'eau, colonne montante
-→ Si le client utilise un terme technique — utilise-le dans ta réponse
-
-[Task & Goals]
-1. Accueille par : "Bonjour, vous êtes chez ${company_name}. Comment puis-je vous aider ?"
-
-2. TAIS-TOI et laisse le client expliquer jusqu'au bout. N'interromps pas.
-   Pendant qu'il parle, dis uniquement : "Oui...", "Je vois...", "Tout à fait..."
-   Quand il s'arrête : "D'accord. C'est tout ce que vous souhaitez nous communiquer ?"
-   - OUI → passe à l'étape 3
-   - NON → laisse-le continuer
-
-3. Si urgence détectée (fuite, fuite d'eau, ça fuit, ça coule, y'a de l'eau partout, huit d'eau, fuit deau, inondation, eau partout, dégât des eaux, WC déborde, chauffe-eau en panne, pas d'eau chaude, odeur de gaz) :
-   → Tous ces mots signifient une URGENCE — même si mal prononcés.
-   → N'attends pas. Dis : "Je comprends, c'est urgent. Votre nom s'il vous plaît ?"
-   → Collecte nom et adresse rapidement.
-   → Clôture : "Je transmets immédiatement à ${artisan_name}. Il vous rappelle dès que possible."
-
-4. Sinon, collecte les informations — UNE question à la fois.
-   Si le client a déjà donné une info → ne la redemande PAS.
-
-   a. "C'est à quel nom s'il vous plaît ?"
-      → "[Nom], noté."
-
-   b. Adresse en TROIS temps :
-      - "Quel est votre numéro de rue ?" → "[numéro] — c'est bien ça ?"
-      - "Et le nom de la rue ?" → "Rue [nom] — c'est correct ?"
-      - "Et votre ville et code postal ?" → "[ville] [code postal] — c'est bien ça ?"
-      → Si le client corrige → répète la version corrigée.
-      → Ne passe JAMAIS à la suite sans confirmation.
-
-   c. "C'est urgent ou vous pouvez attendre quelques jours ?"
-
-   d. "Vous êtes disponible plutôt quel moment ?"
-
-5. Avant de clôturer : "Avez-vous autre chose à me communiquer ?"
-   - OUI → écoute et note
-   - NON → confirme : "J'ai bien noté : [nom], [adresse], pour [problème], disponible [disponibilité]. C'est bien ça ?"
-   → "Parfait, ${artisan_name} vous rappellera dès que possible. Merci de nous avoir contactés, ${company_name} est à votre service. Bonne journée !"
-
-[Questions fréquentes]
-"Vous êtes ouverts quand ?" → "${horairesStr}."
-"Quand peut-il venir ?" → "${artisan_name} vous rappelle pour fixer un rendez-vous."
-"Il est disponible maintenant ?" → "${artisan_name} est en intervention. Il vous rappelle dès que possible."
-"C'est qui ?" / "Je parle à qui ?" → "Je suis l'assistante de ${company_name}."
-"Vous êtes une IA ?" → "Je suis l'assistante vocale de ${company_name}. Je prends votre message pour ${artisan_name}."
-"Vous venez où ?" → "${artisan_name} intervient en Côte-d'Or et aux alentours."
-"C'est combien ?" → "${artisan_name} vous fera un devis gratuit lors de sa visite. Le tarif dépend de l'intervention."
-"Je voulais annuler" → "Bien noté. Votre nom s'il vous plaît ? Je transmets l'annulation à ${artisan_name}."
-"Je rappelle" / "Il devait me rappeler" → "Votre nom s'il vous plaît ? Je transmets à ${artisan_name} que vous avez rappelé."
-"Il est disponible ?" / "Le patron est là ?" → "${artisan_name} est en intervention. Il vous rappelle dès que possible. C'est à quel nom ?"
-
-[Villes reconnues]
-Bourgogne : Dijon, Chenôve, Longvic, Beaune, Chalon-sur-Saône, Chevigny, Marsannay, Talant, Quetigny, Fontaine-lès-Dijon
-France : Paris, Lyon, Marseille, Toulouse, Bordeaux, Strasbourg, Lille, Rennes, Nantes, Grenoble, Nice
-"Chenôve" = "Shenvé" ou "Chenov" — note directement.
-
-[Error Handling]
-- Réponse ambiguë → reformule calmement la question
-- Client demande un prix → "Le tarif dépend de l'intervention. ${artisan_name} vous fera un devis gratuit sur place."
-- Question hors compétence → "Je ne peux pas répondre à cette question, mais ${artisan_name} pourra vous renseigner lors de son passage."
-- Nom mal compris → "Je n'ai pas bien saisi. Pouvez-vous l'épeler s'il vous plaît ?"
-  Client épelle → "Donc [lettres] — c'est bien ça ?"
-  Après 2 tentatives → "Je note ce que j'ai compris. ${artisan_name} confirmera lors du rappel."
-- Ne reste JAMAIS silencieux — réponds toujours quelque chose
-- Silence +4 secondes → "Vous êtes toujours là ?"
-- Client ne répond plus × 2 → "Je ne vous entends plus. N'hésitez pas à rappeler. Au revoir."
-- Client en colère → "Je comprends votre frustration. Je transmets votre demande immédiatement."
-- Répondeur détecté → "Bonjour, assistante de ${company_name}. Merci de rappeler. Au revoir."
-
-[Règles absolues]
-- Toujours en français
-- Jamais de prix ni de délai précis
-- Une question à la fois
-- Adresse en trois temps — jamais en une seule question
-- Répondre à la question du client AVANT de collecter une info
-- Toujours demander "Avez-vous autre chose ?" avant de clôturer
-- Ne raccroche JAMAIS sans 3 tentatives de compréhension
-- Ne jamais rester bloqué — toujours avancer`
-
-      const systemPrompt = systemPromptPlombier
-
-      // PATCH payload — nuk prek model, voice, transcriber
-      const patchPayload = {
-        name: `Marie - ${company_name}`,
-        firstMessage,
-        serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
-        waitSeconds: 0.3,
-        numWordsToInterruptAssistant: 3,
-        endCallMessage: "Au revoir et bonne journée !",
-        maxDurationSeconds: 600,
-      }
-
-      // POST payload — per artizane te ri
-      const postPayload = {
-        name: `Marie - ${company_name}`,
-        firstMessage,
-        serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
-        model: {
-          provider: "groq",
-          model: "llama-3.1-8b-instant",
-          temperature: 0.1,
-          systemPrompt,
-        },
-        transcriber: {
-          provider: "deepgram",
-          model: "flux-general-multi",
-          language: "fr",
-        },
-        voice: {
-          provider: "11labs",
-          voiceId: "ohItIVrXTBI80RrUECOD",
-          model: "eleven_turbo_v2_5",
-          stability: 0.5,
-          similarityBoost: 0.8,
-          speed: 0.8,
-        },
-        waitSeconds: 0.3,
-        numWordsToInterruptAssistant: 3,
-        endCallMessage: "Au revoir et bonne journée !",
-        maxDurationSeconds: 600,
-        recordingPath: "mp3",
-        voicemailDetection: {
-          provider: "vapi",
-          enabled: true,
-        },
-        analysisPlan: {
-          structuredDataSchema: {
-            type: "object",
-            properties: {
-              nom_client:    { type: "string",  description: "Prénom et nom du client" },
-              adresse:       { type: "string",  description: "Adresse complète — numéro de rue, nom de rue, ville et code postal" },
-              probleme:      { type: "string",  description: "Nature du problème ou travaux demandés" },
-              urgent:        { type: "boolean", description: "Si la demande est urgente" },
-              disponibilite: { type: "string",  description: "Disponibilités du client" },
-            },
-            required: ["nom_client", "probleme"],
-          },
-          structuredDataPrompt: "Extrais les informations collectées pendant l'appel : nom du client, adresse complète, problème ou travaux demandés, si c'est urgent, disponibilités.",
-        },
-      }
-      const vapiPayload = patchPayload
-
-      let newVapiAssistantId = vapiAssistantId
-
-      if (vapiAssistantId) {
-        // PATCH — vetëm firstMessage dhe systemPrompt, asgjë tjetër
-        console.log("[vapi] PATCH assistant:", vapiAssistantId)
-        const vapiRes = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
+      if (vapiId) {
+        const patchPayload = {
+          name: payload.name,
+          firstMessage: payload.firstMessage,
+          serverUrl: payload.serverUrl,
+          model: payload.model,
+          waitSeconds: payload.waitSeconds,
+          numWordsToInterruptAssistant: payload.numWordsToInterruptAssistant,
+          maxDurationSeconds: payload.maxDurationSeconds,
+          endCallMessage: payload.endCallMessage,
+        }
+        console.log("[vapi] PATCH assistant:", vapiId)
+        const res = await fetch(`https://api.vapi.ai/assistant/${vapiId}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
-          body: JSON.stringify(vapiPayload),
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${vapiKey}` },
+          body: JSON.stringify(patchPayload),
         })
-        if (!vapiRes.ok) console.error("Vapi PATCH error:", await vapiRes.text())
-        else console.log("[vapi] PATCH OK — model/voice/transcriber untouched")
+        if (!res.ok) console.error("[vapi] PATCH error:", await res.text())
+        else console.log("[vapi] PATCH OK")
       } else {
-        // Krijo assistant te ri
-        const vapiRes = await fetch("https://api.vapi.ai/assistant", {
+        console.log("[vapi] POST new assistant for:", company_name)
+        const res = await fetch("https://api.vapi.ai/assistant", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${vapiKey}` },
-          body: JSON.stringify(postPayload),
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${vapiKey}` },
+          body: JSON.stringify(payload),
         })
-        if (vapiRes.ok) {
-          const vapiData = await vapiRes.json()
-          newVapiAssistantId = vapiData.id
-          console.log("Vapi assistant created:", newVapiAssistantId)
-          // Ruaj vapi_assistant_id ne Supabase
-          await supabase.from("artisan_settings").update({
-            vapi_assistant_id: newVapiAssistantId,
-            updated_at: new Date().toISOString(),
-          }).eq("artisan_id", user.id)
+        if (res.ok) {
+          const data = await res.json()
+          console.log("[vapi] created:", data.id)
+          await supabase
+            .from("artisan_settings")
+            .update({ vapi_assistant_id: data.id, updated_at: new Date().toISOString() })
+            .eq("artisan_id", user.id)
         } else {
-          console.error("Vapi POST error:", await vapiRes.text())
+          console.error("[vapi] POST error:", await res.text())
         }
       }
     }
 
-    // 3. Krijo marie_subscriptions nese nuk ekziston
+    // 3. Trial subscription nëse nuk ekziston
     const { createClient } = await import("@supabase/supabase-js")
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -271,32 +241,32 @@ France : Paris, Lyon, Marseille, Toulouse, Bordeaux, Strasbourg, Lille, Rennes, 
       })
     }
 
-    return NextResponse.json({ ok: true, artisan_id: user.id });
+    return NextResponse.json({ ok: true, artisan_id: user.id })
   } catch (err) {
-    console.error("Setup error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    console.error("[setup] error:", err)
+    return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 }
 
 export async function GET() {
   try {
-    const supabase = await getSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
+    const supabase = await getSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 })
 
     const { data, error } = await supabase
       .from("artisan_settings")
       .select("*")
       .eq("artisan_id", user.id)
-      .single();
+      .single()
 
     if (error && error.code !== "PGRST116") {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ ok: true, settings: data ?? null, artisan_id: user.id });
+    return NextResponse.json({ ok: true, settings: data ?? null, artisan_id: user.id })
   } catch (err) {
-    console.error("GET settings error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    console.error("[setup] GET error:", err)
+    return NextResponse.json({ error: "Internal error" }, { status: 500 })
   }
 }
