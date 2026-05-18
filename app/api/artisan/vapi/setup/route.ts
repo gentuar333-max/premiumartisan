@@ -56,11 +56,11 @@ Si le client donne tout d'un coup — confirme quand même en 3 parties.
 "Avez-vous autre chose à me communiquer ?"
 → NON : "Parfait. J'ai noté : [nom], [adresse complète], pour [problème]. ${artisan} vous rappelle dès que possible. Bonne journée !"
 
-URGENCES — priorité absolue — interromps et agis immédiatement :
+URGENCES — priorité absolue :
 Mots : fuite, fuit, ça coule, huit d'eau, fuit deau, eau partout, inondation, dégât des eaux, WC bouché, WC déborde, chauffe-eau en panne, pas d'eau chaude, odeur de gaz, gaz
 → "Je comprends, c'est urgent. Votre nom s'il vous plaît ?"
 → Collecte nom + adresse en 3 temps rapidement
-→ "Je transmets immédiatement à ${artisan}. Bonne journée !"
+→ "Je transmets immédiatement à ${artisan}."
 
 RÉPONSES AUX QUESTIONS FRÉQUENTES :
 "Qui êtes-vous ?" → "Je suis l'assistante de ${company}."
@@ -80,63 +80,72 @@ Client en colère → "Je comprends. Je transmets votre demande immédiatement."
 Répondeur → "Bonjour, assistante de ${company}. Merci de rappeler. Au revoir."`
 }
 
-function buildVapiPayload(
-  company: string,
-  artisan: string,
-  horaires: string,
-  systemPrompt: string
-) {
-  return {
-    name: `Marie - ${company}`,
-    firstMessage: `Bonjour, ${company}, je vous écoute.`,
-    serverUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`,
+async function createRetellAgent(company: string, artisan: string, horairesStr: string) {
+  const apiKey = process.env.RETELL_API_KEY!
+  const prompt = buildPrompt(company, artisan, horairesStr)
 
-    model: {
-      provider: "openai",
+  // 1. Krijo LLM
+  const llmRes = await fetch("https://api.retellai.com/create-retell-llm", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
       model: "gpt-4o-mini",
-      temperature: 0.0,
-      systemPrompt,
-    },
+      general_prompt: prompt,
+      begin_message: `Bonjour, ${company}, je vous écoute.`,
+      general_tools: [],
+    }),
+  })
+  if (!llmRes.ok) throw new Error(`LLM create failed: ${await llmRes.text()}`)
+  const llm = await llmRes.json()
 
-    transcriber: {
-      provider: "deepgram",
-      model: "nova-3",
-      language: "fr",
-      smartFormat: true,
-    },
+  // 2. Krijo Agent
+  const agentRes = await fetch("https://api.retellai.com/create-agent", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      agent_name: `Marie - ${company}`,
+      response_engine: { type: "retell-llm", llm_id: llm.llm_id },
+      voice_id: "11labs-Domi",
+      language: "fr-FR",
+      stt_mode: "accurate",
+      denoising_mode: "noise-cancellation",
+      normalize_for_speech: true,
+      webhook_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/retell/webhook`,
+      post_call_analysis_data: [
+        { type: "string",  name: "nom_client",    description: "Prénom et nom du client", required: false },
+        { type: "string",  name: "adresse",       description: "Adresse complète : numéro, rue, ville", required: false },
+        { type: "string",  name: "probleme",      description: "Nature du problème ou travaux", required: true },
+        { type: "boolean", name: "urgent",        description: "Si la demande est urgente", required: false },
+        { type: "string",  name: "disponibilite", description: "Disponibilités du client", required: false },
+      ],
+    }),
+  })
+  if (!agentRes.ok) throw new Error(`Agent create failed: ${await agentRes.text()}`)
+  const agent = await agentRes.json()
 
-    voice: {
-      provider: "11labs",
-      voiceId: "ohItIVrXTBI80RrUECOD",
-      model: "eleven_turbo_v2_5",
-      stability: 0.5,
-      similarityBoost: 0.8,
-      speed: 0.85,
-    },
+  return { agentId: agent.agent_id, llmId: llm.llm_id }
+}
 
-    waitSeconds: 0.4,
-    numWordsToInterruptAssistant: 3,
-    maxDurationSeconds: 600,
-    endCallMessage: "Au revoir et bonne journée !",
-    recordingPath: "mp3",
-    voicemailDetection: { provider: "vapi", enabled: true },
+async function updateRetellAgent(agentId: string, llmId: string, company: string, artisan: string, horairesStr: string) {
+  const apiKey = process.env.RETELL_API_KEY!
+  const prompt = buildPrompt(company, artisan, horairesStr)
 
-    analysisPlan: {
-      structuredDataSchema: {
-        type: "object",
-        properties: {
-          nom_client:    { type: "string",  description: "Prénom et nom du client" },
-          adresse:       { type: "string",  description: "Adresse complète : numéro, rue, ville" },
-          probleme:      { type: "string",  description: "Nature du problème ou travaux" },
-          urgent:        { type: "boolean", description: "Si la demande est urgente" },
-          disponibilite: { type: "string",  description: "Disponibilités du client" },
-        },
-        required: ["probleme"],
-      },
-      structuredDataPrompt:
-        "Extrais du transcript : nom du client, adresse complète, problème, si urgent, disponibilités.",
-    },
-  }
+  // Update LLM prompt
+  await fetch(`https://api.retellai.com/update-retell-llm/${llmId}`, {
+    method: "PATCH",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      general_prompt: prompt,
+      begin_message: `Bonjour, ${company}, je vous écoute.`,
+    }),
+  })
+
+  // Update Agent
+  await fetch(`https://api.retellai.com/update-agent/${agentId}`, {
+    method: "PATCH",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ agent_name: `Marie - ${company}` }),
+  })
 }
 
 export async function POST(req: Request) {
@@ -165,60 +174,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: dbError.message }, { status: 500 })
     }
 
-    // 2. Vapi assistant
-    const vapiKey = process.env.VAPI_PRIVATE_KEY
-    if (vapiKey) {
-      const { data: existing } = await supabase
-        .from("artisan_settings")
-        .select("vapi_assistant_id")
-        .eq("artisan_id", user.id)
-        .maybeSingle()
+    // 2. Retell agent
+    const { data: existing } = await supabase
+      .from("artisan_settings")
+      .select("vapi_assistant_id, retell_llm_id")
+      .eq("artisan_id", user.id)
+      .maybeSingle()
 
-      const vapiId = existing?.vapi_assistant_id ?? null
-      const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h"
-      const systemPrompt = buildPrompt(company_name, artisan_name, horairesStr)
-      const payload = buildVapiPayload(company_name, artisan_name, horairesStr, systemPrompt)
+    const horairesStr = horaires ?? "du lundi au vendredi de 8h à 18h"
+    const existingAgentId = existing?.vapi_assistant_id ?? null
+    const existingLlmId = existing?.retell_llm_id ?? null
 
-      if (vapiId) {
-        const patchPayload = {
-          name: payload.name,
-          firstMessage: payload.firstMessage,
-          serverUrl: payload.serverUrl,
-          model: payload.model,
-          waitSeconds: payload.waitSeconds,
-          numWordsToInterruptAssistant: payload.numWordsToInterruptAssistant,
-          maxDurationSeconds: payload.maxDurationSeconds,
-          endCallMessage: payload.endCallMessage,
-        }
-        console.log("[vapi] PATCH assistant:", vapiId)
-        const res = await fetch(`https://api.vapi.ai/assistant/${vapiId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${vapiKey}` },
-          body: JSON.stringify(patchPayload),
-        })
-        if (!res.ok) console.error("[vapi] PATCH error:", await res.text())
-        else console.log("[vapi] PATCH OK")
-      } else {
-        console.log("[vapi] POST new assistant for:", company_name)
-        const res = await fetch("https://api.vapi.ai/assistant", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${vapiKey}` },
-          body: JSON.stringify(payload),
-        })
-        if (res.ok) {
-          const data = await res.json()
-          console.log("[vapi] created:", data.id)
-          await supabase
-            .from("artisan_settings")
-            .update({ vapi_assistant_id: data.id, updated_at: new Date().toISOString() })
-            .eq("artisan_id", user.id)
-        } else {
-          console.error("[vapi] POST error:", await res.text())
-        }
-      }
+    if (existingAgentId && existingLlmId) {
+      console.log("[retell] UPDATE agent:", existingAgentId)
+      await updateRetellAgent(existingAgentId, existingLlmId, company_name, artisan_name, horairesStr)
+    } else {
+      console.log("[retell] CREATE agent for:", company_name)
+      const { agentId, llmId } = await createRetellAgent(company_name, artisan_name, horairesStr)
+      await supabase.from("artisan_settings").update({
+        vapi_assistant_id: agentId,
+        retell_llm_id: llmId,
+        updated_at: new Date().toISOString(),
+      }).eq("artisan_id", user.id)
+      console.log("[retell] created agent:", agentId)
     }
 
-    // 3. Trial subscription nëse nuk ekziston
+    // 3. Trial subscription
     const { createClient } = await import("@supabase/supabase-js")
     const admin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -242,9 +223,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ ok: true, artisan_id: user.id })
-  } catch (err) {
+  } catch (err: any) {
     console.error("[setup] error:", err)
-    return NextResponse.json({ error: "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: err.message ?? "Internal error" }, { status: 500 })
   }
 }
 
