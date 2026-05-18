@@ -83,7 +83,8 @@ fuite, canalisation, robinet, chauffe-eau, WC bouché, siphon, joint, ballon eau
    - OUI → passe à l'étape 3
    - NON → laisse-le continuer
 
-3. Si urgence détectée (fuite, ça coule, inondation, eau partout, dégât des eaux, WC déborde, chauffe-eau en panne, pas d'eau chaude, odeur de gaz) :
+3. Si urgence détectée (fuite, fuite d'eau, ça fuit, ça coule, y'a de l'eau partout, huit d'eau, fuit deau, inondation, eau partout, dégât des eaux, WC déborde, chauffe-eau en panne, pas d'eau chaude, odeur de gaz) :
+   → Tous ces mots signifient une URGENCE — même si mal prononcés.
    → N'attends pas. Dis : "Je comprends, c'est urgent. Votre nom s'il vous plaît ?"
    → Collecte nom et adresse rapidement.
    → Clôture : "Je transmets immédiatement à ${artisan_name}. Il vous rappelle dès que possible."
