@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     }
 
     // Structured data
-    const analysis = call?.call_analysis ?? {}
+    const analysis = call?.call_analysis?.custom_analysis_data ?? {}
     const transcript = call?.transcript ?? ""
     const callerPhone = call?.from_number ?? null
 
