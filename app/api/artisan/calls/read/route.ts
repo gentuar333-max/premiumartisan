@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     )
 
     await admin
-      .from("calls")
+      .from("marie_calls")
       .update({ isnew: false })
       .eq("id", call_id)
       .eq("artisan_id", user.id)
