@@ -9,11 +9,9 @@ export async function POST(req: Request) {
     const { event, call } = body
 
     console.log("[retell/webhook] event:", event, "call_id:", call?.call_id)
-
-    // Log all events for debugging
     console.log("[retell/webhook] full body:", JSON.stringify(body).slice(0, 500))
 
-    if (event !== "call_ended" && event !== "call_analyzed") {
+    if (event !== "call_analyzed") {
       return NextResponse.json({ ok: true })
     }
 
