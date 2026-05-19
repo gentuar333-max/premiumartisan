@@ -55,7 +55,6 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/creer-facture-artisan") ||
     // ── Dashboard artisan public ──
     pathname.startsWith("/artisan/dashboard") ||
-    pathname.startsWith("/artisan/receptionist") ||
     // ── Landing pages publiques ──
     pathname.startsWith("/receptionniste-ia-artisan") ||
     // ── Pages confirmation/devis client ──
