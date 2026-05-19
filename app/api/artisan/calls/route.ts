@@ -17,7 +17,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
     const { data, error } = await supabase
-      .from("calls").select("*")
+      .from("marie_calls").select("*")
       .eq("artisan_id", user.id)
       .order("created_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -34,7 +34,7 @@ export async function PATCH(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
     const { id, status } = await req.json();
-    const { error } = await supabase.from("calls")
+    const { error } = await supabase.from("marie_calls")
       .update({ status, isnew: false })
       .eq("id", id).eq("artisan_id", user.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -51,7 +51,7 @@ export async function DELETE(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Non authentifie" }, { status: 401 });
     const { id } = await req.json();
-    const { error } = await supabase.from("calls")
+    const { error } = await supabase.from("marie_calls")
       .delete().eq("id", id).eq("artisan_id", user.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
